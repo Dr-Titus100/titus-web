@@ -72,15 +72,21 @@ export const GROUP_NAMES: Record<string, string> = {
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
 
+// Python reports offsets in code points, and JavaScript strings index UTF-16 units.
+// Slicing an array of code points keeps the two in line when the text has emoji.
+const codePoints = (text: string) => Array.from(text);
+
 // Turns text plus overlapping spans into HTML with <mark> tags.
 export function highlight(text: string, spans: Span[]) {
-  const cuts = new Set<number>([0, text.length]);
+  const cps = codePoints(text);
+  const cut = (a: number, b: number) => cps.slice(a, b).join("");
+  const cuts = new Set<number>([0, cps.length]);
   spans.forEach((s) => { cuts.add(s.start); cuts.add(s.end); });
   const points = [...cuts].sort((a, b) => a - b);
   let html = "";
   for (let i = 0; i < points.length - 1; i++) {
     const a = points[i], b = points[i + 1];
-    const piece = esc(text.slice(a, b));
+    const piece = esc(cut(a, b));
     const covering = spans.filter((s) => s.start <= a && s.end >= b);
     if (!covering.length) { html += piece; continue; }
     covering.sort((x, y) => (x.end - x.start) - (y.end - y.start));
@@ -93,15 +99,17 @@ export function highlight(text: string, spans: Span[]) {
 
 // Shows the original text with a visible badge where each hidden character sits.
 export function showHidden(text: string, marks: Mark[]) {
+  const cps = codePoints(text);
+  const cut = (a: number, b?: number) => cps.slice(a, b).join("");
   let html = "", last = 0;
   for (const m of marks) {
-    html += esc(text.slice(last, m.start));
-    const ch = text.slice(m.start, m.end);
+    html += esc(cut(last, m.start));
+    const ch = cut(m.start, m.end);
     const tip = `${m.name} (${m.cp})${m.looks ? `, looks like "${m.looks}"` : ""}`;
     html += m.name === "look-alike letter"
       ? `<mark class="hid hid-letter" title="${esc(tip)}">${esc(ch)}</mark>`
       : `<mark class="hid" title="${esc(tip)}">${esc(m.cp)}</mark>${ch === "\n" ? "\n" : ""}`;
     last = m.end;
   }
-  return html + esc(text.slice(last));
+  return html + esc(cut(last));
 }

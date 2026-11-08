@@ -301,6 +301,8 @@ const skill = skills["titus-humanizer"];
       if (notes) { $("out-notes").textContent = notes; $("out-notes").hidden = false; }
       if (mode !== "review") {
         const c = await compare(text, body);
+        // Show and copy the cleaned rewrite, the same text the after score describes.
+        if (c.cleaned_rewrite !== body) { outText = c.cleaned_rewrite; $("out-text").textContent = outText; }
         $("compare").hidden = false;
         setRing("ring-before", c.before.score, c.before.tier, c.before.score === null ? "Too short" : undefined);
         setRing("ring-after", c.after.score, c.after.tier, c.after.score === null ? "Too short" : undefined);
