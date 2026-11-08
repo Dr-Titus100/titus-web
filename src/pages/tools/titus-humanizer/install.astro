@@ -21,7 +21,7 @@ const platforms = [
     <div class="hero-glow" aria-hidden="true"></div>
     <div class="wrap wrap-narrow">
       <p class="eyebrow">Install</p>
-      <h1 class="h1" data-rise>Add it to your assistant in a minute.</h1>
+      <h1 class="h1" data-rise>A one-minute install for your assistant</h1>
       <p class="lead">One zip file works in claude.ai, the Claude desktop app and ChatGPT. Claude Code and Codex install it from GitHub.</p>
       <div class="btn-row">
         <a class="btn" href={skill.zipUrl}>Download titus-humanizer.zip</a>
@@ -34,7 +34,7 @@ const platforms = [
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Watch</p>
-        <h2 class="h2">See it work.</h2>
+        <h2 class="h2">The tour</h2>
       </div>
       <PromoVideo />
     </div>
@@ -43,7 +43,7 @@ const platforms = [
   <section class="section" id="steps">
     <div class="wrap wrap-narrow">
       <div class="section-head">
-        <h2 class="h2">Pick where you use it.</h2>
+        <h2 class="h2">Install steps for each assistant</h2>
       </div>
       <div class="center" style="margin-bottom: 28px">
         <div class="segmented" role="tablist" aria-label="Platform">
@@ -57,7 +57,7 @@ const platforms = [
         <h3 class="h3">claude.ai and the Claude desktop app</h3>
         <ol class="steps" style="margin-top: 22px">
           <li>Download <a href={skill.zipUrl}>titus-humanizer.zip</a>. Keep it zipped.</li>
-          <li>In Settings, open Capabilities and turn on "Code execution and file creation". Skills need it.</li>
+          <li>In Settings, open Capabilities and turn on "Create and edit files". Older layouts call it "Code execution and file creation". Skills need it.</li>
           <li>Open <a href="https://claude.ai/customize/skills">Customize, then Skills</a>, choose "Upload a skill" and select the zip.</li>
           <li>Turn the skill on in your skills list. Then ask "Humanize this:" followed by your text.</li>
         </ol>
@@ -75,7 +75,7 @@ const platforms = [
         <h4 style="margin: 28px 0 8px">No skills on your plan? Build a Custom GPT.</h4>
         <ol class="steps">
           <li>Paste the <a href={u("/skills/titus-humanizer/gpt-instructions.md")}>short instructions</a> into the Instructions field.</li>
-          <li>Upload <a href={u("/skills/titus-humanizer/SKILL.md")} download>SKILL.md</a> and <a href={u("/skills/titus-humanizer/titus_tools.py")} download>titus_tools.py</a> as Knowledge files.</li>
+          <li>Upload <a href={u("/skills/titus-humanizer/SKILL.md")} download>the full rulebook</a> and <a href={u("/skills/titus-humanizer/titus_tools.py")} download>the scoring script</a> as Knowledge files.</li>
           <li>Turn on Code Interpreter under Capabilities, so the GPT can run the cleanup and the score.</li>
         </ol>
       </div>

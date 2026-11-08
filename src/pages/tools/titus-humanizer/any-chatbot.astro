@@ -60,7 +60,7 @@ const guides = [
         <div class="card copy-card reveal">
           <p class="eyebrow">Recommended</p>
           <h2 class="h3">Full rulebook</h2>
-          <p class="muted">The complete SKILL.md, about 6,600 words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity.</p>
+          <p class="muted">The complete rulebook, about 6,600 words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity.</p>
           <div class="btn-row" style="margin-top: auto">
             <button class="btn" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
             <a class="btn btn-quiet" href={full} download="SKILL.md">Download</a>
@@ -107,7 +107,7 @@ const guides = [
     <div class="wrap wrap-narrow">
       <div class="section-head">
         <p class="eyebrow">One-time prompt</p>
-        <h2 class="h2">Paste once and you're done.</h2>
+        <h2 class="h2">One message with the rules and your text</h2>
         <p class="lead">Put your text below. The page joins it with the full rulebook into one message you can paste into any chat.</p>
       </div>
       <div class="card reveal">
@@ -131,7 +131,7 @@ const guides = [
 
   <section class="section-tight section-soft">
     <div class="wrap wrap-narrow center">
-      <h2 class="h3">Check the result here.</h2>
+      <h2 class="h3">A score for the chatbot's rewrite</h2>
       <p class="muted">Most chatbots can't run the scoring script. Paste the rewrite into the checker to see its score and any patterns left.</p>
       <div class="btn-row center" style="margin-top: 20px">
         <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Open the checker</a>
@@ -160,7 +160,7 @@ const guides = [
     if (!text) { toast("Paste some text first"); return; }
     const ask = (document.getElementById("pb-mode") as HTMLSelectElement).value;
     const rules = await (await fetch(btn.dataset.full!)).text();
-    const prompt = `Follow the titus-humanizer rules below for this whole chat. You can't run titus_tools.py here, so write "Score: not available" instead of a score and never make one up.\n\n<rules>\n${rules}\n</rules>\n\n${ask}\n\n${text}`;
+    const prompt = `Follow the titus-humanizer rules below for this whole chat. You can't run the scoring script here, so write "Score: not available" instead of a score and never make one up.\n\n<rules>\n${rules}\n</rules>\n\n${ask}\n\n${text}`;
     copyText(prompt, "Prompt copied");
   });
 </script>
