@@ -1,0 +1,166 @@
+---
+import Base from "../../../layouts/Base.astro";
+import ToolNav from "../../../components/ToolNav.astro";
+import { u } from "../../../lib/url";
+
+const full = u("/skills/titus-humanizer/SKILL.md");
+const short = u("/skills/titus-humanizer/gpt-instructions.md");
+const guides = [
+  {
+    id: "gemini", name: "Gemini",
+    steps: [
+      "Open gemini.google.com and sign in.",
+      "To reuse the rules, open Gems in the side menu and create a new Gem. Paste the full rulebook into its instructions and save it.",
+      "For a single chat, paste the full rulebook as your first message instead.",
+      "Paste your text and ask: \"Humanize this.\"",
+    ],
+  },
+  {
+    id: "copilot", name: "Microsoft Copilot",
+    steps: [
+      "Open copilot.microsoft.com, or Copilot in Windows or Edge.",
+      "Start a new chat and paste the short version. Copilot limits how long one message can be, so the full rulebook may not fit.",
+      "Send it, then paste your text in the next message and ask: \"Humanize this.\"",
+    ],
+  },
+  {
+    id: "perplexity", name: "Perplexity",
+    steps: [
+      "Open perplexity.ai and create a Space.",
+      "Paste the full rulebook into the Space's instructions.",
+      "Ask inside that Space: \"Humanize this:\" followed by your text.",
+    ],
+  },
+  {
+    id: "other", name: "Any other",
+    steps: [
+      "Look for a setting called custom instructions, a project, an agent or a persona. If the assistant has one, paste the rulebook there so it applies to every chat.",
+      "If it has none, paste the rulebook as the first message of a new chat.",
+      "If the assistant says the text is too long, use the short version.",
+      "Then paste your text and ask: \"Humanize this.\"",
+    ],
+  },
+];
+---
+<Base title="Use any chatbot" current="tools" description="Copy-ready titus-humanizer instructions and short guides for Gemini, Copilot, Perplexity and other assistants.">
+  <ToolNav slot="subnav" current="any-chatbot" />
+
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="wrap wrap-narrow">
+      <p class="eyebrow">Any chatbot</p>
+      <h1 class="h1" data-rise>The rules work in the chatbot you already use.</h1>
+      <p class="lead">Copy the titus-humanizer rulebook, paste it into Gemini, Copilot or any other assistant, and ask it to humanize your text. It's free, and you don't need an account here.</p>
+    </div>
+  </section>
+
+  <section class="section-tight" style="padding-top: 0">
+    <div class="wrap">
+      <div class="grid grid-2">
+        <div class="card copy-card reveal">
+          <p class="eyebrow">Recommended</p>
+          <h2 class="h3">Full rulebook</h2>
+          <p class="muted">The complete SKILL.md, about 6,600 words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity.</p>
+          <div class="btn-row" style="margin-top: auto">
+            <button class="btn" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
+            <a class="btn btn-quiet" href={full} download="SKILL.md">Download</a>
+          </div>
+        </div>
+        <div class="card copy-card reveal" style="--d: 0.08s">
+          <p class="eyebrow">For short limits</p>
+          <h2 class="h3">Short version</h2>
+          <p class="muted">A summary of the rules, under 5,000 characters. Use it when an assistant says your message is too long, as Copilot often does.</p>
+          <div class="btn-row" style="margin-top: auto">
+            <button class="btn" data-copy-url={short} data-copy-label="Short version copied">Copy short version</button>
+            <a class="btn btn-quiet" href={short} download="titus-humanizer-short.md">Download</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-soft">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <h2 class="h2">Step by step</h2>
+        <p class="lead">Pick your assistant.</p>
+      </div>
+      <div class="center" style="margin-bottom: 28px">
+        <div class="segmented" role="tablist" aria-label="Assistant">
+          {guides.map((g, i) => (
+            <button role="tab" aria-selected={i === 0 ? "true" : "false"} aria-controls={`g-${g.id}`} data-guide={g.id}>{g.name}</button>
+          ))}
+        </div>
+      </div>
+      {guides.map((g, i) => (
+        <div class="card guide" id={`g-${g.id}`} role="tabpanel" hidden={i !== 0}>
+          <h3 class="h3" style="margin-bottom: 22px">{g.name}</h3>
+          <ol class="steps">
+            {g.steps.map((s) => <li>{s}</li>)}
+          </ol>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <p class="eyebrow">One-time prompt</p>
+        <h2 class="h2">Paste once and you're done.</h2>
+        <p class="lead">Put your text below. The page joins it with the full rulebook into one message you can paste into any chat.</p>
+      </div>
+      <div class="card reveal">
+        <label for="pb-text">Your text</label>
+        <textarea id="pb-text" placeholder="Paste the draft you want rewritten."></textarea>
+        <div class="field" style="margin-top: 16px">
+          <label for="pb-mode">Ask for</label>
+          <select id="pb-mode">
+            <option value="Humanize this:">A rewrite</option>
+            <option value="Rewrite this and tell me what you changed:">A rewrite and a list of changes</option>
+            <option value="Does this sound like AI? Review this:">A review</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="pb-copy" data-full={full}>Copy prompt</button>
+          <span class="small muted">Then paste it into your chatbot and send it.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight section-soft">
+    <div class="wrap wrap-narrow center">
+      <h2 class="h3">Check the result here.</h2>
+      <p class="muted">Most chatbots can't run the scoring script. Paste the rewrite into the checker to see its score and any patterns left.</p>
+      <div class="btn-row center" style="margin-top: 20px">
+        <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Open the checker</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .copy-card { display: flex; flex-direction: column; gap: 12px; min-height: 280px; }
+  .copy-card p { margin: 0; }
+  .guide { animation: resultsIn 0.6s var(--ease); }
+  @keyframes resultsIn { from { opacity: 0; transform: translateY(16px); } }
+  #pb-text { min-height: 200px; }
+</style>
+
+<script>
+  import { copyText, toast } from "../../../scripts/site";
+  document.querySelectorAll<HTMLButtonElement>("[data-guide]").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll<HTMLButtonElement>("[data-guide]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    document.querySelectorAll<HTMLElement>(".guide").forEach((p) => { p.hidden = p.id !== `g-${b.dataset.guide}`; });
+  }));
+  const btn = document.getElementById("pb-copy") as HTMLButtonElement;
+  btn.addEventListener("click", async () => {
+    const text = (document.getElementById("pb-text") as HTMLTextAreaElement).value.trim();
+    if (!text) { toast("Paste some text first"); return; }
+    const ask = (document.getElementById("pb-mode") as HTMLSelectElement).value;
+    const rules = await (await fetch(btn.dataset.full!)).text();
+    const prompt = `Follow the titus-humanizer rules below for this whole chat. You can't run titus_tools.py here, so write "Score: not available" instead of a score and never make one up.\n\n<rules>\n${rules}\n</rules>\n\n${ask}\n\n${text}`;
+    copyText(prompt, "Prompt copied");
+  });
+</script>

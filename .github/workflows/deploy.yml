@@ -1,0 +1,55 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  # titus-humanizer (and future skill repos) send this after each release.
+  repository_dispatch:
+    types: [skill-released]
+  # Nightly fallback, in case a release didn't send the event.
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Pulls each skill's files from its latest release, checks the script runs, then builds.
+      - run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Check wording rules on the built pages
+        run: node scripts/check-copy.mjs
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: dist
+
+  deploy:
+    # Only main goes live. dev and pull requests only build, to catch problems early.
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,76 @@
+---
+import ScoreRing from "./ScoreRing.astro";
+// Real output from titus_tools.py v1.0.0 for these two texts: 0.62 (high) before, 0.21 (low) after.
+const before = "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker. It's a gateway to a seamless experience, fostering alignment across all 12 setup steps. Moreover, it serves as a pivotal tool that empowers new hires and their managers to navigate the first two weeks with confidence. Ultimately, it is a testament to our commitment to people.";
+const after = "The new onboarding checklist lists all 12 setup steps for a new hire's first two weeks. New hires can tick off each step as they finish it. Their managers see the same list, so both of them know what is left to do.";
+const spans = [[0, 39, "stock opener"], [70, 96, "reject-then-assert"], [112, 120, "AI vocabulary"], [131, 142, "tacked-on -ing clause"], [180, 188, "sentence-initial connector"], [193, 202, "copula avoidance"], [205, 212, "AI vocabulary"], [223, 231, "AI vocabulary"], [264, 276, "AI vocabulary"], [310, 320, "canned ending"], [328, 342, "inflated significance"]];
+---
+<div class="demo card reveal" id="demo" data-before={before} data-after={after} data-spans={JSON.stringify(spans)}>
+  <div class="demo-top">
+    <span class="demo-pill" id="demo-pill">Draft</span>
+    <button class="btn btn-small btn-quiet" id="demo-replay" type="button">Replay</button>
+  </div>
+  <div class="demo-body">
+    <p class="demo-text" id="demo-text">{before}</p>
+    <div class="demo-side">
+      <ScoreRing id="demo-ring" size={150} />
+      <p class="small muted center" id="demo-caption">AI-pattern score</p>
+    </div>
+  </div>
+</div>
+<style is:global>
+  .demo { padding: clamp(24px, 4vw, 44px); max-width: 980px; margin: 0 auto; }
+  .demo-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .demo-pill { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 5px 10px; border-radius: 980px; background: var(--bg-soft); color: var(--ink-soft); transition: background 0.4s, color 0.4s; }
+  .demo-pill.is-after { background: rgba(52, 199, 89, 0.15); color: var(--good); }
+  .demo-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(20px, 4vw, 48px); align-items: center; }
+  @media (max-width: 680px) { .demo-body { grid-template-columns: 1fr; justify-items: center; } }
+  .demo-text { margin: 0; font-size: clamp(18px, 2.2vw, 24px); line-height: 1.55; letter-spacing: -0.015em; min-height: 7.5em; transition: opacity 0.5s, filter 0.5s, transform 0.5s var(--ease); }
+  .demo-text.fade { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+  .demo-text mark { color: inherit; border-radius: 4px; background: transparent; box-shadow: inset 0 0 0 transparent; transition: background 0.5s, box-shadow 0.5s; }
+  .demo-text mark.on { background: var(--hl-rule); box-shadow: inset 0 -2px 0 var(--hl-rule-line); }
+  .demo-text mark.on.v { background: var(--hl-vocab); box-shadow: inset 0 -2px 0 var(--hl-vocab-line); }
+  .demo-text mark.on.t { background: var(--hl-tone); box-shadow: inset 0 -2px 0 var(--hl-tone-line); }
+</style>
+<script>
+  import { setRing } from "../scripts/ring";
+  const el = document.getElementById("demo") as HTMLElement | null;
+  if (el) {
+    const before = el.dataset.before!, after = el.dataset.after!;
+    const spans: [number, number, string][] = JSON.parse(el.dataset.spans!);
+    const text = document.getElementById("demo-text")!;
+    const pill = document.getElementById("demo-pill")!;
+    const caption = document.getElementById("demo-caption")!;
+    const cls = (l: string) => (l === "AI vocabulary" || l === "stock opener" || l === "sentence-initial connector" ? "v" : l === "reject-then-assert" ? "" : "t");
+    const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]!));
+    const timers: number[] = [];
+    const later = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function play() {
+      timers.splice(0).forEach(clearTimeout);
+      let html = "", last = 0;
+      spans.forEach(([s, e, l], i) => { html += esc(before.slice(last, s)) + `<mark data-i="${i}" class="${cls(l)}" title="${l}">${esc(before.slice(s, e))}</mark>`; last = e; });
+      text.innerHTML = html + esc(before.slice(last));
+      text.classList.remove("fade");
+      pill.textContent = "Draft"; pill.classList.remove("is-after");
+      caption.textContent = "Scanning for patterns";
+      setRing("demo-ring", 0, "none", "Score");
+      const step = reduce ? 0 : 260;
+      text.querySelectorAll("mark").forEach((m, i) => later(400 + i * step, () => m.classList.add("on")));
+      const t1 = 400 + spans.length * step + 200;
+      later(t1, () => { setRing("demo-ring", 0.62, "high"); caption.textContent = `${spans.length} patterns found`; });
+      later(t1 + (reduce ? 0 : 2600), () => text.classList.add("fade"));
+      later(t1 + (reduce ? 0 : 3200), () => {
+        text.textContent = after;
+        text.classList.remove("fade");
+        pill.textContent = "Rewrite"; pill.classList.add("is-after");
+        setRing("demo-ring", 0.21, "low");
+        caption.textContent = "Same facts, no patterns left";
+      });
+    }
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { play(); io.disconnect(); } }, { threshold: 0.4 });
+    io.observe(el);
+    document.getElementById("demo-replay")!.addEventListener("click", play);
+  }
+</script>

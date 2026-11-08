@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+# Filled in at build time by scripts/fetch-skills.mjs and scripts/copy-pyodide.mjs
+public/skills/
+public/vendor/
+src/data/skills.generated.json

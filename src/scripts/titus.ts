@@ -1,0 +1,107 @@
+// Talks to the worker that runs titus_tools.py in the browser.
+type Listener = (state: { ready: boolean; failed: boolean; text: string }) => void;
+
+let worker: Worker | null = null;
+let seq = 0;
+const pending = new Map<number, { resolve: (v: any) => void; reject: (e: Error) => void }>();
+const listeners = new Set<Listener>();
+let state = { ready: false, failed: false, text: "Starting" };
+
+function start() {
+  if (worker) return worker;
+  const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+  worker = new Worker(base + "js/titus-worker.js");
+  worker.onmessage = (ev) => {
+    const m = ev.data;
+    if (m.type === "status") state = { ...state, text: m.text };
+    else if (m.type === "ready") state = { ready: true, failed: false, text: "Ready" };
+    else if (m.type === "failed") state = { ready: false, failed: true, text: m.text };
+    else if (m.id) {
+      const p = pending.get(m.id);
+      pending.delete(m.id);
+      if (p) m.ok ? p.resolve(m.value) : p.reject(new Error(m.error));
+      return;
+    }
+    listeners.forEach((l) => l(state));
+  };
+  return worker;
+}
+
+export function onStatus(l: Listener) {
+  listeners.add(l);
+  l(state);
+  start();
+}
+
+function call<T>(op: string, ...args: string[]): Promise<T> {
+  const w = start();
+  const id = ++seq;
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve, reject });
+    w.postMessage({ id, op, args });
+  });
+}
+
+export interface Span { start: number; end: number; label: string; weight: number }
+export interface Mark { start: number; end: number; name: string; cp: string; looks?: string }
+export interface Score {
+  words: number; sentences: number; status: string; score: number | null; tier: string;
+  patterns: { label: string; count: number; sample: string }[];
+  density?: number; sentence_cv?: number | null; mattr?: number; dampened?: boolean;
+}
+export interface Analysis { cleaned: string; found: Record<string, number>; found_text: string; hidden: Mark[]; score: Score; spans: Span[]; min_words: number }
+export interface Comparison { report: string; cleaned_rewrite: string; before: Score; after: Score; spans_after: Span[] }
+
+export const analyze = (text: string) => call<Analysis>("analyze", text);
+export const compare = (original: string, rewrite: string) => call<Comparison>("compare", original, rewrite);
+
+// Groups for coloring highlights. Labels the list doesn't know fall back to "tone".
+const GROUPS: Record<string, string> = {
+  "em dash": "rule", "dash used as a break": "rule", "semicolon": "rule", "arrow, bar or inline dot": "rule",
+  "reject-then-assert": "rule", "not only / not just ... but": "rule", "rather than contrast": "rule",
+  "passive voice (heuristic)": "rule", "slogan fragment": "rule", "illustrative hedging": "rule", "chatbot residue": "rule",
+  "AI vocabulary": "vocab", "stock opener": "vocab", "sentence-initial connector": "vocab",
+  "bold-label bullet": "format",
+  "stated lesson": "story", "emotion as body sensation": "story", "setting as mirror": "story",
+  "decorative smell": "story", "tidy inner resolution": "story",
+};
+export const groupOf = (label: string) => GROUPS[label] || "tone";
+export const GROUP_NAMES: Record<string, string> = {
+  rule: "Hard rule", tone: "Substance and tone", vocab: "Vocabulary", format: "Formatting", story: "Story pattern",
+};
+
+const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
+
+// Turns text plus overlapping spans into HTML with <mark> tags.
+export function highlight(text: string, spans: Span[]) {
+  const cuts = new Set<number>([0, text.length]);
+  spans.forEach((s) => { cuts.add(s.start); cuts.add(s.end); });
+  const points = [...cuts].sort((a, b) => a - b);
+  let html = "";
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i + 1];
+    const piece = esc(text.slice(a, b));
+    const covering = spans.filter((s) => s.start <= a && s.end >= b);
+    if (!covering.length) { html += piece; continue; }
+    covering.sort((x, y) => (x.end - x.start) - (y.end - y.start));
+    const top = covering[0];
+    const labels = [...new Set(covering.map((s) => s.label))].join(", ");
+    html += `<mark class="hl hl-${groupOf(top.label)}" data-label="${esc(labels)}" title="${esc(labels)}">${piece}</mark>`;
+  }
+  return html;
+}
+
+// Shows the original text with a visible badge where each hidden character sits.
+export function showHidden(text: string, marks: Mark[]) {
+  let html = "", last = 0;
+  for (const m of marks) {
+    html += esc(text.slice(last, m.start));
+    const ch = text.slice(m.start, m.end);
+    const tip = `${m.name} (${m.cp})${m.looks ? `, looks like "${m.looks}"` : ""}`;
+    html += m.name === "look-alike letter"
+      ? `<mark class="hid hid-letter" title="${esc(tip)}">${esc(ch)}</mark>`
+      : `<mark class="hid" title="${esc(tip)}">${esc(m.cp)}</mark>${ch === "\n" ? "\n" : ""}`;
+    last = m.end;
+  }
+  return html + esc(text.slice(last));
+}

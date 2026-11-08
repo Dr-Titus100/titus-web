@@ -1,0 +1,68 @@
+---
+import Base from "../../../layouts/Base.astro";
+import ToolNav from "../../../components/ToolNav.astro";
+import Demo from "../../../components/Demo.astro";
+import Examples from "../../../components/Examples.astro";
+import PromoVideo from "../../../components/PromoVideo.astro";
+import { u } from "../../../lib/url";
+import skills from "../../../data/skills.generated.json";
+const skill = skills["titus-humanizer"];
+---
+<Base title="titus-humanizer" current="tools" description="titus-humanizer rewrites text so it reads like a careful, plain-spoken person wrote it, and keeps every fact, number and name.">
+  <ToolNav slot="subnav" current="overview" />
+
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="wrap">
+      <p class="eyebrow">titus-humanizer {skill.version}</p>
+      <h1 class="display" data-rise>Plain words that keep every fact.</h1>
+      <p class="lead">An editing skill that rewrites text so it reads like a careful, plain-spoken person wrote it. It strips hidden characters first and scores the AI-writing patterns before and after.</p>
+      <div class="btn-row">
+        <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Check your text free</a>
+        <a class="btn btn-ghost" href={u("/tools/titus-humanizer/install/")}>Install</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight" style="padding-top: 0">
+    <div class="wrap"><Demo /></div>
+  </section>
+
+  <section class="section section-dark">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="h2">Watch the tour.</h2>
+      </div>
+      <PromoVideo />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="h2">It works on almost anything you write.</h2>
+        <p class="lead">Emails, reports, slide decks, resumes, papers, cover letters, personal statements, blog posts and fiction.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="card reveal"><h3 class="h3">Seven hard rules</h3><p class="muted">No em dashes or semicolons, no "it's not X, it's Y", no passive voice that hides who acted, no slogans and no chatbot phrases.</p></div>
+        <div class="card reveal" style="--d: 0.08s"><h3 class="h3">Five kinds of weak wording</h3><p class="muted">Awkward, flowery, vague, unnecessary and illogical. Each comes with a test, such as "would you say this out loud to a colleague?"</p></div>
+        <div class="card reveal" style="--d: 0.16s"><h3 class="h3">Story patterns</h3><p class="muted">AI stories state their moral, stack body sensations for fear and make the weather match the mood. The skill cuts these and keeps your real details.</p></div>
+      </div>
+      <p class="small muted center" style="margin-top: 32px; max-width: 700px; margin-left: auto; margin-right: auto">The score counts patterns. It doesn't measure quality, it isn't a detector, and a low score doesn't prove a person wrote the text. The cleanup removes invisible characters only. It doesn't remove AI watermarks or file metadata.</p>
+    </div>
+  </section>
+
+  <Examples />
+
+  <section class="section">
+    <div class="wrap center">
+      <h2 class="h2 reveal">Try it now.</h2>
+      <div class="btn-row center reveal" style="margin-top: 28px">
+        <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Open the checker</a>
+        <a class="btn btn-ghost" href={u("/tools/titus-humanizer/rewrite/")}>Rewrite with your key</a>
+        <a class="btn btn-ghost" href={u("/tools/titus-humanizer/any-chatbot/")}>Use any chatbot</a>
+      </div>
+      <p class="small muted" style="margin-top: 28px">Source code on <a href={skill.repoUrl}>GitHub</a>. MIT license.</p>
+    </div>
+  </section>
+</Base>

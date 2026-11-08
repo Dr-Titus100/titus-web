@@ -1,0 +1,11 @@
+---
+interface Props { title: string; text: string }
+const { title, text } = Astro.props;
+---
+<section class="section empty">
+  <div class="wrap wrap-narrow">
+    <div class="orb" aria-hidden="true"></div>
+    <h1 class="h1" data-rise>{title}</h1>
+    <p class="lead">{text}</p>
+  </div>
+</section>

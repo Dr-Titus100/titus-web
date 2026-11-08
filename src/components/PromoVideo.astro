@@ -1,0 +1,11 @@
+---
+import { u } from "../lib/url";
+---
+<div class="video-stage reveal">
+  <div class="video-frame" data-scroll-scale>
+    <video controls playsinline preload="metadata" poster={u("/media/titus-humanizer-promo-poster.jpg")} aria-label="titus-humanizer promo video">
+      <source src={u("/media/titus-humanizer-promo.mp4")} type="video/mp4" />
+      Your browser can't play this video. <a href={u("/media/titus-humanizer-promo.mp4")}>Download it</a> instead.
+    </video>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+{
+  "name": "titus-web",
+  "version": "0.1.0",
+  "description": "Website for Titus Nyarko Nde: skills, plugins, writing and experience.",
+  "scripts": {
+    "fetch-skills": "node scripts/fetch-skills.mjs",
+    "copy-pyodide": "node scripts/copy-pyodide.mjs",
+    "prepare-site": "npm run fetch-skills && npm run copy-pyodide",
+    "dev": "npm run prepare-site && astro dev",
+    "build": "npm run prepare-site && astro build",
+    "preview": "astro preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dr-Titus100/titus-web.git"
+  },
+  "author": "Titus Nyarko Nde",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Dr-Titus100/titus-web/issues"
+  },
+  "homepage": "https://github.com/Dr-Titus100/titus-web#readme",
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.7",
+    "pyodide": "^0.29.5"
+  },
+  "private": true,
+  "type": "module"
+}
