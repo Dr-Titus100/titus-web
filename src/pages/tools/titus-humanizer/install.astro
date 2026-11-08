@@ -22,7 +22,7 @@ const platforms = [
     <div class="wrap wrap-narrow">
       <p class="eyebrow">Install</p>
       <h1 class="h1" data-rise>A one-minute install for your assistant</h1>
-      <p class="lead">One zip file works in claude.ai, the Claude desktop app and ChatGPT. Claude Code and Codex install it from GitHub.</p>
+      <p class="lead">The quickest route is to give your assistant the repository link and let it do the work. To install by hand, one zip file works in claude.ai, the Claude desktop app and ChatGPT, and Claude Code and Codex install it from GitHub.</p>
       <div class="btn-row">
         <a class="btn" href={skill.zipUrl}>Download titus-humanizer.zip</a>
         <a class="btn btn-ghost" href={skill.releaseUrl}>{skill.version} release notes</a>
@@ -40,7 +40,22 @@ const platforms = [
     </div>
   </section>
 
-  <section class="section" id="steps">
+  <section class="section" id="easy">
+    <div class="wrap wrap-narrow">
+      <div class="card easy reveal">
+        <p class="eyebrow">The simplest way</p>
+        <h2 class="h3">Let your assistant install it</h2>
+        <p class="muted">Copy the repository link below into Claude, Claude Code, ChatGPT or Codex and ask it to help you install the skill. It handles the installation for you, or walks you through any step it can't do itself.</p>
+        <div class="copy-block">
+          <pre><code id="repo-link">{skill.repoUrl}.git</code></pre>
+          <button class="btn btn-small btn-quiet" data-copy-from="#repo-link">Copy</button>
+        </div>
+        <p class="small muted" style="margin: 0">To install it yourself, follow the steps below.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="steps" style="padding-top: 0">
     <div class="wrap wrap-narrow">
       <div class="section-head">
         <h2 class="h2">Install steps for each assistant</h2>
@@ -116,6 +131,8 @@ cp -r titus-humanizer/skills/titus-humanizer ~/.agents/skills/</code></pre>
 </Base>
 
 <style is:global>
+  .easy { display: flex; flex-direction: column; gap: 12px; }
+  .easy p, .easy h2 { margin: 0; }
   .platform { animation: resultsIn 0.6s var(--ease); }
   @keyframes resultsIn { from { opacity: 0; transform: translateY(16px); } }
 </style>
