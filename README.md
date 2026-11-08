@@ -24,13 +24,28 @@ A build runs when:
 
 ### Rebuild on each titus-humanizer release
 
-The release workflow in titus-humanizer sends the `skill-released` event. It needs a token with access to this repo:
+The release workflow in titus-humanizer sends the `skill-released` event, and it needs a token with access to this repo. You set this up once.
 
-1. On GitHub, open Settings, then Developer settings, then Personal access tokens, then Fine-grained tokens, and choose Generate new token.
-2. Under Repository access, pick only `Dr-Titus100/titus-web`. Under Permissions, set **Contents** to Read and write. Generate the token and copy it.
-3. In the titus-humanizer repo, open Settings, then Secrets and variables, then Actions. Add a secret named `SITE_DISPATCH_TOKEN` and paste the token.
+**1. Create the token**
 
-Without the secret, the release still works, and the site picks up the new version on its nightly build.
+1. On GitHub, click your profile picture, then open Settings, then Developer settings, then Personal access tokens, then Fine-grained tokens. Choose **Generate new token**.
+2. Fill in the form:
+   - **Token name:** `titus-web site rebuild`
+   - **Description:** `Lets the titus-humanizer release workflow rebuild the titus-web site. Saved as SITE_DISPATCH_TOKEN in titus-humanizer.`
+   - **Expiration:** 1 year is a sensible choice. When the token expires, the rebuild step stops working, but the nightly build still picks up new releases. Put a reminder in your calendar to replace the token before it runs out.
+   - **Repository access:** choose **Only select repositories** and pick `Dr-Titus100/titus-web`.
+   - **Permissions:** under Repository permissions, set **Contents** to **Read and write**. GitHub then sets **Metadata** to Read-only on its own. Leave every other permission on No access, including Actions, Pages and Workflows.
+3. Choose **Generate token** and copy it. GitHub shows it only once.
+
+**2. Save the token in titus-humanizer**
+
+1. Open the titus-humanizer repo on GitHub, then Settings. In the left menu, open **Secrets and variables**, then **Actions**.
+2. Stay on the **Secrets** tab. The page has two boxes, Environment secrets and Repository secrets. Use the **Repository secrets** box and choose **New repository secret**.
+3. Set **Name** to `SITE_DISPATCH_TOKEN`, paste the token into **Secret** and choose **Add secret**.
+
+The next titus-humanizer release then rebuilds the site within a few minutes. Without the secret, the release still works, and the site picks up the new version on its nightly build.
+
+**Replacing an expired token.** Create a new token the same way, then open `SITE_DISPATCH_TOKEN` under Repository secrets in titus-humanizer, choose the pencil icon to edit it and paste the new token.
 
 ## Turn on GitHub Pages (once)
 
