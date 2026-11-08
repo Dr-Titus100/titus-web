@@ -6,15 +6,15 @@ import { u } from "../../../lib/url";
 import skills from "../../../data/skills.generated.json";
 const skill = skills["titus-humanizer"];
 ---
-<Base title="Checker" current="checker" description="Paste text to see its AI-pattern score, the patterns highlighted in place, and the hidden characters removed. It runs titus_tools.py in your browser.">
+<Base title="Checker" current="checker" description="Paste text to see its AI-pattern score, the patterns highlighted in place, and the hidden characters removed. It runs the titus-humanizer scoring script in your browser.">
   <ToolNav slot="subnav" current="checker" />
 
   <section class="hero" style="padding-bottom: 32px">
     <div class="hero-glow" aria-hidden="true"></div>
     <div class="wrap wrap-narrow">
       <p class="eyebrow">Checker</p>
-      <h1 class="h1" data-rise>See what sounds machine-made.</h1>
-      <p class="lead">Paste any text. The checker scores it from 0 to 1, marks each pattern where it appears and removes hidden characters. It runs the real titus_tools.py from {skill.version}, right in your browser.</p>
+      <h1 class="h1" data-rise>Which phrases sound machine-made?</h1>
+      <p class="lead">Paste any text. The checker scores it from 0 to 1, marks each pattern where it appears and removes hidden characters. It uses the same scoring script as titus-humanizer {skill.version}, and it runs inside your browser.</p>
     </div>
   </section>
 
