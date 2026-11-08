@@ -1,0 +1,46 @@
+---
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url";
+import skills from "../../data/skills.generated.json";
+// Add a new skill or plugin here, and to skills.config.json if the site should pull its files.
+const tools = [
+  {
+    name: "titus-humanizer",
+    kind: "Skill",
+    blurb: "Rewrites text so it reads like a careful person wrote it, and scores AI-writing patterns from 0 to 1.",
+    href: "/tools/titus-humanizer/",
+    version: skills["titus-humanizer"].version,
+    gradient: "linear-gradient(135deg,#0071e3,#a34dff,#ff4d6d)",
+  },
+];
+---
+<Base title="Tools" current="tools" description="Skills and plugins by Titus Nyarko Nde.">
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="wrap wrap-narrow">
+      <h1 class="h1" data-rise>Tools</h1>
+      <p class="lead">Skills and plugins for Claude, ChatGPT and other assistants. Each one has a free way to try it on this site.</p>
+    </div>
+  </section>
+  <section class="section-tight" style="padding-top: 0">
+    <div class="wrap">
+      <div class="grid grid-3">
+        {tools.map((t) => (
+          <a class="card tile reveal" href={u(t.href)}>
+            <span class="tile-icon" style={`background:${t.gradient}`}>T</span>
+            <p class="small muted" style="margin:0">{t.kind}, {t.version}</p>
+            <h2 class="h3">{t.name}</h2>
+            <p>{t.blurb}</p>
+            <span class="link-arrow">Explore</span>
+          </a>
+        ))}
+        <div class="card tile soon reveal" style="--d: 0.08s">
+          <span class="tile-icon" style="background: var(--line)">+</span>
+          <h2 class="h3">More soon</h2>
+          <p>New skills and plugins will show up here as they ship.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>.soon { box-shadow: none; border: 1px dashed var(--line); background: transparent; }</style>

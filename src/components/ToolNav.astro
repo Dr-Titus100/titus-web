@@ -1,0 +1,23 @@
+---
+import { u } from "../lib/url";
+interface Props { current: string }
+const { current } = Astro.props;
+const items = [
+  { key: "overview", href: "/tools/titus-humanizer/", label: "Overview" },
+  { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Checker" },
+  { key: "rewrite", href: "/tools/titus-humanizer/rewrite/", label: "Rewrite" },
+  { key: "any-chatbot", href: "/tools/titus-humanizer/any-chatbot/", label: "Any chatbot" },
+  { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
+];
+---
+<nav class="subnav" aria-label="titus-humanizer">
+  <div class="wrap subnav-inner">
+    <a class="subnav-title" href={u("/tools/titus-humanizer/")}>titus-humanizer</a>
+    <div class="subnav-links">
+      {items.filter((i) => i.key !== "overview").map((i) => (
+        <a href={u(i.href)} aria-current={current === i.key ? "page" : undefined}>{i.label}</a>
+      ))}
+      <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Try it free</a>
+    </div>
+  </div>
+</nav>

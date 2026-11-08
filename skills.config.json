@@ -1,0 +1,16 @@
+{
+  "skills": [
+    {
+      "slug": "titus-humanizer",
+      "name": "titus-humanizer",
+      "repo": "Dr-Titus100/titus-humanizer",
+      "zipAsset": "titus-humanizer.zip",
+      "files": {
+        "SKILL.md": "skills/titus-humanizer/SKILL.md",
+        "titus_tools.py": "skills/titus-humanizer/scripts/titus_tools.py",
+        "gpt-instructions.md": "chatgpt/gpt-instructions.md"
+      },
+      "check": ["python3", "{dir}/titus_tools.py", "score", "{sample}"]
+    }
+  ]
+}

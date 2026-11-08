@@ -1,0 +1,128 @@
+---
+import Base from "../../../layouts/Base.astro";
+import ToolNav from "../../../components/ToolNav.astro";
+import Examples from "../../../components/Examples.astro";
+import PromoVideo from "../../../components/PromoVideo.astro";
+import { u } from "../../../lib/url";
+import skills from "../../../data/skills.generated.json";
+const skill = skills["titus-humanizer"];
+
+const platforms = [
+  { id: "claude", name: "Claude" },
+  { id: "chatgpt", name: "ChatGPT" },
+  { id: "claude-code", name: "Claude Code" },
+  { id: "codex", name: "Codex" },
+];
+---
+<Base title="Install titus-humanizer" current="tools" description="Install titus-humanizer in Claude, ChatGPT, Claude Code or Codex, and see before-and-after examples.">
+  <ToolNav slot="subnav" current="install" />
+
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="wrap wrap-narrow">
+      <p class="eyebrow">Install</p>
+      <h1 class="h1" data-rise>Add it to your assistant in a minute.</h1>
+      <p class="lead">One zip file works in claude.ai, the Claude desktop app and ChatGPT. Claude Code and Codex install it from GitHub.</p>
+      <div class="btn-row">
+        <a class="btn" href={skill.zipUrl}>Download titus-humanizer.zip</a>
+        <a class="btn btn-ghost" href={skill.releaseUrl}>{skill.version} release notes</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight section-dark">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Watch</p>
+        <h2 class="h2">See it work.</h2>
+      </div>
+      <PromoVideo />
+    </div>
+  </section>
+
+  <section class="section" id="steps">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <h2 class="h2">Pick where you use it.</h2>
+      </div>
+      <div class="center" style="margin-bottom: 28px">
+        <div class="segmented" role="tablist" aria-label="Platform">
+          {platforms.map((p, i) => (
+            <button role="tab" aria-selected={i === 0 ? "true" : "false"} aria-controls={`p-${p.id}`} data-platform={p.id}>{p.name}</button>
+          ))}
+        </div>
+      </div>
+
+      <div class="card platform" id="p-claude" role="tabpanel">
+        <h3 class="h3">claude.ai and the Claude desktop app</h3>
+        <ol class="steps" style="margin-top: 22px">
+          <li>Download <a href={skill.zipUrl}>titus-humanizer.zip</a>. Keep it zipped.</li>
+          <li>In Settings, open Capabilities and turn on "Code execution and file creation". Skills need it.</li>
+          <li>Open <a href="https://claude.ai/customize/skills">Customize, then Skills</a>, choose "Upload a skill" and select the zip.</li>
+          <li>Turn the skill on in your skills list. Then ask "Humanize this:" followed by your text.</li>
+        </ol>
+        <p class="small muted">Team and Enterprise owners may need to allow user-created skills first. Anthropic's guide is <a href="https://support.claude.com/en/articles/12512180-use-skills-in-claude">Use skills in Claude</a>.</p>
+      </div>
+
+      <div class="card platform" id="p-chatgpt" role="tabpanel" hidden>
+        <h3 class="h3">ChatGPT</h3>
+        <ol class="steps" style="margin-top: 22px">
+          <li>Download <a href={skill.zipUrl}>titus-humanizer.zip</a>. Keep it zipped.</li>
+          <li>In the ChatGPT app, go to Skills and select Create.</li>
+          <li>Select "Upload from your computer" and choose the zip.</li>
+        </ol>
+        <p class="small muted">OpenAI lists skills for Business, Enterprise, Healthcare and Edu workspaces, and an admin may need to turn them on. OpenAI's guide is <a href="https://help.openai.com/en/articles/20001066-skills-in-chatgpt">Skills in ChatGPT</a>.</p>
+        <h4 style="margin: 28px 0 8px">No skills on your plan? Build a Custom GPT.</h4>
+        <ol class="steps">
+          <li>Paste the <a href={u("/skills/titus-humanizer/gpt-instructions.md")}>short instructions</a> into the Instructions field.</li>
+          <li>Upload <a href={u("/skills/titus-humanizer/SKILL.md")} download>SKILL.md</a> and <a href={u("/skills/titus-humanizer/titus_tools.py")} download>titus_tools.py</a> as Knowledge files.</li>
+          <li>Turn on Code Interpreter under Capabilities, so the GPT can run the cleanup and the score.</li>
+        </ol>
+      </div>
+
+      <div class="card platform" id="p-claude-code" role="tabpanel" hidden>
+        <h3 class="h3">Claude Code</h3>
+        <p class="muted" style="margin-top: 12px">Add the repository as a plugin marketplace and install the plugin:</p>
+        <div class="copy-block">
+          <pre><code id="cc1">/plugin marketplace add Dr-Titus100/titus-humanizer
+/plugin install titus-humanizer@titus-humanizer</code></pre>
+          <button class="btn btn-small btn-quiet" data-copy-from="#cc1">Copy</button>
+        </div>
+        <p class="muted">Or copy the skill folder in by hand:</p>
+        <div class="copy-block">
+          <pre><code id="cc2">git clone https://github.com/Dr-Titus100/titus-humanizer.git
+cp -r titus-humanizer/skills/titus-humanizer ~/.claude/skills/</code></pre>
+          <button class="btn btn-small btn-quiet" data-copy-from="#cc2">Copy</button>
+        </div>
+      </div>
+
+      <div class="card platform" id="p-codex" role="tabpanel" hidden>
+        <h3 class="h3">Codex</h3>
+        <p class="muted" style="margin-top: 12px">Codex loads skills from <code>~/.agents/skills</code> in your home folder, or from <code>.agents/skills</code> inside a project:</p>
+        <div class="copy-block">
+          <pre><code id="cx1">git clone https://github.com/Dr-Titus100/titus-humanizer.git
+mkdir -p ~/.agents/skills
+cp -r titus-humanizer/skills/titus-humanizer ~/.agents/skills/</code></pre>
+          <button class="btn btn-small btn-quiet" data-copy-from="#cx1">Copy</button>
+        </div>
+        <p class="small muted">OpenAI's guide is <a href="https://developers.openai.com/codex/build-skills">Build skills</a>.</p>
+      </div>
+
+      <p class="center muted" style="margin-top: 36px">Using Gemini, Copilot or something else? <a class="link-arrow" href={u("/tools/titus-humanizer/any-chatbot/")}>Use the rules in any chatbot</a></p>
+    </div>
+  </section>
+
+  <Examples />
+</Base>
+
+<style is:global>
+  .platform { animation: resultsIn 0.6s var(--ease); }
+  @keyframes resultsIn { from { opacity: 0; transform: translateY(16px); } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-platform]").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll<HTMLButtonElement>("[data-platform]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    document.querySelectorAll<HTMLElement>(".platform").forEach((p) => { p.hidden = p.id !== `p-${b.dataset.platform}`; });
+  }));
+</script>

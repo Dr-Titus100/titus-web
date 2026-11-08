@@ -1,0 +1,29 @@
+---
+import Base from "../../layouts/Base.astro";
+import ComingSoon from "../../components/ComingSoon.astro";
+import { getCollection } from "astro:content";
+import { u } from "../../lib/url";
+const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+---
+<Base title="Blog" current="blog" description="Writing by Titus Nyarko Nde.">
+  {posts.length === 0 ? (
+    <ComingSoon title="Blog" text="The first posts are coming soon." />
+  ) : (
+    <>
+      <section class="hero"><div class="wrap wrap-narrow"><h1 class="h1" data-rise>Blog</h1></div></section>
+      <section class="section-tight" style="padding-top: 0">
+        <div class="wrap wrap-narrow">
+          {posts.map((p) => (
+            <a class="card tile reveal post-row" href={u(`/blog/${p.id}/`)}>
+              <p class="small muted" style="margin:0">{fmt(p.data.date)}</p>
+              <h2 class="h3">{p.data.title}</h2>
+              <p>{p.data.description}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+    </>
+  )}
+</Base>
+<style>.post-row { min-height: 0; margin-bottom: 20px; }</style>

@@ -1,0 +1,246 @@
+---
+import Base from "../../../layouts/Base.astro";
+import ToolNav from "../../../components/ToolNav.astro";
+import ScoreRing from "../../../components/ScoreRing.astro";
+import { u } from "../../../lib/url";
+import skills from "../../../data/skills.generated.json";
+const skill = skills["titus-humanizer"];
+---
+<Base title="Checker" current="checker" description="Paste text to see its AI-pattern score, the patterns highlighted in place, and the hidden characters removed. It runs titus_tools.py in your browser.">
+  <ToolNav slot="subnav" current="checker" />
+
+  <section class="hero" style="padding-bottom: 32px">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="wrap wrap-narrow">
+      <p class="eyebrow">Checker</p>
+      <h1 class="h1" data-rise>See what sounds machine-made.</h1>
+      <p class="lead">Paste any text. The checker scores it from 0 to 1, marks each pattern where it appears and removes hidden characters. It runs the real titus_tools.py from {skill.version}, right in your browser.</p>
+    </div>
+  </section>
+
+  <section class="section-tight" style="padding-top: 0">
+    <div class="wrap">
+      <div class="card checker-card reveal">
+        <div class="checker-top">
+          <label for="input">Your text</label>
+          <span class="status" id="status" data-state="loading"><span class="dot"></span><span class="status-text">Starting</span></span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="Paste an email, an essay, a cover letter or a story here."></textarea>
+        <div class="checker-actions">
+          <div class="btn-row">
+            <button class="btn" id="run" disabled>Check text</button>
+            <button class="btn btn-quiet" id="sample" type="button">Try a sample</button>
+            <button class="btn btn-quiet" id="clear" type="button">Clear</button>
+          </div>
+          <span class="small muted" id="count">0 words</span>
+        </div>
+        <div class="notice" style="margin-top: 18px">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1a3 3 0 0 0-3 3v2H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3Zm-1.5 3a1.5 1.5 0 0 1 3 0v2h-3V4Z"/></svg>
+          <span>Your text stays on your device. The page downloads Python once, about 12 MB, and your browser keeps it for next time.</span>
+        </div>
+      </div>
+
+      <div class="results" id="results" hidden>
+        <div class="grid results-grid">
+          <div class="card score-card">
+            <ScoreRing id="ring" />
+            <dl class="stats">
+              <div><dt>Words</dt><dd id="s-words">0</dd></div>
+              <div><dt>Sentences</dt><dd id="s-sents">0</dd></div>
+              <div><dt>Patterns per 100 words</dt><dd id="s-density">--</dd></div>
+              <div><dt>Hidden characters</dt><dd id="s-hidden">0</dd></div>
+            </dl>
+            <p class="small muted" id="s-note"></p>
+          </div>
+          <div class="card">
+            <h2 class="h3">Patterns found</h2>
+            <ul class="patterns" id="patterns"></ul>
+            <p class="small muted" id="hidden-summary"></p>
+          </div>
+        </div>
+
+        <div class="card view-card">
+          <div class="view-head">
+            <div class="segmented" role="tablist" aria-label="View">
+              <button role="tab" aria-selected="true" data-view="patterns">Highlighted patterns</button>
+              <button role="tab" aria-selected="false" data-view="hidden">Hidden characters</button>
+              <button role="tab" aria-selected="false" data-view="cleaned">Cleaned text</button>
+            </div>
+            <button class="btn btn-small btn-ghost" id="copy-clean" type="button">Copy cleaned text</button>
+          </div>
+          <div class="legend" id="legend">
+            <span><i class="hl-rule"></i>Hard rule</span>
+            <span><i class="hl-tone"></i>Substance and tone</span>
+            <span><i class="hl-vocab"></i>Vocabulary</span>
+            <span><i class="hl-format"></i>Formatting</span>
+            <span><i class="hl-story"></i>Story pattern</span>
+          </div>
+          <div class="view" id="view" tabindex="0"></div>
+          <p class="small muted" id="view-note"></p>
+        </div>
+
+        <div class="next reveal">
+          <h2 class="h2">Want it rewritten?</h2>
+          <p class="lead">Use your own Claude, OpenAI or Gemini key on this site, or paste the rules into any chatbot you already use.</p>
+          <div class="btn-row center" style="margin-top: 24px">
+            <a class="btn" href={u("/tools/titus-humanizer/rewrite/")}>Rewrite with your key</a>
+            <a class="btn btn-ghost" href={u("/tools/titus-humanizer/any-chatbot/")}>Use any chatbot</a>
+          </div>
+        </div>
+      </div>
+
+      <p class="small muted center" style="margin-top: 40px; max-width: 680px; margin-left: auto; margin-right: auto">
+        The score counts the writing patterns titus-humanizer targets. It doesn't measure quality, it isn't the output of GPTZero, Turnitin or any other detector, and a low score doesn't prove a person wrote the text.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .checker-card { padding: 28px; }
+  .checker-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .checker-top label { margin: 0; }
+  .checker-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  #input { min-height: 280px; }
+  .status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft); }
+  .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); animation: pulse 1.2s ease-in-out infinite; }
+  .status[data-state="ready"] .dot { background: var(--good); animation: none; }
+  .status[data-state="failed"] .dot { background: var(--bad); animation: none; }
+  @keyframes pulse { 50% { opacity: 0.3; transform: scale(0.8); } }
+  .results { margin-top: 28px; animation: resultsIn 0.8s var(--ease); }
+  @keyframes resultsIn { from { opacity: 0; transform: translateY(24px); } }
+  .results-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-bottom: 20px; }
+  @media (max-width: 820px) { .results-grid { grid-template-columns: 1fr; } }
+  .score-card { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin: 0; width: 100%; }
+  .stats div { border-top: 1px solid var(--line-soft); padding-top: 10px; }
+  .stats dt { font-size: 12px; color: var(--ink-soft); }
+  .stats dd { margin: 2px 0 0; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .patterns { list-style: none; padding: 0; margin: 16px 0; }
+  .patterns li { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line-soft); opacity: 0; transform: translateX(-10px); animation: itemIn 0.5s var(--ease) forwards; }
+  @keyframes itemIn { to { opacity: 1; transform: none; } }
+  .patterns .chip { flex: none; width: 10px; height: 10px; border-radius: 3px; transform: translateY(1px); }
+  .patterns .name { font-weight: 600; }
+  .patterns .count { margin-left: auto; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .patterns .eg { display: block; font-size: 14px; color: var(--ink-soft); font-weight: 400; }
+  .patterns .empty-row { color: var(--good); font-weight: 600; }
+  .view-card { padding: 24px 28px; }
+  .view-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--ink-soft); margin: 16px 0 4px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .view { white-space: pre-wrap; word-wrap: break-word; font-size: 17px; line-height: 1.7; margin-top: 14px; max-height: 560px; overflow: auto; padding: 4px 2px; }
+  .hl-rule { background: var(--hl-rule); --line: var(--hl-rule-line); }
+  .hl-tone { background: var(--hl-tone); --line: var(--hl-tone-line); }
+  .hl-vocab { background: var(--hl-vocab); --line: var(--hl-vocab-line); }
+  .hl-format { background: var(--hl-format); --line: var(--hl-format-line); }
+  .hl-story { background: var(--hl-story); --line: var(--hl-story-line); }
+  .legend .hl-rule { background: var(--hl-rule-line); } .legend .hl-tone { background: var(--hl-tone-line); }
+  .legend .hl-vocab { background: var(--hl-vocab-line); } .legend .hl-format { background: var(--hl-format-line); }
+  .legend .hl-story { background: var(--hl-story-line); }
+  mark.hl { color: inherit; border-radius: 4px; padding: 1px 0; box-shadow: inset 0 -2px 0 var(--line); cursor: help; animation: markIn 0.6s var(--ease) backwards; }
+  @keyframes markIn { from { background: transparent; box-shadow: inset 0 0 0 transparent; } }
+  mark.hid { background: var(--bad); color: #fff; font-family: var(--mono); font-size: 11px; padding: 1px 5px; border-radius: 5px; margin: 0 1px; vertical-align: 1px; cursor: help; }
+  mark.hid-letter { background: transparent; color: var(--bad); font: inherit; font-size: inherit; padding: 0; margin: 0; box-shadow: inset 0 -2px 0 var(--bad); vertical-align: baseline; }
+  .next { text-align: center; margin: 80px auto 0; max-width: 720px; }
+</style>
+
+<script>
+  import { onStatus, analyze, highlight, showHidden, groupOf, type Analysis } from "../../../scripts/titus";
+  import { setRing } from "../../../scripts/ring";
+  import { copyText, toast } from "../../../scripts/site";
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const input = $<HTMLTextAreaElement>("input");
+  const run = $<HTMLButtonElement>("run");
+  const status = $("status");
+  let last: Analysis | null = null;
+  let original = "";
+  let view = "patterns";
+
+  const SAMPLE = "In today’s fast-paced digital landscape, our new onboarding checklist isn’t just a tracker — it’s a gateway to a more seamless experience, fostering alignment and driving meaningful impact. Moreover, it serves as a pivotal tool for every team​ member. The checklist was designed to empower new hires to navigate the process with confidence. Experts say that clear onboarding plays a crucial role in retention. Additionally, it leverages robust automation to unlock value acrоss departments. Ultimately, this is not only a checklist but a testament to our commitment to people. I hope this helps, and let me know if you have any questions!";
+
+  const words = (t: string) => (t.match(/[A-Za-z0-9À-ɏ']+/g) || []).length;
+  input.addEventListener("input", () => { $("count").textContent = `${words(input.value)} words`; });
+
+  onStatus((s) => {
+    status.dataset.state = s.ready ? "ready" : s.failed ? "failed" : "loading";
+    status.querySelector(".status-text")!.textContent = s.ready ? "Ready" : s.failed ? "Could not load Python" : `${s.text}`;
+    run.disabled = !s.ready;
+  });
+
+  function render() {
+    if (!last) return;
+    const el = $("view");
+    const legend = $("legend");
+    legend.hidden = view !== "patterns";
+    if (view === "patterns") {
+      el.innerHTML = highlight(last.cleaned, last.spans);
+      $("view-note").textContent = last.spans.length ? "Hover over or tap a highlight to see the pattern's name." : "Nothing to highlight.";
+    } else if (view === "hidden") {
+      el.innerHTML = last.hidden.length ? showHidden(original, last.hidden) : "";
+      $("view-note").textContent = last.hidden.length ? "Red badges show where each hidden character was. Underlined letters were look-alikes from another alphabet." : "No hidden characters found.";
+    } else {
+      el.textContent = last.cleaned;
+      $("view-note").textContent = "This is your text with the hidden characters removed. Patterns are left for you or a rewrite to fix.";
+    }
+  }
+
+  async function check() {
+    original = input.value;
+    if (!original.trim()) { toast("Paste some text first"); return; }
+    run.disabled = true;
+    run.textContent = "Checking";
+    try {
+      last = await analyze(original);
+    } catch (e) {
+      toast("Something went wrong. Try again.");
+      console.error(e);
+      return;
+    } finally {
+      run.disabled = false;
+      run.textContent = "Check text";
+    }
+    const r = last.score;
+    const results = $("results");
+    const first = results.hidden;
+    results.hidden = false;
+    if (first) results.scrollIntoView({ behavior: "smooth", block: "start" });
+    setRing("ring", r.score, r.tier, r.score === null ? `Needs ${last.min_words}+ words` : undefined);
+    $("s-words").textContent = String(r.words);
+    $("s-sents").textContent = String(r.sentences);
+    $("s-density").textContent = r.density != null ? String(r.density) : "--";
+    const hiddenTotal = Object.values(last.found).reduce((a, b) => a + b, 0);
+    $("s-hidden").textContent = String(hiddenTotal);
+    $("s-note").textContent = r.score === null
+      ? `The text has ${r.words} words. The score needs at least ${last.min_words}, so only the patterns are listed.`
+      : r.dampened ? "The text is short, so the score is dampened and less reliable." : "Scores of 0.60 and up count as high. Under 0.35 counts as low.";
+    const list = $("patterns");
+    list.innerHTML = "";
+    if (!r.patterns.length) {
+      list.innerHTML = `<li class="empty-row">No patterns found.</li>`;
+    } else {
+      [...r.patterns].sort((a, b) => b.count - a.count).forEach((p, i) => {
+        const li = document.createElement("li");
+        li.style.animationDelay = `${0.05 * i}s`;
+        const g = groupOf(p.label);
+        li.innerHTML = `<span class="chip" style="background: var(--hl-${g}-line)"></span><span><span class="name"></span><span class="eg"></span></span><span class="count">x${p.count}</span>`;
+        li.querySelector(".name")!.textContent = p.label;
+        li.querySelector(".eg")!.textContent = `e.g. "${p.sample.replace(/^[\s.!?]+/, "").slice(0, 60)}"`;
+        list.appendChild(li);
+      });
+    }
+    $("hidden-summary").textContent = `Hidden characters removed: ${last.found_text}.`;
+    render();
+  }
+
+  run.addEventListener("click", check);
+  input.addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !run.disabled) check(); });
+  $("sample").addEventListener("click", () => { input.value = SAMPLE; input.dispatchEvent(new Event("input")); if (!run.disabled) check(); });
+  $("clear").addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); $("results").hidden = true; input.focus(); });
+  $("copy-clean").addEventListener("click", () => last && copyText(last.cleaned, "Cleaned text copied"));
+  document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.addEventListener("click", () => {
+    view = b.dataset.view!;
+    document.querySelectorAll("[data-view]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    render();
+  }));
+</script>

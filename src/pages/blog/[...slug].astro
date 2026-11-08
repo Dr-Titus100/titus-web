@@ -1,0 +1,29 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection, render } from "astro:content";
+import { u } from "../../lib/url";
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", (p) => !p.data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+const { post } = Astro.props;
+const { Content } = await render(post);
+const date = post.data.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+---
+<Base title={post.data.title} current="blog" description={post.data.description}>
+  <article class="section">
+    <div class="wrap wrap-narrow">
+      <p class="eyebrow"><a href={u("/blog/")}>Blog</a>, {date}</p>
+      <h1 class="h1">{post.data.title}</h1>
+      <p class="lead">{post.data.description}</p>
+      <div class="prose"><Content /></div>
+    </div>
+  </article>
+</Base>
+<style is:global>
+  .prose { margin-top: 48px; font-size: 19px; line-height: 1.65; }
+  .prose h2 { font-size: 28px; letter-spacing: -0.02em; margin: 48px 0 12px; }
+  .prose h3 { font-size: 22px; margin: 36px 0 10px; }
+  .prose img { border-radius: var(--radius); margin: 28px 0; }
+  .prose blockquote { margin: 24px 0; padding-left: 20px; border-left: 3px solid var(--line); color: var(--ink-soft); }
+</style>

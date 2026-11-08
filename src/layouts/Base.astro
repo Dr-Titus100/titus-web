@@ -1,0 +1,100 @@
+---
+import "../styles/global.css";
+import { u } from "../lib/url";
+
+interface Props {
+  title: string;
+  description?: string;
+  current?: string;
+}
+const { title, description = "Skills, plugins and writing by Titus Nyarko Nde.", current = "" } = Astro.props;
+const fullTitle = title === "Titus Nyarko Nde" ? title : `Titus Nyarko Nde: ${title}`;
+const links = [
+  { href: "/tools/", label: "Tools", key: "tools" },
+  { href: "/tools/titus-humanizer/checker/", label: "Checker", key: "checker" },
+  { href: "/blog/", label: "Blog", key: "blog" },
+  { href: "/experience/", label: "Experience", key: "experience" },
+  { href: "/about/", label: "About", key: "about" },
+];
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href={u("/favicon.svg")} type="image/svg+xml" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <script is:inline>document.documentElement.classList.remove("no-js");</script>
+  </head>
+  <body>
+    <a class="sr-only" href="#main">Skip to content</a>
+    <header class="nav" id="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href={u("/")}><span class="brand-dot" aria-hidden="true"></span>Titus Nyarko Nde</a>
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><span></span><span></span></button>
+        <ul class="nav-links" id="nav-links">
+          {links.map((l) => (
+            <li><a href={u(l.href)} aria-current={current === l.key ? "page" : undefined}>{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </header>
+    <slot name="subnav" />
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="footer">
+      <div class="wrap">
+        <div class="footer-cols">
+          <div>
+            <h4>titus-humanizer</h4>
+            <ul>
+              <li><a href={u("/tools/titus-humanizer/")}>Overview</a></li>
+              <li><a href={u("/tools/titus-humanizer/checker/")}>Checker</a></li>
+              <li><a href={u("/tools/titus-humanizer/rewrite/")}>Rewrite with your key</a></li>
+              <li><a href={u("/tools/titus-humanizer/any-chatbot/")}>Use any chatbot</a></li>
+              <li><a href={u("/tools/titus-humanizer/install/")}>Install</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Tools</h4>
+            <ul>
+              <li><a href={u("/tools/")}>All tools</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Writing</h4>
+            <ul>
+              <li><a href={u("/blog/")}>Blog</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Titus</h4>
+            <ul>
+              <li><a href={u("/about/")}>About</a></li>
+              <li><a href={u("/experience/")}>Experience</a></li>
+              <li><a href="https://github.com/Dr-Titus100">GitHub</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>Copyright © {year} Titus Nyarko Nde.</span>
+          <span>Text you check on this site stays in your browser.</span>
+        </div>
+      </div>
+    </footer>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script>
+      import { initSite } from "../scripts/site";
+      initSite();
+    </script>
+  </body>
+</html>
