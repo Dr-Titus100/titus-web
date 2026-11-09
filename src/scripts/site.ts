@@ -118,7 +118,23 @@ function copyButtons() {
   });
 }
 
+// Links that leave this site open in a new tab, so visitors keep their place here.
+function externalLinksInNewTab() {
+  const mark = (a: HTMLAnchorElement) => {
+    if (!/^https?:$/.test(a.protocol) || a.host === location.host) return;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+  };
+  document.querySelectorAll<HTMLAnchorElement>("a[href]").forEach(mark);
+  // Catch links added after load, such as ones written into results.
+  document.addEventListener("click", (e) => {
+    const a = (e.target as Element | null)?.closest?.("a[href]");
+    if (a) mark(a as HTMLAnchorElement);
+  }, true);
+}
+
 export function initSite() {
+  externalLinksInNewTab();
   nav();
   splitHeadlines();
   revealOnScroll();
