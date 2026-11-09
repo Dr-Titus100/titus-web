@@ -240,7 +240,7 @@ a:hover { text-decoration: underline; }
 
 /* Forms */
 label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; }
-textarea, input[type="text"], input[type="password"], select {
+textarea, input[type="text"], input[type="email"], input[type="password"], select {
   width: 100%; font: inherit; font-size: 17px; color: var(--ink);
   background: var(--bg-raised); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
   transition: border-color 0.2s, box-shadow 0.2s;

@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url";
 import { links } from "../data/profile";
+import ContactForm from "../components/ContactForm.astro";
 
 const chapters = [
   {
@@ -41,6 +42,7 @@ const chapters = [
       <div class="btn-row">
         <a class="btn" href={u("/experience/")}>See my experience</a>
         <a class="btn btn-ghost" href={u("/tools/")}>Skills I've built</a>
+        <a class="btn btn-ghost" href="#contact">Contact me</a>
       </div>
     </div>
   </section>
@@ -96,6 +98,17 @@ const chapters = [
         <h2 class="h2">Outside the lab</h2>
       </div>
       <p class="lead reveal" style="margin: 0 auto; max-width: 720px">At Boise State I led the SIAM student chapter as president, served as vice president of the International Students Association, mentored new international students and volunteered at STEM nights for elementary schools and refugee families. In December 2025 the university gave me the Bronco Spirit Award for academic excellence and leadership.</p>
+    </div>
+  </section>
+
+  <section class="section section-soft" id="contact">
+    <div class="wrap wrap-narrow">
+      <div class="section-head reveal">
+        <p class="eyebrow">Contact</p>
+        <h2 class="h2">Write to me</h2>
+        <p class="lead">Send a message here and it comes straight to my inbox. I reply from my own email.</p>
+      </div>
+      <div class="reveal"><ContactForm /></div>
     </div>
   </section>
 

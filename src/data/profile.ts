@@ -224,3 +224,8 @@ export const skills = [
   ["Geospatial", "Rasterio, GeoPandas, GDAL, PDAL, ArcGIS, LAStools, Sentinel-2, MODIS, GOES-R, GEDI and ICESat-2 data"],
   ["Computing and tools", "Linux, Slurm, HPC clusters, AWS, Git, GitHub, VS Code, Jupyter, R Shiny, Power BI, Tableau, Matplotlib, Seaborn, Excel, SPSS, GRETL, Minitab"],
 ];
+
+// The address shown on the site. Messages from the contact form go to a different, private address,
+// which lives only in the Web3Forms account that issued the key below. The key is safe to publish.
+export const publicEmail = "ndedrtitusn100@gmail.com";
+export const contactFormKey = "";
