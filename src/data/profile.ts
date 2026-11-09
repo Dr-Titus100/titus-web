@@ -149,7 +149,7 @@ export const education = [
   {
     degree: "B.Sc. in Actuarial Science (First-Class Honors)",
     school: "University for Development Studies, Tamale, Ghana",
-    date: "Jul 2018",
+    date: "Sep 2014 – Jul 2018",
     notes: [
       "Thesis: Gamma distribution modeling and time series analysis and forecasting of rainfall in the Tamale Metropolitan Assembly, Ghana.",
       "Advisor: Dr. Ernest Zamanah. GPA 4.58/5.0.",
