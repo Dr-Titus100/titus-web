@@ -228,4 +228,4 @@ export const skills = [
 // The address shown on the site. Messages from the contact form go to a different, private address,
 // which lives only in the Web3Forms account that issued the key below. The key is safe to publish.
 export const publicEmail = "ndedrtitusn100@gmail.com";
-export const contactFormKey = "";
+export const contactFormKey = "48ee3263-5462-45f5-90f8-58a6f2bc0f49";
