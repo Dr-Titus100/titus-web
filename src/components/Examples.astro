@@ -50,6 +50,7 @@ const examples = [
   .example.in .ba-before p { text-decoration: line-through; text-decoration-color: rgba(201, 48, 44, 0.45); text-decoration-thickness: 1.5px; transition: text-decoration-color 0.8s 0.6s; }
   .example .ba-after { transform: translateX(24px); opacity: 0; transition: transform 1s var(--ease) 0.35s, opacity 1s var(--ease) 0.35s; }
   .example.in .ba-after { transform: none; opacity: 1; }
+  @media (max-width: 760px) { .example .ba-after { transform: translateY(18px); } .example.in .ba-after { transform: none; } }
   .no-js .example .ba-after { transform: none; opacity: 1; }
   .ex-report { margin-top: 14px; font-size: 14px; color: var(--ink-soft); }
   .ex-report summary { cursor: pointer; }

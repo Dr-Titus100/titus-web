@@ -12,12 +12,22 @@ const items = [
 ---
 <nav class="subnav" aria-label="titus-humanizer">
   <div class="wrap subnav-inner">
-    <a class="subnav-title" href={u("/tools/titus-humanizer/")}>titus-humanizer</a>
+    <a class="subnav-title" href={u("/tools/titus-humanizer/")} aria-current={current === "overview" ? "page" : undefined}>titus-humanizer</a>
     <div class="subnav-links">
       {items.filter((i) => i.key !== "overview").map((i) => (
         <a href={u(i.href)} aria-current={current === i.key ? "page" : undefined}>{i.label}</a>
       ))}
-      <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Try it free</a>
+      {current !== "checker" && <a class="btn btn-ghost subnav-cta" href={u("/tools/titus-humanizer/checker/")}>Try it free</a>}
     </div>
   </div>
 </nav>
+
+<script>
+  // On narrow screens the links scroll sideways, so bring the current one into view.
+  const cur = document.querySelector<HTMLElement>(".subnav-links a[aria-current='page']");
+  const row = cur?.parentElement;
+  if (cur && row && row.scrollWidth > row.clientWidth) {
+    const r = row.getBoundingClientRect(), c = cur.getBoundingClientRect();
+    row.scrollLeft += c.left - r.left - (r.width - c.width) / 2;
+  }
+</script>
