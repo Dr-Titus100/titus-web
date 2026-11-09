@@ -178,13 +178,17 @@ a:hover { text-decoration: underline; }
 /* Sub navigation for a tool, like a product bar */
 .subnav { position: sticky; top: 48px; z-index: 40; background: var(--nav-bg); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--line-soft); }
 .subnav-inner { display: flex; align-items: center; justify-content: space-between; min-height: 52px; gap: 16px; }
-.subnav-title { font-size: 21px; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; white-space: nowrap; }
-.subnav-title:hover { text-decoration: none; }
-.subnav-links { display: flex; gap: 22px; align-items: center; overflow-x: auto; scrollbar-width: none; }
+.subnav-title { font-size: 21px; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; white-space: nowrap; transition: color 0.2s; }
+.subnav-title:hover { text-decoration: none; color: var(--accent); }
+.subnav-title[aria-current="page"] { color: var(--accent); }
+.subnav-links { display: flex; gap: 22px; align-items: center; align-self: stretch; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .subnav-links::-webkit-scrollbar { display: none; }
-.subnav-links a { font-size: 12px; color: var(--ink); opacity: 0.8; white-space: nowrap; }
-.subnav-links a[aria-current="page"] { opacity: 0.5; pointer-events: none; }
-.subnav-links .btn { opacity: 1; font-size: 12px; min-height: 28px; padding: 4px 12px; color: #fff; }
+.subnav-links a:not(.btn) { position: relative; display: flex; align-items: center; align-self: stretch; font-size: 12px; color: var(--ink); opacity: 0.8; white-space: nowrap; transition: opacity 0.2s, color 0.2s; }
+.subnav-links a:not(.btn):hover { opacity: 1; text-decoration: none; }
+.subnav-links a:not(.btn)::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--accent); transform: scaleX(0); transition: transform 0.3s var(--ease); }
+.subnav-links a[aria-current="page"] { opacity: 1; color: var(--accent); font-weight: 600; }
+.subnav-links a[aria-current="page"]::after { transform: scaleX(1); }
+.subnav-links .btn { opacity: 1; font-size: 12px; min-height: 28px; padding: 4px 12px; align-self: center; white-space: nowrap; flex-shrink: 0; }
 @media (max-width: 600px) { .subnav-title { font-size: 17px; } .subnav-links { gap: 16px; } }
 
 /* Sections */
