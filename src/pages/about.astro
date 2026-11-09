@@ -1,7 +1,138 @@
 ---
 import Base from "../layouts/Base.astro";
-import ComingSoon from "../components/ComingSoon.astro";
+import { u } from "../lib/url";
+import { links } from "../data/profile";
+
+const chapters = [
+  {
+    when: "Until 2018",
+    where: "Tamale, Ghana",
+    title: "Actuarial science",
+    text: "I studied Actuarial Science at the University for Development Studies and graduated with first-class honors. My undergraduate thesis modeled and forecast rainfall in the Tamale Metropolitan Assembly, and in 2018 I received the Prudential Actuarial Support Scheme award.",
+  },
+  {
+    when: "2019 – 2021",
+    where: "Kigali, Rwanda",
+    title: "Credit risk and banking",
+    text: "A Mastercard Foundation scholarship took me to the African Institute for Mathematical Sciences (AIMS) for a master's in mathematical sciences. For my thesis I worked with a microfinance lender in Ghana on credit risk. The lender's credit team adopted the scoring model we built, and the paper on it in Risks has more than 100 citations. I also worked as a data analyst at KCB Bank Rwanda, where I built a churn model and the R and Python tools that the customer service, operations, credit risk and HR teams used.",
+  },
+  {
+    when: "2021 – 2026",
+    where: "Boise, Idaho",
+    title: "A Ph.D. on uncertainty",
+    text: "My Ph.D. in Computing at Boise State University asked how much we can trust a model's answer in three different systems: the masses of galaxy clusters, the height of dryland vegetation and the albedo of mountain snow. I spent summer 2025 at Lawrence Berkeley National Laboratory on the albedo work. For my last two years I also worked in Research Computing, teaching students and faculty to use the Borah supercomputer.",
+  },
+  {
+    when: "2026 – now",
+    where: "Remote",
+    title: "AI evaluation and AI skills",
+    text: "Since March 2026 I've trained and evaluated large language models for Outlier AI and Mercor. I grade model writing against detailed rubrics, write benchmark tasks and correct failed agent runs. That grading taught me which patterns give AI writing away, so I wrote the rules down as titus-humanizer, a skill that rewrites text in plain words and scores what's left. This site is where I publish it and the skills that follow.",
+  },
+];
 ---
-<Base title="About" current="about" description="About Titus Nyarko Nde.">
-  <ComingSoon title="About" text="This page is coming soon." />
+<Base title="About" current="about" description="Titus Nyarko Nde is a data scientist with a Ph.D. in Computing from Boise State University. He works on machine learning uncertainty, AI evaluation and AI writing tools.">
+  <section class="hero about-hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="wrap wrap-narrow">
+      <div class="monogram" aria-hidden="true">TN</div>
+      <p class="eyebrow">About</p>
+      <h1 class="display" data-rise>Titus Nyarko Nde</h1>
+      <p class="lead">I'm a data scientist with a Ph.D. in Computing from Boise State University. I build machine learning models, work out how far to trust their answers, and write tools that help people write clearly with AI.</p>
+      <div class="btn-row">
+        <a class="btn" href={u("/experience/")}>See my experience</a>
+        <a class="btn btn-ghost" href={u("/tools/")}>Skills I've built</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="path">
+    <div class="wrap wrap-narrow">
+      <div class="section-head">
+        <p class="eyebrow">How I got here</p>
+        <h2 class="h2">From Tamale to Kigali to Boise</h2>
+      </div>
+      <ol class="chapters">
+        {chapters.map((c, i) => (
+          <li class="chapter reveal" style={`--d: ${i * 0.04}s`}>
+            <div class="chapter-when">
+              <span class="chapter-year">{c.when}</span>
+              <span class="muted small">{c.where}</span>
+            </div>
+            <div>
+              <h3 class="h3">{c.title}</h3>
+              <p>{c.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section-soft" id="focus">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="h2">What I work on</h2>
+      </div>
+      <div class="grid grid-3">
+        <div class="card reveal">
+          <h3 class="h3">Uncertainty in machine learning</h3>
+          <p class="muted">Bayesian inference, MCMC and ensembles that say how much to trust a prediction. I've applied them to galaxy cluster masses, vegetation height from satellite lasers and 20 m snow albedo maps.</p>
+        </div>
+        <div class="card reveal" style="--d: 0.08s">
+          <h3 class="h3">AI writing and evaluation</h3>
+          <p class="muted">Rubric grading, benchmark tasks with Python verifiers, and AI skills such as <a href={u("/tools/titus-humanizer/")}>titus-humanizer</a> that make model output clearer and easier to check.</p>
+        </div>
+        <div class="card reveal" style="--d: 0.16s">
+          <h3 class="h3">Teaching computing</h3>
+          <p class="muted">I co-founded the Center for Computational Research and Education, which runs a six-week online HPC training and research program each year for students and early-career researchers in Africa.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="community">
+    <div class="wrap wrap-narrow">
+      <div class="section-head reveal">
+        <h2 class="h2">Outside the lab</h2>
+      </div>
+      <p class="lead reveal" style="margin: 0 auto; max-width: 720px">At Boise State I led the SIAM student chapter as president, served as vice president of the International Students Association, mentored new international students and volunteered at STEM nights for elementary schools and refugee families. In December 2025 the university gave me the Bronco Spirit Award for academic excellence and leadership.</p>
+    </div>
+  </section>
+
+  <section class="section section-dark" id="links">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="h2">Find me online</h2>
+      </div>
+      <div class="grid grid-2 link-grid">
+        <a class="card tile tile-dark reveal" href={links.linkedin}><h3 class="h3">LinkedIn</h3><p>Work history and contact</p><span class="link-arrow">linkedin.com/in/titus-n-nde</span></a>
+        <a class="card tile tile-dark reveal" style="--d: 0.06s" href={links.github}><h3 class="h3">GitHub</h3><p>titus-humanizer, this website and other code</p><span class="link-arrow">github.com/Dr-Titus100</span></a>
+        <a class="card tile tile-dark reveal" style="--d: 0.12s" href={links.scholar}><h3 class="h3">Google Scholar</h3><p>Papers and citations</p><span class="link-arrow">Google Scholar profile</span></a>
+        <a class="card tile tile-dark reveal" style="--d: 0.18s" href={links.orcid}><h3 class="h3">ORCID</h3><p>Research record</p><span class="link-arrow">0000-0002-0089-0774</span></a>
+      </div>
+    </div>
+  </section>
 </Base>
+
+<style is:global>
+  .about-hero .monogram {
+    width: 112px; height: 112px; margin: 0 auto 28px; border-radius: 50%;
+    display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 40px; letter-spacing: -0.02em;
+    color: #fff; background: linear-gradient(135deg, #0071e3, #7c3aed 55%, #ff375f);
+    box-shadow: 0 18px 50px rgba(0, 113, 227, 0.28);
+    animation: monoIn 1s var(--ease) both;
+  }
+  @keyframes monoIn { from { opacity: 0; transform: scale(0.8) translateY(10px); } }
+  .chapters { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .chapter { display: grid; grid-template-columns: 170px 1fr; gap: 32px; padding: 30px 0; border-top: 1px solid var(--line-soft); }
+  .chapter:first-child { border-top: 0; }
+  .chapter-when { display: flex; flex-direction: column; gap: 4px; }
+  .chapter-year { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; background: linear-gradient(90deg, var(--accent), #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .chapter h3 { margin: 0 0 10px; }
+  .chapter p { margin: 0; line-height: 1.65; color: var(--ink-soft); font-size: 17px; }
+  @media (max-width: 680px) { .chapter { grid-template-columns: 1fr; gap: 10px; } }
+  .link-grid .tile { min-height: 0; gap: 6px; text-decoration: none; }
+  .link-grid .tile h3 { color: #f5f5f7; margin: 0; }
+  .link-grid .tile .link-arrow { margin-top: 14px; }
+  @media (prefers-reduced-motion: reduce) { .about-hero .monogram { animation: none; } }
+</style>
