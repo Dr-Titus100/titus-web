@@ -1,0 +1,87 @@
+---
+import { publicEmail, contactFormKey } from "../data/profile";
+---
+<form class="card contact-form" id="contact-form" data-key={contactFormKey} novalidate>
+  <div class="contact-row">
+    <div class="field">
+      <label for="cf-name">Your name</label>
+      <input type="text" id="cf-name" name="name" autocomplete="name" required maxlength="120" />
+    </div>
+    <div class="field">
+      <label for="cf-email">Your email</label>
+      <input type="email" id="cf-email" name="email" autocomplete="email" required maxlength="200" />
+    </div>
+  </div>
+  <div class="field">
+    <label for="cf-message">Message</label>
+    <textarea id="cf-message" name="message" required maxlength="5000" placeholder="What would you like to talk about?"></textarea>
+  </div>
+  <input type="checkbox" name="botcheck" class="cf-trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <div class="btn-row" style="margin-top: 18px; align-items: center">
+    <button class="btn" type="submit" id="cf-send">Send message</button>
+    <span class="small muted" id="cf-status" role="status" aria-live="polite"></span>
+  </div>
+  <p class="small muted" style="margin: 18px 0 0">You can also email me at <a href={`mailto:${publicEmail}`}>{publicEmail}</a>.</p>
+</form>
+
+<style is:global>
+  .contact-form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+  .contact-form .field { margin: 0; }
+  .contact-form textarea { min-height: 180px; }
+  .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .contact-row { grid-template-columns: 1fr; } }
+  .cf-trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  #cf-status.ok { color: var(--good); }
+  #cf-status.err { color: var(--bad); }
+  .contact-form.sent { animation: sentPulse 0.7s var(--ease); }
+  @keyframes sentPulse { 40% { transform: scale(0.985); } }
+</style>
+
+<script>
+  const form = document.getElementById("contact-form") as HTMLFormElement | null;
+  if (form) {
+    const status = document.getElementById("cf-status")!;
+    const send = document.getElementById("cf-send") as HTMLButtonElement;
+    const say = (text: string, kind = "") => { status.textContent = text; status.className = `small muted ${kind}`; };
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const name = String(data.get("name") || "").trim();
+      const email = String(data.get("email") || "").trim();
+      const message = String(data.get("message") || "").trim();
+      if (!name || !message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        say("Please add your name, a valid email and a message.", "err");
+        return;
+      }
+      if (data.get("botcheck")) return;
+      const key = form.dataset.key;
+      if (!key) {
+        say("The form isn't connected yet. Please use the email address below.", "err");
+        return;
+      }
+      send.disabled = true;
+      say("Sending...");
+      try {
+        const res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            access_key: key,
+            subject: `Website message from ${name}`,
+            from_name: "titus-web contact form",
+            name, email, message,
+          }),
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || out.success === false) throw new Error(out.message || res.statusText);
+        form.reset();
+        form.classList.remove("sent"); void form.offsetWidth; form.classList.add("sent");
+        say("Thanks. Your message is on its way.", "ok");
+      } catch {
+        say("The message didn't send. Please try again, or use the email address below.", "err");
+      } finally {
+        send.disabled = false;
+      }
+    });
+  }
+</script>

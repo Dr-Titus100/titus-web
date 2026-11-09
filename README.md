@@ -74,3 +74,12 @@ Set `SITE_URL` to the domain and `SITE_BASE` to `/` in the build step of `.githu
 ## Writing rules
 
 The visible text follows the same rules as titus-humanizer. `scripts/check-copy.mjs` runs on every build and fails it if a page uses an em dash or a semicolon.
+
+## Contact form
+
+The form on the About page sends messages through [Web3Forms](https://web3forms.com), so the address that receives them never appears on the site.
+
+1. Go to web3forms.com, enter the receiving address and choose "Create Access Key". Web3Forms emails the key to that address.
+2. Paste the key into `contactFormKey` in `src/data/profile.ts` and merge the change.
+
+The key only lets visitors send messages to that one inbox, so it's safe to publish. Until a key is set, the form says it isn't connected and points people to the public address in `publicEmail`.
