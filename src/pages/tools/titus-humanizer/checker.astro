@@ -270,10 +270,17 @@ const skill = skills["titus-humanizer"];
     tip.textContent = m.dataset.label || m.title;
     tip.hidden = false;
     tipFor = m;
-    const r = m.getBoundingClientRect();
+    // A highlight that wraps has one box per line, so use the line that was clicked.
+    const rects = [...m.getClientRects()];
+    const r = rects.find((b) => e.clientY >= b.top && e.clientY <= b.bottom) || rects[0] || m.getBoundingClientRect();
     const left = Math.min(Math.max(8, r.left + window.scrollX), window.scrollX + document.documentElement.clientWidth - tip.offsetWidth - 8);
+    // Go above the line, unless that would put the label under the sticky menus or the top of the view.
+    const covered = Math.max(0, ...[...document.querySelectorAll(".nav, .subnav")].map((n) => n.getBoundingClientRect().bottom));
+    const floor = Math.max(covered, $("view").getBoundingClientRect().top);
+    const above = r.top - tip.offsetHeight - 8;
+    const top = above >= floor ? above : r.bottom + 8;
     tip.style.left = `${left}px`;
-    tip.style.top = `${r.top + window.scrollY - tip.offsetHeight - 8}px`;
+    tip.style.top = `${top + window.scrollY}px`;
   });
   document.addEventListener("click", (e) => { if (!$("view").contains(e.target as Node)) hideTip(); });
   $("view").addEventListener("scroll", hideTip);
