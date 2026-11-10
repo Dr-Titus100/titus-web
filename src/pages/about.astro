@@ -6,16 +6,10 @@ import ContactForm from "../components/ContactForm.astro";
 
 const chapters = [
   {
-    when: "2014 – 2018",
-    where: "Tamale, Ghana",
-    title: "Actuarial science",
-    text: "I studied Actuarial Science at the University for Development Studies and graduated with first-class honors. My undergraduate thesis modeled and forecast rainfall in the Tamale Metropolitan Assembly, and in 2018 I received the Prudential Actuarial Support Scheme award.",
-  },
-  {
-    when: "2019 – 2021",
-    where: "Kigali, Rwanda",
-    title: "Credit risk and banking",
-    text: "A Mastercard Foundation scholarship took me to the African Institute for Mathematical Sciences (AIMS) for a master's in mathematical sciences. For my thesis I worked with a microfinance lender in Ghana on credit risk. The lender's credit team adopted the scoring model we built, and the paper on it in Risks has more than 100 citations. I also worked as a data analyst at KCB Bank Rwanda, where I built a churn model and the R and Python tools that the customer service, operations, credit risk and HR teams used.",
+    when: "2026 – now",
+    where: "Remote",
+    title: "AI evaluation and AI skills",
+    text: "Since March 2026 I've trained and evaluated large language models for Outlier AI and Mercor. I grade model writing against detailed rubrics, write benchmark tasks and correct failed agent runs. That grading taught me which patterns give AI writing away, so I wrote the rules down as titus-humanizer, a skill that rewrites text in plain words and scores what's left. This site is where I publish it and the skills that follow.",
   },
   {
     when: "2021 – 2026",
@@ -24,10 +18,16 @@ const chapters = [
     text: "My Ph.D. in Computing at Boise State University asked how much we can trust a model's answer in three different systems: the masses of galaxy clusters, the height of dryland vegetation and the albedo of mountain snow. I spent summer 2025 at Lawrence Berkeley National Laboratory on the albedo work. For my last two years I also worked in Research Computing, teaching students and faculty to use the Borah supercomputer.",
   },
   {
-    when: "2026 – now",
-    where: "Remote",
-    title: "AI evaluation and AI skills",
-    text: "Since March 2026 I've trained and evaluated large language models for Outlier AI and Mercor. I grade model writing against detailed rubrics, write benchmark tasks and correct failed agent runs. That grading taught me which patterns give AI writing away, so I wrote the rules down as titus-humanizer, a skill that rewrites text in plain words and scores what's left. This site is where I publish it and the skills that follow.",
+    when: "2019 – 2021",
+    where: "Kigali, Rwanda",
+    title: "Credit risk and banking",
+    text: "A Mastercard Foundation scholarship took me to the African Institute for Mathematical Sciences (AIMS) for a master's in mathematical sciences. For my thesis I worked with a microfinance lender in Ghana on credit risk. The lender's credit team adopted the scoring model we built, and the paper on it in Risks has more than 100 citations. I also worked as a data analyst at KCB Bank Rwanda, where I built a churn model and the R and Python tools that the customer service, operations, credit risk and HR teams used.",
+  },
+  {
+    when: "2014 – 2018",
+    where: "Tamale, Ghana",
+    title: "Actuarial science",
+    text: "I studied Actuarial Science at the University for Development Studies and graduated with first-class honors. My undergraduate thesis modeled and forecast rainfall in the Tamale Metropolitan Assembly, and in 2018 I received the Prudential Actuarial Support Scheme award.",
   },
 ];
 ---
@@ -51,7 +51,7 @@ const chapters = [
     <div class="wrap wrap-narrow">
       <div class="section-head">
         <p class="eyebrow">How I got here</p>
-        <h2 class="h2">From Tamale to Kigali to Boise</h2>
+        <h2 class="h2">From my AI work today back to Tamale</h2>
       </div>
       <ol class="chapters">
         {chapters.map((c, i) => (
