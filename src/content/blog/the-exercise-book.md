@@ -61,7 +61,7 @@ On weekends I played soccer with a team that called itself the Panthers. We were
 
 ## The defense
 
-The room was smaller than I had imagined. Three committee members, a few lab mates, and a projector that took two tries to wake up.
+Three committee members sat at the front. A few lab mates came, and then my friends and classmates kept arriving until every chair was taken and people stood along the back wall. More friends, classmates and family joined online, and their names filled the side of the screen next to my first slide. The projector took two tries to wake up.
 
 I talked for forty minutes about clusters, albedo and shrubs. Then the questions started. The hardest one came near the end. One committee member pointed at my slide on mass bias and asked how I knew the twenty to fifty percent came from projection and not from something else I had missed.
 
