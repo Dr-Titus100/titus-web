@@ -1,4 +1,4 @@
-// Facts for the About and Experience pages, taken from Titus's two resumes, his papers and his dissertation.
+// Facts for the About and Experience pages, taken from Titus's three resumes, his papers and his dissertation.
 
 export const links = {
   linkedin: "https://www.linkedin.com/in/titus-n-nde/",
@@ -85,6 +85,18 @@ export const roles: Role[] = [
     ],
   },
   {
+    title: "Teaching Assistant, Scientific Computing and Cosmology",
+    org: "Department of Physics, Boise State University",
+    orgUrl: "https://www.boisestate.edu/physics/",
+    place: "Boise, ID",
+    dates: "Fall 2023 – Spring 2024",
+    tag: "teaching",
+    points: [
+      "Led tutorials and lab sessions for students in scientific computing and cosmology.",
+      "Graded assignments and quizzes.",
+    ],
+  },
+  {
     title: "Ph.D. Researcher, Department of Computing",
     org: "Boise State University",
     orgUrl: "https://www.boisestate.edu/computing/",
@@ -125,6 +137,41 @@ export const roles: Role[] = [
       "Found with a Cox proportional hazards model that defaults rise after six months of repayment, and recommended micro-loan terms of six months or less.",
     ],
   },
+  {
+    title: "Teaching Assistant",
+    org: "Department of Statistics, University for Development Studies",
+    place: "Navrongo, Ghana",
+    dates: "Sep 2018 – Aug 2019",
+    tag: "teaching",
+    points: [
+      "Led tutorials in econometrics, probability and the R programming language.",
+      "Helped five students with their undergraduate projects.",
+      "Helped run the department's daily administration.",
+    ],
+  },
+  {
+    title: "Intern, Health Insurance Claims Unit",
+    org: "Tamale Central Hospital",
+    place: "Tamale, Ghana",
+    dates: "May 2017 – Aug 2017",
+    tag: "industry",
+    points: [
+      "Filed health insurance claims and kept daily records of patients.",
+      "Assigned wards and bed numbers to admitted patients.",
+    ],
+  },
+  {
+    title: "Community Studies",
+    org: "Wanjagenia community",
+    place: "Manyoro, Ghana",
+    dates: "May 2015 – Jul 2016",
+    tag: "research",
+    points: [
+      "Carried out a needs assessment for the Wanjagenia community.",
+      "Ran a population and housing census of the community.",
+      "Wrote a community profile and a development proposal for the community.",
+    ],
+  },
 ];
 
 export const education = [
@@ -134,6 +181,7 @@ export const education = [
     date: "May 2026",
     notes: [
       "Dissertation: From the cosmos to the canopy: quantifying uncertainty across cosmological and environmental systems.",
+      "Comprehensive exam: dark matter halo density profile calibration.",
       "Advisor: Prof. Nancy F. Glenn. GPA 4.0/4.0.",
     ],
   },
@@ -194,9 +242,13 @@ export const talks = [
   ["Nov 2024", "Attendee, Supercomputing (SC24), Atlanta"],
   ["Jul 2024", "Poster, International HPC Summer School, Kobe, Japan"],
   ["2024", "Poster on dark matter halo mass calibration, BSU Graduate Showcase"],
+  ["Nov 2023", "Coach and mentor, SCUDEM VIII 2023 modeling challenge"],
+  ["Jun 2023", "Attendee, Cluster Cosmology Workshop, University of Arizona"],
+  ["Jun 2023", "Attendee, Cosmology Summer School, University of Michigan"],
   ["Aug 2022", "Attendee, La Serena School for Data Science, online"],
   ["Jul 2022", "Attendee, DeepHyper Automated ML Workshop, online"],
   ["Jun 2022", "Co-organizer and speaker, Boise State University Cluster Cosmology Workshop"],
+  ["Jun 2022", "Attendee, Summer School in Astrostatistics and Astroinformatics, Center for Astrostatistics, Pennsylvania State University"],
   ["Jul 2021", "Attendee, 4th Institute of Space Sciences Summer School: Artificial Intelligence for Astronomy, online"],
 ];
 
@@ -206,14 +258,19 @@ export const leadership = [
   ["Vice President (Aug 2024 – Jul 2025)", "International Students Association, Boise State University", ""],
   ["Mentor (Jul 2024 – May 2025)", "International Students Peer Mentorship Program, Boise State University", ""],
   ["Volunteer (Sep 2024 – May 2025)", "STEM Nights for Elementary Schools and Refugee Families, Boise", ""],
+  ["Students' Representative (Sep 2019 – Jul 2020)", "AIMS Rwanda, 4th cohort", ""],
+  ["Vice President (Apr 2017 – Apr 2018)", "Actuarial Science Students' Association of Ghana (ASSAG), UDS Chapter", ""],
+  ["Member (Mar 2015 – Jul 2018)", "Transformational Leadership International (TLI), UDS Chapter", ""],
 ];
 
 export const awards = [
   ["Dec 2025", "Bronco Spirit Award for academic excellence and leadership, Boise State University"],
+  ["2021", "U.S. Department of Energy funding (Grant DE-SC0021916) for my Ph.D."],
   ["Mar 2020", "IBM certificates in Data Science, Machine Learning and Deep Learning"],
   ["Feb 2020", "Dataquest certificate in Data Science"],
   ["Aug 2019", "Mastercard Foundation Scholar, fully funded M.Sc. at AIMS Rwanda"],
   ["Nov 2018", "Prudential Actuarial Support Scheme (PASS) award for excellence in Actuarial Science, Ghana"],
+  ["2013", "Overall best student in the West African Senior School Certificate Examination (WASSCE), Business Senior High School (BISCO), Tamale, Ghana"],
 ];
 
 export const skills = [
@@ -222,7 +279,7 @@ export const skills = [
   ["AI evaluation", "Rubric-based LLM evaluation, human-feedback (RLHF) and supervised fine-tuning data, benchmark and verifier design, agent trajectory review, Claude and ChatGPT skill authoring"],
   ["Languages and libraries", "Python, R, SQL, MATLAB, PyTorch, TensorFlow, Keras, scikit-learn, NumPy, Pandas, Xarray, basic C++ and HTML"],
   ["Geospatial", "Rasterio, GeoPandas, GDAL, PDAL, ArcGIS, LAStools, Sentinel-2, MODIS, GOES-R, GEDI and ICESat-2 data"],
-  ["Computing and tools", "Linux, Slurm, HPC clusters, AWS, Git, GitHub, VS Code, Jupyter, R Shiny, Power BI, Tableau, Matplotlib, Seaborn, Excel, SPSS, GRETL, Minitab"],
+  ["Computing and tools", "Linux, Slurm, HPC clusters, AWS, Git, GitHub, VS Code, Jupyter, R Shiny, Power BI, Tableau, Matplotlib, Seaborn, Excel, SPSS, GRETL, Minitab, EasyFit, LaTeX, Microsoft Office, LibreOffice, Windows and macOS"],
 ];
 
 // The address shown on the site. Messages from the contact form go to a different, private address,
