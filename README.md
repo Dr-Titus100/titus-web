@@ -14,7 +14,7 @@ The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It
   - **Install.** Steps for Claude, ChatGPT, Claude Code and Codex, the zip download, the promo video and the examples.
 - **Experience** (`/experience/`). Work history with filters for AI, research, industry and teaching, plus education, publications, talks, awards, leadership and skills.
 - **About** (`/about/`). Titus's story, newest chapter first, his photo and the contact form.
-- **Blog** (`/blog/`). Empty until the first post is published.
+- **Blog** (`/blog/`). Posts from `src/content/blog/`. Stories carry a "Fiction" label so readers know they are made up.
 
 ## How the skill files get here
 
@@ -56,7 +56,7 @@ The next titus-humanizer release then rebuilds the site within a few minutes. Wi
 
 ## Make changes
 
-Make every change on the `dev` branch and open a pull request from `dev` into `main`. A push to `dev` builds the site as a check, and merging into `main` deploys it.
+Make every change on the `dev` branch and open a pull request from `dev` into `main`. A push to `dev` builds the site as a check, and merging into `main` deploys it. Add a short note about each change to `CHANGELOG.md`.
 
 ## Turn on GitHub Pages (once)
 
@@ -74,7 +74,7 @@ npm run build      # builds into dist/
 
 ## Add things
 
-- **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`, and the home page lists the three newest posts.
+- **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`, and the home page lists the three newest posts. For a story, also set `fiction: true`, and the post shows a "Fiction" label everywhere it appears.
 - **About and Experience.** The facts on both pages, such as roles, education, publications, talks, awards and skills, live in `src/data/profile.ts`. Change the data there, and edit `src/pages/about.astro` or `src/pages/experience.astro` only to change the layout or the story text.
 - **A new skill or plugin.**
   1. Add an entry to `src/data/tools.ts`. Its card then shows up on the Tools page.
@@ -96,4 +96,4 @@ The form on the About page sends messages through [Web3Forms](https://web3forms.
 
 The access key is already set in `contactFormKey` in the same file. The key only lets visitors send messages to that one inbox, so it's safe to publish. To change the receiving address, create a new key at web3forms.com with the new address and replace `contactFormKey`.
 
-A reply goes to the email address the visitor typed into the form. If that bounces, check the address for a typo.
+A reply goes to the email address the visitor typed into the form. So, make sure you type the correct email in the form.
