@@ -320,3 +320,6 @@ pre code { background: none; padding: 0; }
   .reveal { opacity: 1; transform: none; }
   .rise .w { opacity: 1; transform: none; filter: none; }
 }
+
+/* Keep in-page targets clear of the sticky nav and subnav */
+#video { scroll-margin-top: 96px; }
