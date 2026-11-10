@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-10 (evening)
 
+- The privacy note under the Checker's text box no longer mentions the Python download. It now says only that your text stays on your device.
 - On the Checker, clicking or tapping a highlight shows the pattern's name in a small label. Before, only hovering did. The same works for the hidden-character badges.
 - On the Checker, Highlighted patterns is selected when the results appear and after each new check. The color key now shows only with Highlighted patterns.
 - The Short version card on Any chatbot gives its word count as well as its character count.
