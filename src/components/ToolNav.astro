@@ -30,6 +30,17 @@ const items = checkerSet
 </nav>
 
 <script>
+  // Watch video is a link to a spot on the overview page, so mark it by hand
+  // when someone clicks it or arrives with #video in the address.
+  const video = document.querySelector<HTMLAnchorElement>(".subnav-links a[href$='#video']");
+  const markVideo = () => {
+    if (!video) return;
+    if (location.hash !== "#video") { video.removeAttribute("aria-current"); return; }
+    document.querySelectorAll(".subnav-links a[aria-current]").forEach((a) => a.removeAttribute("aria-current"));
+    video.setAttribute("aria-current", "page");
+  };
+  markVideo();
+  window.addEventListener("hashchange", markVideo);
   // On narrow screens the links scroll sideways, so bring the current one into view.
   const cur = document.querySelector<HTMLElement>(".subnav-links a[aria-current='page']");
   const row = cur?.parentElement;
