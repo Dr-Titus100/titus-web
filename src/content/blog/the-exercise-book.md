@@ -1,6 +1,6 @@
 ---
 title: "The exercise book"
-description: "A short story about counting things right, from a market stall in Tamale to a dissertation defense in Boise."
+description: "A short story about counting things right, from a fish stall in Chinderi to a dissertation defense in Boise."
 date: 2026-11-10
 fiction: true
 ---
@@ -9,21 +9,21 @@ fiction: true
 
 On the morning of my dissertation defense, I packed three things: my laptop, a printed copy of my slides, and a blue exercise book with a torn cover that said "Mathematics, Form 2."
 
-The exercise book was not mine. It belonged to my father.
+The exercise book was not mine. It belonged to my mother.
 
-He sold maize and groundnuts from a stall near the Aboabo market in Tamale, and he wrote down every sale in that book. Date, buyer, bags, price. When a column didn't add up, he didn't erase anything. He drew one straight line through the wrong number and wrote the right one above it, small and neat, so you could still read both.
+She sold smoked fish from a stall at the market in Chinderi, and she wrote down every sale in that book. Date, buyer, how many fish, price. When a column didn't add up, she didn't erase anything. She drew one straight line through the wrong number and wrote the right one above it, small and neat, so you could still read both.
 
-I was nine when he first handed me the book and a pencil. "Add this page," he said. I added it and got a total that was twelve cedis short of his.
+I was nine when she first handed me the book and a pencil. "Add this page," she said. I added it and got a total that was twelve cedis short of hers.
 
-"Again," he said.
+"Again," she said.
 
-I added it again and got the same number. He took the book, ran his finger down the column and stopped at a 7 that I had read as a 1. He had a way of writing sevens without the little cross in the middle.
+I added it again and got the same number. She took the book, ran her finger down the column and stopped at a 7 that I had read as a 1. She had a way of writing sevens without the little cross in the middle.
 
-"So whose mistake is it?" he asked.
+"So whose mistake is it?" she asked.
 
 "Yours," I said, because I was nine.
 
-He laughed and crossed out the 7 and wrote it again, with the cross this time. That was the only time I saw him change his handwriting for anybody.
+She laughed and crossed out the 7 and wrote it again, with the cross this time. That was the only time I saw her change her handwriting for anybody.
 
 ## Navrongo
 
@@ -31,7 +31,7 @@ At university I studied actuarial science, which is a polite name for counting t
 
 The claims came back rejected more often than I expected. One afternoon a supervisor dropped a thick pile on my desk. Most of them had failed for the same reason. A patient's name was spelled one way on the admission form and another way on the insurance card. Abdul and Abdulai. Fuseini and Fusheini. The patients were the same people, but the system didn't think so.
 
-I spent two weeks matching names by hand. Then I wrote the corrections in a notebook, one line per patient, and drew a straight line through each wrong spelling. My supervisor flipped through it and asked who taught me to do it that way. I said my father.
+I spent two weeks matching names by hand. Then I wrote the corrections in a notebook, one line per patient, and drew a straight line through each wrong spelling. My supervisor flipped through it and asked who taught me to do it that way. I said my mother.
 
 Around the same time, our community studies program sent us to Wanjagenia, a farming community near Manyoro, to run a population and housing census. We walked from compound to compound with clipboards. At one house an old man refused to give us the number of people living there until we had also counted his goats. We explained that the census was only for people. He said the goats ate from the same pot, so they should count.
 
@@ -73,7 +73,7 @@ When they called me back in, the chair of the committee shook my hand and said, 
 
 ## After
 
-That evening I called my mother in Tamale on WhatsApp. The line was bad, so she kept asking me to repeat myself.
+That evening I called my mother in Chinderi on WhatsApp. The line was bad, so she kept asking me to repeat myself.
 
 "So you are finished?" she asked.
 
@@ -83,8 +83,8 @@ That evening I called my mother in Tamale on WhatsApp. The line was bad, so she 
 
 I said I hoped so. She said she would tell my brother and my sister and the woman who sells kenkey across the road, in that order.
 
-After the call I opened the exercise book to the last page with writing on it. It was a list of sales from a Saturday in a year I was too young to remember. At the bottom, in my father's hand, was a total with one straight line through it and the right number written small above.
+After the call I opened the exercise book to the last page with writing on it. It was a list of sales from a market day in a year I was too young to remember. At the bottom, in my mother's hand, was a total with one straight line through it and the right number written small above.
 
-I took a pen and, under his total, I wrote the date, my name and one word: "Finished." Then I added the column again to make sure he had it right.
+I took a pen and, under her total, I wrote the date, my name and one word: "Finished." Then I added the column again to make sure she had it right.
 
-He did.
+She did.

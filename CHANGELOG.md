@@ -4,7 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-10 (later)
 
-- The blog has its first post, "The exercise book", a short story told in first person. It's fiction, and it says so at the top.
+- The blog has its first post, "The exercise book", a short story told in first person about a fish seller's sales book and a dissertation defense. It's fiction, and it says so at the top.
 - Blog posts can set `fiction: true`. Those posts show a "Fiction" label on the blog list, on the home page and on the post itself.
 - The README explains the fiction label and asks visitors to type their correct email in the contact form. This file is new too.
 
