@@ -8,7 +8,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 - The Checker no longer has the Cleaned text tab or the Copy cleaned text button, since it scores text and doesn't change it. Its hidden-character line now says "found" instead of "removed".
 - "Rewrite with your key" on the Checker uses the outline style, like "Use any chatbot".
 - On Any chatbot, the Full rulebook and Short version cards say that both keep quotations as written. Their word and character counts now come from the release files.
-- The Rewrite card on the Overview says quotations stay as they were.
+- On the Overview, the Rewrite card says quotations stay as they were, and the Check any text card says the Checker finds hidden characters and leaves quoted text out of the score.
 
 ## 2026-11-10 (later)
 
