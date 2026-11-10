@@ -42,7 +42,7 @@ const guides = [
   },
 ];
 ---
-<Base title="Use any chatbot" current="tools" description="Copy-ready titus-humanizer instructions and short guides for Gemini, Copilot, Perplexity and other assistants.">
+<Base title="Use any chatbot" current="humanizer" description="Copy-ready titus-humanizer instructions and short guides for Gemini, Copilot, Perplexity and other assistants.">
   <ToolNav slot="subnav" current="any-chatbot" />
 
   <section class="hero">
@@ -63,7 +63,7 @@ const guides = [
           <p class="muted">The complete rulebook, about 6,600 words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity.</p>
           <div class="btn-row" style="margin-top: auto">
             <button class="btn btn-ghost" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
-            <a class="btn btn-quiet" href={full} download="SKILL.md">Download</a>
+            <a class="btn btn-ghost" href={full} download="SKILL.md">Download</a>
           </div>
         </div>
         <div class="card copy-card reveal" style="--d: 0.08s">
@@ -72,7 +72,7 @@ const guides = [
           <p class="muted">A summary of the rules, under 5,000 characters. Use it when an assistant says your message is too long, as Copilot often does.</p>
           <div class="btn-row" style="margin-top: auto">
             <button class="btn btn-ghost" data-copy-url={short} data-copy-label="Short version copied">Copy short version</button>
-            <a class="btn btn-quiet" href={short} download="titus-humanizer-short.md">Download</a>
+            <a class="btn btn-ghost" href={short} download="titus-humanizer-short.md">Download</a>
           </div>
         </div>
       </div>
@@ -122,7 +122,7 @@ const guides = [
           </select>
         </div>
         <div class="btn-row">
-          <button class="btn" id="pb-copy" data-full={full}>Copy prompt</button>
+          <button class="btn btn-ghost" id="pb-copy" data-full={full}>Copy prompt</button>
           <span class="small muted">Then paste it into your chatbot and send it.</span>
         </div>
       </div>
