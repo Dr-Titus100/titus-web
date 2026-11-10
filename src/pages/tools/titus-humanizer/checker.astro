@@ -29,8 +29,8 @@ const skill = skills["titus-humanizer"];
         <div class="checker-actions">
           <div class="btn-row">
             <button class="btn btn-ghost" id="run" disabled>Check text</button>
-            <button class="btn btn-quiet" id="sample" type="button">Try a sample</button>
-            <button class="btn btn-quiet" id="clear" type="button">Clear</button>
+            <button class="btn btn-ghost" id="sample" type="button">Try a sample</button>
+            <button class="btn btn-ghost" id="clear" type="button">Clear</button>
           </div>
           <span class="small muted" id="count">0 words</span>
         </div>
@@ -233,6 +233,8 @@ const skill = skills["titus-humanizer"];
     render();
   }
 
+  const actions = ["run", "sample", "clear"].map((id) => $(id));
+  actions.forEach((b) => b.addEventListener("click", () => actions.forEach((x) => x.classList.toggle("picked", x === b))));
   run.addEventListener("click", check);
   input.addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !run.disabled) check(); });
   $("sample").addEventListener("click", () => { input.value = SAMPLE; input.dispatchEvent(new Event("input")); if (!run.disabled) check(); });
@@ -246,6 +248,8 @@ const skill = skills["titus-humanizer"];
 </script>
 
 <style is:global>
+  /* Check text, Try a sample and Clear start as matching outlines. The last one clicked fills in. */
+  .checker-actions .btn.picked { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
   /* No view tab is marked until someone clicks one, then the clicked tab is clearly filled. */
   .view-head .segmented button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
 </style>
