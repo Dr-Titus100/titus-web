@@ -4,22 +4,29 @@ The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It
 
 ## What's on it
 
-- **titus-humanizer**, under `/tools/titus-humanizer/`
+- **Home** (`/`). A short intro, cards that lead to Tools, Blog and Experience, the latest blog posts and a short About me section.
+- **Tools** (`/tools/`). One card for each skill or plugin, read from `src/data/tools.ts`.
+- **Humanizer** (`/tools/titus-humanizer/`), with its own row of tabs:
+  - **Overview.** The live demo, four ways to use the skill, the promo video, how it works, the rules it applies and before-and-after examples.
   - **Checker.** Paste text and see its 0 to 1 score, each pattern highlighted in place and the hidden characters removed. It runs the real `titus_tools.py` in the browser with [Pyodide](https://pyodide.org), so the text never leaves the visitor's device.
   - **Rewrite.** Visitors bring their own Gemini, Claude or OpenAI key. The page sends `SKILL.md` as the instructions, straight from the browser to the provider, then scores the original and the rewrite.
   - **Any chatbot.** Copy-ready rules and short guides for Gemini, Copilot, Perplexity and others.
-  - **Install.** Steps for Claude, ChatGPT, Claude Code and Codex, the before-and-after examples and the promo video.
-- **About**, **Experience** and **Blog** pages, empty for now.
+  - **Install.** Steps for Claude, ChatGPT, Claude Code and Codex, the zip download, the promo video and the examples.
+- **Experience** (`/experience/`). Work history with filters for AI, research, industry and teaching, plus education, publications, talks, awards, leadership and skills.
+- **About** (`/about/`). Titus's story, newest chapter first, his photo and the contact form.
+- **Blog** (`/blog/`). Empty until the first post is published.
 
 ## How the skill files get here
 
 The site keeps no copy of any skill. Before each build, `scripts/fetch-skills.mjs` reads `skills.config.json`, finds each skill's latest GitHub release, downloads the files it lists, runs the script once to make sure it works, and writes them to `public/skills/<slug>/`. A broken release stops the build, so it never goes live.
 
+The site always uses each skill's **latest release**, never its main branch. Changes in a skill repo show up here only after you publish a new release there. The version label on the Humanizer pages and the zip on the Install page come from that release.
+
 A build runs when:
 
 - you push to `main` (this deploys) or `dev` (this only builds, as a check),
 - a skill repo publishes a release and sends a `skill-released` event (see below),
-- every night at 07:17 UTC, as a fallback,
+- every night at 07:17 UTC (12:17 AM in Boise during standard time), as a fallback,
 - you start it by hand under Actions.
 
 ### Rebuild on each titus-humanizer release
@@ -47,6 +54,10 @@ The next titus-humanizer release then rebuilds the site within a few minutes. Wi
 
 **Replacing an expired token.** Create a new token the same way, then open `SITE_DISPATCH_TOKEN` under Repository secrets in titus-humanizer, choose the pencil icon to edit it and paste the new token.
 
+## Make changes
+
+Make every change on the `dev` branch and open a pull request from `dev` into `main`. A push to `dev` builds the site as a check, and merging into `main` deploys it.
+
 ## Turn on GitHub Pages (once)
 
 In this repo, open Settings, then Pages, and set Source to **GitHub Actions**. The next push to `main` publishes the site.
@@ -63,9 +74,13 @@ npm run build      # builds into dist/
 
 ## Add things
 
-- **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`.
-- **About and Experience.** Edit `src/pages/about.astro` and `src/pages/experience.astro`.
-- **A new skill or plugin.** Add it to `skills.config.json` if the site should pull its files, add a card to `src/pages/tools/index.astro`, and add its pages under `src/pages/tools/<name>/`. In the new skill's repo, copy the "Rebuild the website" step from titus-humanizer's release workflow.
+- **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`, and the home page lists the three newest posts.
+- **About and Experience.** The facts on both pages, such as roles, education, publications, talks, awards and skills, live in `src/data/profile.ts`. Change the data there, and edit `src/pages/about.astro` or `src/pages/experience.astro` only to change the layout or the story text.
+- **A new skill or plugin.**
+  1. Add an entry to `src/data/tools.ts`. Its card then shows up on the Tools page.
+  2. Add it to `skills.config.json` if the site should pull its files from its releases.
+  3. Add its pages under `src/pages/tools/<name>/`. Copy `src/components/ToolNav.astro` if it needs its own row of tabs, and add it to the top menu in `src/layouts/Base.astro` if it should have one.
+  4. In the new skill's repo, copy the "Rebuild the website" step from titus-humanizer's release workflow and add the same `SITE_DISPATCH_TOKEN` secret.
 
 ## Custom domain
 
@@ -73,13 +88,12 @@ Set `SITE_URL` to the domain and `SITE_BASE` to `/` in the build step of `.githu
 
 ## Writing rules
 
-The visible text follows the same rules as titus-humanizer. `scripts/check-copy.mjs` runs on every build and fails it if a page uses an em dash or a semicolon.
+The visible text follows the same rules as titus-humanizer. `scripts/check-copy.mjs` runs after every build and fails it if a page uses an em dash or a semicolon. Code blocks and the "before" examples are skipped.
 
 ## Contact form
 
-The form on the About page sends messages through [Web3Forms](https://web3forms.com), so the address that receives them never appears on the site.
+The form on the About page sends messages through [Web3Forms](https://web3forms.com). The address that receives them is stored only in the Web3Forms account, so it never appears on the site or in this repo. The site shows only the public address in `publicEmail` in `src/data/profile.ts`.
 
-1. Go to web3forms.com, enter the receiving address and choose "Create Access Key". Web3Forms emails the key to that address.
-2. Paste the key into `contactFormKey` in `src/data/profile.ts` and merge the change.
+The access key is already set in `contactFormKey` in the same file. The key only lets visitors send messages to that one inbox, so it's safe to publish. To change the receiving address, create a new key at web3forms.com with the new address and replace `contactFormKey`.
 
-The key only lets visitors send messages to that one inbox, so it's safe to publish. Until a key is set, the form says it isn't connected and points people to the public address in `publicEmail`.
+A reply goes to the email address the visitor typed into the form. If that bounces, check the address for a typo.
