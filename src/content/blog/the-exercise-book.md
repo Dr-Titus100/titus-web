@@ -5,11 +5,11 @@ date: 2026-11-10
 fiction: true
 ---
 
-*This is a work of fiction. The places and the work in it come from my life, but the events, the people and the conversations are made up.*
+*This is a work of fiction. My mother, Akosua Yentumi, is real, and so are the places and the work. The events and the conversations are made up.*
 
 On the morning of my dissertation defense, I packed three things: my laptop, a printed copy of my slides, and a blue exercise book with a torn cover that said "Mathematics, Form 2."
 
-The exercise book was not mine. It belonged to my mother.
+The exercise book was not mine. It belonged to my mother, Akosua Yentumi.
 
 She sold smoked fish from a stall at the market in Chinderi, and she wrote down every sale in that book. Date, buyer, how many fish, price. When a column didn't add up, she didn't erase anything. She drew one straight line through the wrong number and wrote the right one above it, small and neat, so you could still read both.
 
@@ -31,7 +31,7 @@ At university I studied actuarial science, which is a polite name for counting t
 
 The claims came back rejected more often than I expected. One afternoon a supervisor dropped a thick pile on my desk. Most of them had failed for the same reason. A patient's name was spelled one way on the admission form and another way on the insurance card. Abdul and Abdulai. Fuseini and Fusheini. The patients were the same people, but the system didn't think so.
 
-I spent two weeks matching names by hand. Then I wrote the corrections in a notebook, one line per patient, and drew a straight line through each wrong spelling. My supervisor flipped through it and asked who taught me to do it that way. I said my mother.
+I spent two weeks matching names by hand. Then I wrote the corrections in a notebook, one line per patient, and drew a straight line through each wrong spelling. My supervisor flipped through it and asked who taught me to do it that way. I said Akosua Yentumi, my mother.
 
 Around the same time, our community studies program sent us to Wanjagenia, a farming community near Manyoro, to run a population and housing census. We walked from compound to compound with clipboards. At one house an old man refused to give us the number of people living there until we had also counted his goats. We explained that the census was only for people. He said the goats ate from the same pot, so they should count.
 
