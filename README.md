@@ -8,7 +8,7 @@ The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It
 - **Tools** (`/tools/`). One card for each skill or plugin, read from `src/data/tools.ts`.
 - **Humanizer** (`/tools/titus-humanizer/`), with its own row of tabs:
   - **Overview.** The live demo, four ways to use the skill, the promo video, how it works, the rules it applies and before-and-after examples.
-  - **Checker.** Paste text and see its 0 to 1 score, each pattern highlighted in place and any hidden characters. Quoted text stays out of the score and gets a dashed underline instead of highlights. It runs the real `titus_tools.py` in the browser with [Pyodide](https://pyodide.org), so the text never leaves the visitor's device.
+  - **Checker.** Paste text and see its 0 to 1 score, each pattern highlighted in place and the hidden characters removed. Quoted text stays out of the score and gets a dashed underline instead of highlights. It runs the real `titus_tools.py` in the browser with [Pyodide](https://pyodide.org), so the text never leaves the visitor's device.
   - **Rewrite.** Visitors bring their own Gemini, Claude or OpenAI key. The page sends `SKILL.md` as the instructions, straight from the browser to the provider, then scores the original and the rewrite.
   - **Any chatbot.** Copy-ready rules and short guides for Gemini, Copilot, Perplexity and others.
   - **Install.** Steps for Claude, ChatGPT, Claude Code and Codex, the zip download, the promo video and the examples.
