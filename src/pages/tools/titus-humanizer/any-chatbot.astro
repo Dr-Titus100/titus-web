@@ -62,7 +62,7 @@ const guides = [
           <h2 class="h3">Full rulebook</h2>
           <p class="muted">The complete rulebook, about 6,600 words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity.</p>
           <div class="btn-row" style="margin-top: auto">
-            <button class="btn" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
+            <button class="btn btn-ghost" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
             <a class="btn btn-quiet" href={full} download="SKILL.md">Download</a>
           </div>
         </div>
@@ -71,7 +71,7 @@ const guides = [
           <h2 class="h3">Short version</h2>
           <p class="muted">A summary of the rules, under 5,000 characters. Use it when an assistant says your message is too long, as Copilot often does.</p>
           <div class="btn-row" style="margin-top: auto">
-            <button class="btn" data-copy-url={short} data-copy-label="Short version copied">Copy short version</button>
+            <button class="btn btn-ghost" data-copy-url={short} data-copy-label="Short version copied">Copy short version</button>
             <a class="btn btn-quiet" href={short} download="titus-humanizer-short.md">Download</a>
           </div>
         </div>
@@ -134,7 +134,7 @@ const guides = [
       <h2 class="h3">A score for the chatbot's rewrite</h2>
       <p class="muted">Most chatbots can't run the scoring script. Paste the rewrite into the checker to see its score and any patterns left.</p>
       <div class="btn-row center" style="margin-top: 20px">
-        <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Open the checker</a>
+        <a class="btn btn-ghost" href={u("/tools/titus-humanizer/checker/")}>Open the checker</a>
       </div>
     </div>
   </section>

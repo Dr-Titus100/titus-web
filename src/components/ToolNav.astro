@@ -2,11 +2,21 @@
 import { u } from "../lib/url";
 interface Props { current: string }
 const { current } = Astro.props;
-const items = [
-  { key: "video", href: "/tools/titus-humanizer/#video", label: "Watch video" },
-  { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Try it free" },
-  { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
-];
+// The checker, rewrite and any-chatbot pages share one set of tabs.
+// The overview and install pages use the shorter set.
+const checkerSet = ["checker", "rewrite", "any-chatbot"].includes(current);
+const items = checkerSet
+  ? [
+      { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Checker" },
+      { key: "rewrite", href: "/tools/titus-humanizer/rewrite/", label: "Rewrite" },
+      { key: "any-chatbot", href: "/tools/titus-humanizer/any-chatbot/", label: "Any chatbot" },
+      { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
+    ]
+  : [
+      { key: "video", href: "/tools/titus-humanizer/#video", label: "Watch video" },
+      { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Try it free" },
+      { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
+    ];
 ---
 <nav class="subnav" aria-label="titus-humanizer">
   <div class="wrap subnav-inner">
