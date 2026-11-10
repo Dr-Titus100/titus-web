@@ -57,16 +57,39 @@ def _hidden_marks(text):
                     marks.append({"start": m.start() + j, "end": m.start() + j + 1, "name": "look-alike letter", "cp": "U+%04X" % ord(c), "looks": tt.HOMOGLYPHS[c]})
     return sorted(marks, key=lambda x: x["start"])
 
+def _blank_code(text):
+    return re.sub(r"\x60{3}.*?\x60{3}|\x60[^\x60]*\x60", lambda m: " " * len(m.group(0)), text, flags=re.S)
+
+def _quote_spans(text):
+    # The quotations tt.score skips, found the same way as tt.quotations, with their positions.
+    body = _blank_code(text)
+    found = [(m.start(), m.end()) for m in tt.BLOCK_QUOTE.finditer(body)]
+    blanked = tt.BLOCK_QUOTE.sub(lambda m: " " * len(m.group(0)), body)
+    found += [(m.start(), m.end()) for m in tt.QUOTED.finditer(blanked)]
+    return sorted(found)
+
+def _blank_quotes(text, quotes):
+    # Blank each quotation without moving any position. Like tt._strip_code, a quotation that ends
+    # a sentence leaves a period behind, so the next sentence still starts after one.
+    chars = list(text)
+    for a, b in quotes:
+        fill = [" "] * (b - a)
+        if re.search(r"[.!?]\W*$", text[a:b]) and b - a >= 2:
+            fill[-2] = "."
+        chars[a:b] = fill
+    return "".join(chars)
+
 def _pattern_spans(text):
-    # The same regexes and filters tt.score counts, with code blanked out so positions line up.
-    body = re.sub(r"\x60{3}.*?\x60{3}|\x60[^\x60]*\x60", lambda m: " " * len(m.group(0)), text, flags=re.S)
+    # The same regexes and filters tt.score counts, with code and quoted text blanked out so
+    # positions line up and nothing inside a quotation is marked.
+    body = _blank_quotes(_blank_code(text), _quote_spans(text))
     spans = []
     for label, rx, w in tt.COMPILED:
         keep = tt.FILTERS.get(label, lambda b, m: True)
         for m in rx.finditer(body):
             if m.end() <= m.start() or not keep(body, m):
                 continue
-            seg = text[m.start():m.end()]
+            seg = body[m.start():m.end()]
             lead = len(seg) - len(seg.lstrip(" .!?\n\t"))
             trail = len(seg) - len(seg.rstrip(" \n\t"))
             s, e = m.start() + lead, m.end() - trail
@@ -88,6 +111,7 @@ def analyze(text):
         "hidden": _hidden_marks(text),
         "score": _score_dict(tt.score(cleaned)),
         "spans": _pattern_spans(cleaned),
+        "quotes": [{"start": a, "end": b} for a, b in _quote_spans(cleaned)],
         "min_words": tt.MIN_WORDS,
     })
 
