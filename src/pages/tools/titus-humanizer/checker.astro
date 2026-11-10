@@ -28,7 +28,7 @@ const skill = skills["titus-humanizer"];
         <textarea id="input" spellcheck="false" placeholder="Paste an email, an essay, a cover letter or a story here."></textarea>
         <div class="checker-actions">
           <div class="btn-row">
-            <button class="btn" id="run" disabled>Check text</button>
+            <button class="btn btn-ghost" id="run" disabled>Check text</button>
             <button class="btn btn-quiet" id="sample" type="button">Try a sample</button>
             <button class="btn btn-quiet" id="clear" type="button">Clear</button>
           </div>
@@ -62,7 +62,7 @@ const skill = skills["titus-humanizer"];
         <div class="card view-card">
           <div class="view-head">
             <div class="segmented" role="tablist" aria-label="View">
-              <button role="tab" aria-selected="true" data-view="patterns">Highlighted patterns</button>
+              <button role="tab" aria-selected="false" data-view="patterns">Highlighted patterns</button>
               <button role="tab" aria-selected="false" data-view="hidden">Hidden characters</button>
               <button role="tab" aria-selected="false" data-view="cleaned">Cleaned text</button>
             </div>
@@ -244,3 +244,8 @@ const skill = skills["titus-humanizer"];
     render();
   }));
 </script>
+
+<style is:global>
+  /* No view tab is marked until someone clicks one, then the clicked tab is clearly filled. */
+  .view-head .segmented button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
+</style>
