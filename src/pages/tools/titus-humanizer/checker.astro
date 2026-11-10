@@ -149,6 +149,9 @@ const skill = skills["titus-humanizer"];
   .hl-tip { position: absolute; z-index: 50; max-width: min(320px, calc(100vw - 16px)); padding: 6px 10px; border-radius: 8px; background: var(--ink); color: var(--bg); font-size: 13px; line-height: 1.4; box-shadow: 0 6px 20px rgba(0,0,0,0.25); pointer-events: none; }
   .hl-tip[hidden] { display: none; }
   mark.hl, mark.hid { cursor: pointer; }
+  /* The full text of the pattern under the pointer or the last click. */
+  mark.hl.active { outline: 2px solid var(--ink); outline-offset: 1px; }
+  mark.hid.active { outline: 2px solid var(--bad); outline-offset: 1px; }
   .summary-line { font-weight: 600; }
   .next { text-align: center; margin: 80px auto 0; max-width: 720px; }
 </style>
@@ -255,35 +258,50 @@ const skill = skills["titus-humanizer"];
   $("sample").addEventListener("click", () => { input.value = SAMPLE; input.dispatchEvent(new Event("input")); if (!run.disabled) check(); });
   $("clear").addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); $("results").hidden = true; input.focus(); });
   $("copy-clean").addEventListener("click", () => last && copyText(last.cleaned, "Cleaned text copied"));
-  // A click or tap on a highlight shows its name in a small label, the same text the hover shows.
-  // Touch screens have no hover, so this is the only way to read a name there.
+  // Hovering over a highlight, or clicking or tapping it, shows the pattern's name in a small label
+  // and outlines the exact text that pattern matched. A click keeps it open until the next click.
   const tip = document.createElement("div");
   tip.className = "hl-tip";
   tip.hidden = true;
   document.body.appendChild(tip);
-  let tipFor: HTMLElement | null = null;
-  const hideTip = () => { tip.hidden = true; tipFor = null; };
-  $("view").addEventListener("click", (e) => {
-    const m = (e.target as HTMLElement).closest<HTMLElement>("mark.hl, mark.hid");
-    if (!m || m === tipFor) { hideTip(); return; }
-    e.stopPropagation();
-    tip.textContent = m.dataset.label || m.title;
+  let pinned: HTMLElement | null = null;
+  const viewEl = $("view");
+  const clearActive = () => viewEl.querySelectorAll("mark.active").forEach((x) => x.classList.remove("active"));
+  const hideTip = () => { tip.hidden = true; pinned = null; clearActive(); };
+  const markAt = (t: EventTarget | null) => (t as HTMLElement | null)?.closest?.<HTMLElement>("mark.hl, mark.hid") || null;
+  function showTip(m: HTMLElement, clientY: number) {
+    clearActive();
+    const id = m.dataset.span;
+    const parts = id != null ? viewEl.querySelectorAll<HTMLElement>(`mark.hl[data-span="${id}"]`) : [m];
+    parts.forEach((x) => x.classList.add("active"));
+    tip.textContent = m.dataset.label || "";
     tip.hidden = false;
-    tipFor = m;
-    // A highlight that wraps has one box per line, so use the line that was clicked.
+    // A highlight that wraps has one box per line, so use the line under the pointer.
     const rects = [...m.getClientRects()];
-    const r = rects.find((b) => e.clientY >= b.top && e.clientY <= b.bottom) || rects[0] || m.getBoundingClientRect();
+    const r = rects.find((b) => clientY >= b.top && clientY <= b.bottom) || rects[0] || m.getBoundingClientRect();
     const left = Math.min(Math.max(8, r.left + window.scrollX), window.scrollX + document.documentElement.clientWidth - tip.offsetWidth - 8);
     // Go above the line, unless that would put the label under the sticky menus or the top of the view.
     const covered = Math.max(0, ...[...document.querySelectorAll(".nav, .subnav")].map((n) => n.getBoundingClientRect().bottom));
-    const floor = Math.max(covered, $("view").getBoundingClientRect().top);
+    const floor = Math.max(covered, viewEl.getBoundingClientRect().top);
     const above = r.top - tip.offsetHeight - 8;
     const top = above >= floor ? above : r.bottom + 8;
     tip.style.left = `${left}px`;
     tip.style.top = `${top + window.scrollY}px`;
+  }
+  viewEl.addEventListener("mouseover", (e) => { const m = markAt(e.target); if (m && !pinned) showTip(m, e.clientY); });
+  viewEl.addEventListener("mouseout", (e) => {
+    const m = markAt(e.target);
+    if (m && !pinned && markAt(e.relatedTarget)?.dataset.span !== m.dataset.span) { tip.hidden = true; clearActive(); }
+  });
+  viewEl.addEventListener("click", (e) => {
+    const m = markAt(e.target);
+    if (!m || m === pinned) { hideTip(); return; }
+    e.stopPropagation();
+    showTip(m, e.clientY);
+    pinned = m;
   });
   document.addEventListener("click", (e) => { if (!$("view").contains(e.target as Node)) hideTip(); });
-  $("view").addEventListener("scroll", hideTip);
+  viewEl.addEventListener("scroll", hideTip);
   window.addEventListener("resize", hideTip);
 
   // Each new check opens on Highlighted patterns. The other tabs show when clicked.

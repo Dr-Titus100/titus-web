@@ -91,9 +91,11 @@ export function highlight(text: string, spans: Span[]) {
     const covering = spans.filter((s) => s.start <= a && s.end >= b);
     if (!covering.length) { html += piece; continue; }
     covering.sort((x, y) => (x.end - x.start) - (y.end - y.start));
+    // The shortest span on top owns this piece. data-span ties every piece of that span together,
+    // so the page can outline the whole matched text when one piece is hovered or clicked.
     const top = covering[0];
-    const labels = [...new Set(covering.map((s) => s.label))].join(", ");
-    html += `<mark class="hl hl-${groupOf(top.label)}" data-label="${esc(labels)}" title="${esc(labels)}">${piece}</mark>`;
+    const id = spans.indexOf(top);
+    html += `<mark class="hl hl-${groupOf(top.label)}" data-span="${id}" data-label="${esc(top.label)}" aria-label="${esc(top.label)}">${piece}</mark>`;
   }
   return html;
 }
@@ -108,8 +110,8 @@ export function showHidden(text: string, marks: Mark[]) {
     const ch = cut(m.start, m.end);
     const tip = `${m.name} (${m.cp})${m.looks ? `, looks like "${m.looks}"` : ""}`;
     html += m.name === "look-alike letter"
-      ? `<mark class="hid hid-letter" title="${esc(tip)}">${esc(ch)}</mark>`
-      : `<mark class="hid" title="${esc(tip)}">${esc(m.cp)}</mark>${ch === "\n" ? "\n" : ""}`;
+      ? `<mark class="hid hid-letter" data-label="${esc(tip)}" aria-label="${esc(tip)}">${esc(ch)}</mark>`
+      : `<mark class="hid" data-label="${esc(tip)}" aria-label="${esc(tip)}">${esc(m.cp)}</mark>${ch === "\n" ? "\n" : ""}`;
     last = m.end;
   }
   return html + esc(cut(last));

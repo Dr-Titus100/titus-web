@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-10 (evening)
 
+- On the Checker, hovering over a highlight shows the same label as a click, and both outline the exact text the pattern matched, across every line it covers.
 - In the Checker's Patterns found card, the quoted-text and hidden-character lines are bold. The quoted-text line always shows, and says "Quoted text: none." when there are no quotations. The Try a sample text now includes a quotation, so the sample shows how quotes are left out.
 - The privacy note under the Checker's text box no longer mentions the Python download. It now says your text stays on your device and that the website keeps no copies.
 - On the Checker, clicking or tapping a highlight shows the pattern's name in a small label. Before, only hovering did. The same works for the hidden-character badges.
