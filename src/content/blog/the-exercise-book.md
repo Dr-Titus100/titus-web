@@ -63,7 +63,7 @@ On weekends I played soccer with a team that called itself the Panthers. We were
 
 Three committee members sat at the front. A few lab mates came, and then my friends and classmates kept arriving until every chair was taken and people stood along the back wall. More friends, classmates and family joined online, and their names filled the side of the screen next to my first slide. The projector took two tries to wake up.
 
-I talked for forty minutes about clusters, albedo and shrubs. Then the questions started. The hardest one came near the end. One committee member pointed at my slide on mass bias and asked how I knew the twenty to fifty percent came from projection and not from something else I had missed.
+I talked for about forty-five minutes about clusters, albedo and shrubs. Then the questions started. The hardest one came near the end. One committee member pointed at my slide on mass bias and asked how I knew the twenty to fifty percent came from projection and not from something else I had missed.
 
 I said I didn't know it for certain. I said I had held every other parameter fixed in the simulations and changed only the one that controls projection, and the bias moved with it. Then I said there was one place where my model and the simulation disagreed by a few percent, and I showed them that plot too, because I had marked it in my notes and I wasn't going to hide it.
 
