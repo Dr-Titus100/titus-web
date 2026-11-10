@@ -55,8 +55,8 @@ const skill = skills["titus-humanizer"];
           <div class="card">
             <h2 class="h3">Patterns found</h2>
             <ul class="patterns" id="patterns"></ul>
-            <p class="small muted" id="quote-summary" hidden></p>
-          <p class="small muted" id="hidden-summary"></p>
+            <p class="small muted summary-line" id="quote-summary"></p>
+          <p class="small muted summary-line" id="hidden-summary"></p>
           </div>
         </div>
 
@@ -149,6 +149,7 @@ const skill = skills["titus-humanizer"];
   .hl-tip { position: absolute; z-index: 50; max-width: min(320px, calc(100vw - 16px)); padding: 6px 10px; border-radius: 8px; background: var(--ink); color: var(--bg); font-size: 13px; line-height: 1.4; box-shadow: 0 6px 20px rgba(0,0,0,0.25); pointer-events: none; }
   .hl-tip[hidden] { display: none; }
   mark.hl, mark.hid { cursor: pointer; }
+  .summary-line { font-weight: 600; }
   .next { text-align: center; margin: 80px auto 0; max-width: 720px; }
 </style>
 
@@ -165,7 +166,7 @@ const skill = skills["titus-humanizer"];
   let original = "";
   let view = "patterns";
 
-  const SAMPLE = "In today’s fast-paced digital landscape, our new onboarding checklist isn’t just a tracker — it’s a gateway to a more seamless experience, fostering alignment and driving meaningful impact. Moreover, it serves as a pivotal tool for every team​ member. The checklist was designed to empower new hires to navigate the process with confidence. Experts say that clear onboarding plays a crucial role in retention. Additionally, it leverages robust automation to unlock value acrоss departments. Ultimately, this is not only a checklist but a testament to our commitment to people. I hope this helps, and let me know if you have any questions!";
+  const SAMPLE = "In today’s fast-paced digital landscape, our new onboarding checklist isn’t just a tracker — it’s a gateway to a more seamless experience, fostering alignment and driving meaningful impact. Moreover, it serves as a pivotal tool for every team​ member. The checklist was designed to empower new hires to navigate the process with confidence. Experts say that clear onboarding plays a crucial role in retention. One new hire wrote, \"The checklist is a game-changer — I knew exactly what to do on day one.\" Additionally, it leverages robust automation to unlock value acrоss departments. Ultimately, this is not only a checklist but a testament to our commitment to people. I hope this helps, and let me know if you have any questions!";
 
   const words = (t: string) => (t.match(/[A-Za-z0-9À-ɏ']+/g) || []).length;
   input.addEventListener("input", () => { $("count").textContent = `${words(input.value)} words`; });
@@ -242,8 +243,7 @@ const skill = skills["titus-humanizer"];
     }
     const nq = last.quotes.length;
     const qs = $("quote-summary");
-    qs.hidden = !nq;
-    qs.textContent = nq ? `Quoted text: ${nq} ${nq === 1 ? "quotation" : "quotations"} left as written and not scored.` : "";
+    qs.textContent = nq ? `Quoted text: ${nq} ${nq === 1 ? "quotation" : "quotations"} left as written and not scored.` : "Quoted text: none.";
     $("hidden-summary").textContent = `Hidden characters removed: ${last.found_text}.`;
     selectView("patterns");
   }
