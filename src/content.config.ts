@@ -9,6 +9,8 @@ const blog = defineCollection({
     description: z.string(),
     date: z.coerce.date(),
     draft: z.boolean().default(false),
+    // Set to true for stories. The post then shows a "Fiction" label wherever it appears.
+    fiction: z.boolean().default(false),
   }),
 });
 
