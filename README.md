@@ -14,7 +14,7 @@ The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It
   - **Install.** Steps for Claude, ChatGPT, Claude Code and Codex, the zip download, the promo video and the examples.
 - **Experience** (`/experience/`). Work history with filters for AI, research, industry and teaching, plus education, publications, talks, awards, leadership and skills.
 - **About** (`/about/`). Titus's story, newest chapter first, his photo and the contact form.
-- **Blog** (`/blog/`). Posts from `src/content/blog/`. Stories carry a "Fiction" label so readers know they are made up.
+- **Blog** (`/blog/`). Posts from `src/content/blog/`. Stories carry a "Fiction" label so readers know they are reading fiction.
 
 ## How the skill files get here
 
@@ -29,11 +29,11 @@ A build runs when:
 - every night at 07:17 UTC (12:17 AM in Boise during standard time), as a fallback,
 - you start it by hand under Actions.
 
-### Rebuild on each titus-humanizer release
+### Rebuilds after each titus-humanizer release
 
-The release workflow in titus-humanizer sends the `skill-released` event, and it needs a token with access to this repo. You set this up once.
+The release workflow in titus-humanizer sends the `skill-released` event, and it needs a token with access to this repo. The token is already saved in titus-humanizer as `SITE_DISPATCH_TOKEN`. The steps below are for replacing it, or for setting up a new skill repo the same way.
 
-**1. Create the token**
+**1. The token**
 
 1. On GitHub, click your profile picture, then open Settings, then Developer settings, then Personal access tokens, then Fine-grained tokens. Choose **Generate new token**.
 2. Fill in the form:
@@ -44,7 +44,7 @@ The release workflow in titus-humanizer sends the `skill-released` event, and it
    - **Permissions:** under Repository permissions, set **Contents** to **Read and write**. GitHub then sets **Metadata** to Read-only on its own. Leave every other permission on No access, including Actions, Pages and Workflows.
 3. Choose **Generate token** and copy it. GitHub shows it only once.
 
-**2. Save the token in titus-humanizer**
+**2. Where the token goes**
 
 1. Open the titus-humanizer repo on GitHub, then Settings. In the left menu, open **Secrets and variables**, then **Actions**.
 2. Stay on the **Secrets** tab. The page has two boxes, Environment secrets and Repository secrets. Use the **Repository secrets** box and choose **New repository secret**.
@@ -54,15 +54,15 @@ The next titus-humanizer release then rebuilds the site within a few minutes. Wi
 
 **Replacing an expired token.** Create a new token the same way, then open `SITE_DISPATCH_TOKEN` under Repository secrets in titus-humanizer, choose the pencil icon to edit it and paste the new token.
 
-## Make changes
+## How changes reach the site
 
 Make every change on the `dev` branch and open a pull request from `dev` into `main`. A push to `dev` builds the site as a check, and merging into `main` deploys it. Add a short note about each change to `CHANGELOG.md`.
 
-## Turn on GitHub Pages (once)
+## GitHub Pages setup (one time)
 
 In this repo, open Settings, then Pages, and set Source to **GitHub Actions**. The next push to `main` publishes the site.
 
-## Work on it locally
+## Local development
 
 ```
 npm install
@@ -72,7 +72,7 @@ npm run build      # builds into dist/
 
 `SKILL_REF=dev npm run dev` uses a branch instead of the latest release, which helps when you test an unreleased skill change. `ALLOW_STALE=1` keeps the last fetched files if GitHub can't be reached.
 
-## Add things
+## Adding posts, pages and tools
 
 - **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`, and the home page lists the three newest posts. For a story, also set `fiction: true`, and the post shows a "Fiction" label everywhere it appears.
 - **About and Experience.** The facts on both pages, such as roles, education, publications, talks, awards and skills, live in `src/data/profile.ts`. Change the data there, and edit `src/pages/about.astro` or `src/pages/experience.astro` only to change the layout or the story text.
@@ -88,11 +88,11 @@ Set `SITE_URL` to the domain and `SITE_BASE` to `/` in the build step of `.githu
 
 ## Writing rules
 
-The visible text follows the same rules as titus-humanizer. `scripts/check-copy.mjs` runs after every build and fails it if a page uses an em dash or a semicolon. Code blocks and the "before" examples are skipped.
+The visible text follows the same rules as titus-humanizer. `scripts/check-copy.mjs` runs after every build and fails it if a page uses an em dash or a semicolon. The check skips code blocks and the "before" examples.
 
 ## Contact form
 
-The form on the About page sends messages through [Web3Forms](https://web3forms.com). The address that receives them is stored only in the Web3Forms account, so it never appears on the site or in this repo. The site shows only the public address in `publicEmail` in `src/data/profile.ts`.
+The form on the About page sends messages through [Web3Forms](https://web3forms.com). Only the Web3Forms account holds the address that receives them, so it never appears on the site or in this repo. The site shows only the public address in `publicEmail` in `src/data/profile.ts`.
 
 The access key is already set in `contactFormKey` in the same file. The key only lets visitors send messages to that one inbox, so it's safe to publish. To change the receiving address, create a new key at web3forms.com with the new address and replace `contactFormKey`.
 
