@@ -57,13 +57,13 @@ In my first project I showed that this kind of miscounting can make cluster mass
 
 Later my research moved down from the sky to the ground. I spent a summer in Berkeley turning coarse satellite maps of how much sunlight the Colorado River Basin reflects into maps sharp enough to see a single field. I spent another stretch measuring the height of sagebrush from space, which is harder than it sounds, because sagebrush is short and the laser footprint is wide. In between, I worked at the campus supercomputing center, helping other students get their jobs to run.
 
-On weekends I played soccer with a team that called itself the Panthers. We were not good. In one game I had a clean shot from the edge of the box and hit the post so hard that it rang. A teammate filmed it. I posted the clip with a caption that said I almost got that into the net and would try again later. I still haven't scored on that field.
+On weekends I played soccer with a team that called itself the Panthers. We were good. We reached the final of the second division in our league, lost that last match and finished second. In one game I had a clean shot from the edge of the box and hit the post so hard that it rang. A teammate filmed it. I posted the clip with a caption that said I almost got that into the net and would try again later. I still haven't scored on that field.
 
 ## The defense
 
-The room was smaller than I had imagined. Three committee members, a few lab mates, and a projector that took two tries to wake up.
+Three committee members sat at the front. A few lab mates came, and then my friends and classmates kept arriving until every chair was taken and people stood along the back wall. More friends, classmates and family joined online, and their names filled the side of the screen next to my first slide. The projector took two tries to wake up.
 
-I talked for forty minutes about clusters, albedo and shrubs. Then the questions started. The hardest one came near the end. One committee member pointed at my slide on mass bias and asked how I knew the twenty to fifty percent came from projection and not from something else I had missed.
+I talked for about forty-five minutes about clusters, albedo and shrubs. Then the questions started. The hardest one came near the end. One committee member pointed at my slide on mass bias and asked how I knew the twenty to fifty percent came from projection and not from something else I had missed.
 
 I said I didn't know it for certain. I said I had held every other parameter fixed in the simulations and changed only the one that controls projection, and the bias moved with it. Then I said there was one place where my model and the simulation disagreed by a few percent, and I showed them that plot too, because I had marked it in my notes and I wasn't going to hide it.
 

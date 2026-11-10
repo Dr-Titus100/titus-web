@@ -4,6 +4,8 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-10 (later)
 
+- In "The exercise book", the defense room is full of friends and classmates, with more friends, classmates and family watching online, and the talk runs about forty-five minutes.
+- In "The exercise book", the Panthers soccer team is no longer called "not good". The story now says the team reached the second-division final and finished second.
 - "The exercise book" now names Titus's mother, Akosua Yentumi. The note at the top says she is real and the events are made up. The README headings and wording also got a titus-humanizer pass.
 - The blog has its first post, "The exercise book", a short story told in first person about a fish seller's sales book and a dissertation defense. It's fiction, and it says so at the top.
 - Blog posts can set `fiction: true`. Those posts show a "Fiction" label on the blog list, on the home page and on the post itself.
