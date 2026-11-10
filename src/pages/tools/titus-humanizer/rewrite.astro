@@ -6,7 +6,7 @@ import { u } from "../../../lib/url";
 import skills from "../../../data/skills.generated.json";
 const skill = skills["titus-humanizer"];
 ---
-<Base title="Rewrite with your key" current="tools" description="Rewrite text with titus-humanizer using your own Claude, OpenAI or Gemini API key. Your key and your text go only to the provider you pick.">
+<Base title="Rewrite with your key" current="humanizer" description="Rewrite text with titus-humanizer using your own Claude, OpenAI or Gemini API key. Your key and your text go only to the provider you pick.">
   <ToolNav slot="subnav" current="rewrite" />
 
   <section class="hero" style="padding-bottom: 32px">
@@ -64,7 +64,7 @@ const skill = skills["titus-humanizer"];
             <textarea id="text" placeholder="Paste the draft you want rewritten."></textarea>
           </div>
           <div class="btn-row">
-            <button class="btn" id="go">Rewrite</button>
+            <button class="btn btn-ghost" id="go">Rewrite</button>
             <span class="small muted" id="go-status"></span>
           </div>
         </div>

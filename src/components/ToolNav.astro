@@ -2,25 +2,17 @@
 import { u } from "../lib/url";
 interface Props { current: string }
 const { current } = Astro.props;
-// The checker, rewrite and any-chatbot pages share one set of tabs.
-// The overview and install pages use the shorter set.
-const checkerSet = ["checker", "rewrite", "any-chatbot"].includes(current);
-const items = checkerSet
-  ? [
-      { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Checker" },
-      { key: "rewrite", href: "/tools/titus-humanizer/rewrite/", label: "Rewrite" },
-      { key: "any-chatbot", href: "/tools/titus-humanizer/any-chatbot/", label: "Any chatbot" },
-      { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
-    ]
-  : [
-      { key: "video", href: "/tools/titus-humanizer/#video", label: "Watch video" },
-      { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Try it free" },
-      { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
-    ];
+const items = [
+  { key: "overview", href: "/tools/titus-humanizer/", label: "Overview" },
+  { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Checker" },
+  { key: "rewrite", href: "/tools/titus-humanizer/rewrite/", label: "Rewrite" },
+  { key: "any-chatbot", href: "/tools/titus-humanizer/any-chatbot/", label: "Any chatbot" },
+  { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
+];
 ---
-<nav class="subnav" aria-label="titus-humanizer">
+<nav class="subnav" aria-label="Humanizer">
   <div class="wrap subnav-inner">
-    <a class="subnav-title" href={u("/tools/titus-humanizer/")} aria-current={current === "overview" ? "page" : undefined}>titus-humanizer</a>
+    <a class="subnav-title" href={u("/tools/titus-humanizer/")}>titus-humanizer</a>
     <div class="subnav-links">
       {items.map((i) => (
         <a href={u(i.href)} aria-current={current === i.key ? "page" : undefined}>{i.label}</a>
@@ -30,17 +22,6 @@ const items = checkerSet
 </nav>
 
 <script>
-  // Watch video is a link to a spot on the overview page, so mark it by hand
-  // when someone clicks it or arrives with #video in the address.
-  const video = document.querySelector<HTMLAnchorElement>(".subnav-links a[href$='#video']");
-  const markVideo = () => {
-    if (!video) return;
-    if (location.hash !== "#video") { video.removeAttribute("aria-current"); return; }
-    document.querySelectorAll(".subnav-links a[aria-current]").forEach((a) => a.removeAttribute("aria-current"));
-    video.setAttribute("aria-current", "page");
-  };
-  markVideo();
-  window.addEventListener("hashchange", markVideo);
   // On narrow screens the links scroll sideways, so bring the current one into view.
   const cur = document.querySelector<HTMLElement>(".subnav-links a[aria-current='page']");
   const row = cur?.parentElement;
