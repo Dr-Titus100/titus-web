@@ -1,18 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url";
-import skills from "../../data/skills.generated.json";
-// Add a new skill or plugin here, and to skills.config.json if the site should pull its files.
-const tools = [
-  {
-    name: "titus-humanizer",
-    kind: "Skill",
-    blurb: "Rewrites text so it reads like a careful person wrote it, and scores AI-writing patterns from 0 to 1.",
-    href: "/tools/titus-humanizer/",
-    version: skills["titus-humanizer"].version,
-    gradient: "linear-gradient(135deg,#0071e3,#a34dff,#ff4d6d)",
-  },
-];
+import { tools } from "../../data/tools";
 ---
 <Base title="Tools" current="tools" description="Skills and plugins by Titus Nyarko Nde.">
   <section class="hero">
