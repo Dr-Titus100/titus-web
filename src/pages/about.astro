@@ -35,7 +35,7 @@ const chapters = [
   <section class="hero about-hero">
     <div class="hero-glow" aria-hidden="true"></div>
     <div class="wrap wrap-narrow">
-      <div class="monogram" aria-hidden="true">TN</div>
+      <img class="portrait" src={u("/images/titus.jpg")} alt="Titus Nyarko Nde" width="160" height="160" />
       <p class="eyebrow">About</p>
       <h1 class="display" data-rise>Titus Nyarko Nde</h1>
       <p class="lead">I'm a data scientist with a Ph.D. in Computing from Boise State University. I build machine learning models, work out how far to trust their answers, and write tools that help people write clearly with AI.</p>
@@ -128,11 +128,9 @@ const chapters = [
 </Base>
 
 <style is:global>
-  .about-hero .monogram {
-    width: 112px; height: 112px; margin: 0 auto 28px; border-radius: 50%;
-    display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 40px; letter-spacing: -0.02em;
-    color: #fff; background: linear-gradient(135deg, #0071e3, #7c3aed 55%, #ff375f);
-    box-shadow: 0 18px 50px rgba(0, 113, 227, 0.28);
+  .about-hero .portrait {
+    display: block; width: 160px; height: 160px; margin: 0 auto 28px; border-radius: 50%; object-fit: cover;
+    border: 4px solid var(--bg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 55%, #7c3aed), 0 18px 50px rgba(0, 113, 227, 0.25);
     animation: monoIn 1s var(--ease) both;
   }
   @keyframes monoIn { from { opacity: 0; transform: scale(0.8) translateY(10px); } }
@@ -147,5 +145,5 @@ const chapters = [
   .link-grid .tile { min-height: 0; gap: 6px; text-decoration: none; }
   .link-grid .tile h3 { color: #f5f5f7; margin: 0; }
   .link-grid .tile .link-arrow { margin-top: 14px; }
-  @media (prefers-reduced-motion: reduce) { .about-hero .monogram { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .about-hero .portrait { animation: none; } }
 </style>
