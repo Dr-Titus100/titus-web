@@ -63,7 +63,7 @@ const skill = skills["titus-humanizer"];
         <div class="card view-card">
           <div class="view-head">
             <div class="segmented" role="tablist" aria-label="View">
-              <button role="tab" aria-selected="false" data-view="patterns">Highlighted patterns</button>
+              <button role="tab" aria-selected="true" data-view="patterns">Highlighted patterns</button>
               <button role="tab" aria-selected="false" data-view="hidden">Hidden characters</button>
               <button role="tab" aria-selected="false" data-view="cleaned">Cleaned text</button>
             </div>
@@ -242,7 +242,7 @@ const skill = skills["titus-humanizer"];
     qs.hidden = !nq;
     qs.textContent = nq ? `Quoted text: ${nq} ${nq === 1 ? "quotation" : "quotations"} left as written and not scored.` : "";
     $("hidden-summary").textContent = `Hidden characters removed: ${last.found_text}.`;
-    render();
+    selectView("patterns");
   }
 
   const actions = ["run", "sample", "clear"].map((id) => $(id));
@@ -252,16 +252,19 @@ const skill = skills["titus-humanizer"];
   $("sample").addEventListener("click", () => { input.value = SAMPLE; input.dispatchEvent(new Event("input")); if (!run.disabled) check(); });
   $("clear").addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); $("results").hidden = true; input.focus(); });
   $("copy-clean").addEventListener("click", () => last && copyText(last.cleaned, "Cleaned text copied"));
-  document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.addEventListener("click", () => {
-    view = b.dataset.view!;
-    document.querySelectorAll("[data-view]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+  // Each new check opens on Highlighted patterns. The other tabs show when clicked.
+  function selectView(name: string) {
+    view = name;
+    document.querySelectorAll("[data-view]").forEach((x) => x.setAttribute("aria-selected", String((x as HTMLElement).dataset.view === name)));
     render();
-  }));
+  }
+  document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.addEventListener("click", () => selectView(b.dataset.view!)));
 </script>
 
 <style is:global>
   /* Check text, Try a sample and Clear start as matching outlines. The last one clicked fills in. */
   .checker-actions .btn.picked { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
-  /* No view tab is marked until someone clicks one, then the clicked tab is clearly filled. */
+  /* The selected view tab is filled. Highlighted patterns starts selected. */
+  .legend[hidden] { display: none; }
   .view-head .segmented button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
 </style>

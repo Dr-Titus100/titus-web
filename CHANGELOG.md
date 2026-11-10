@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-10 (evening)
 
+- On the Checker, Highlighted patterns is selected when the results appear and after each new check. The color key now shows only with Highlighted patterns.
 - The Short version card on Any chatbot gives its word count as well as its character count.
 - The Cleaned text tab and the Copy cleaned text button are back on the Checker and work as before. They show and copy the text with hidden characters removed. The Checker's wording says it removes hidden characters again, on the Checker and on the Overview card.
 - The Checker leaves quoted text out, the same way the titus-humanizer script does. Patterns inside a quotation are no longer highlighted, quotations get a dashed underline, and the Patterns found list says how many quotations it left as written.
