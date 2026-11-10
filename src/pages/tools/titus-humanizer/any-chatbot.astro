@@ -2,6 +2,12 @@
 import Base from "../../../layouts/Base.astro";
 import ToolNav from "../../../components/ToolNav.astro";
 import { u } from "../../../lib/url";
+import { readFileSync } from "node:fs";
+
+// The sizes come from the release files the build fetched, so they stay right after each release.
+const read = (name: string) => readFileSync(`public/skills/titus-humanizer/${name}`, "utf8");
+const fullWords = Math.round(read("SKILL.md").split(/\s+/).filter(Boolean).length / 100) * 100;
+const shortChars = Math.round(read("gpt-instructions.md").length / 100) * 100;
 
 const full = u("/skills/titus-humanizer/SKILL.md");
 const short = u("/skills/titus-humanizer/gpt-instructions.md");
@@ -60,7 +66,7 @@ const guides = [
         <div class="card copy-card reveal">
           <p class="eyebrow">Recommended</p>
           <h2 class="h3">Full rulebook</h2>
-          <p class="muted">The complete rulebook, about 6,600 words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity.</p>
+          <p class="muted">The complete rulebook, about {fullWords.toLocaleString("en-US")} words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity. It tells the assistant to keep every quotation, block quote and line of dialogue exactly as written and to rewrite only the text around them.</p>
           <div class="btn-row" style="margin-top: auto">
             <button class="btn btn-ghost" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
             <a class="btn btn-ghost" href={full} download="SKILL.md">Download</a>
@@ -69,7 +75,7 @@ const guides = [
         <div class="card copy-card reveal" style="--d: 0.08s">
           <p class="eyebrow">For short limits</p>
           <h2 class="h3">Short version</h2>
-          <p class="muted">A summary of the rules, under 5,000 characters. Use it when an assistant says your message is too long, as Copilot often does.</p>
+          <p class="muted">A summary of the rules, about {shortChars.toLocaleString("en-US")} characters. Use it when an assistant says your message is too long, as Copilot often does. It carries the same rule for quoted text, so quotes come back unchanged.</p>
           <div class="btn-row" style="margin-top: auto">
             <button class="btn btn-ghost" data-copy-url={short} data-copy-label="Short version copied">Copy short version</button>
             <a class="btn btn-ghost" href={short} download="titus-humanizer-short.md">Download</a>

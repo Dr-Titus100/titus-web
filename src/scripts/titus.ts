@@ -49,7 +49,7 @@ export interface Score {
   patterns: { label: string; count: number; sample: string }[];
   density?: number; sentence_cv?: number | null; mattr?: number; dampened?: boolean;
 }
-export interface Analysis { cleaned: string; found: Record<string, number>; found_text: string; hidden: Mark[]; score: Score; spans: Span[]; min_words: number }
+export interface Analysis { cleaned: string; found: Record<string, number>; found_text: string; hidden: Mark[]; score: Score; spans: Span[]; quotes: { start: number; end: number }[]; min_words: number }
 export interface Comparison { report: string; cleaned_rewrite: string; before: Score; after: Score; spans_after: Span[] }
 
 export const analyze = (text: string) => call<Analysis>("analyze", text);
@@ -64,6 +64,7 @@ const GROUPS: Record<string, string> = {
   "bold-label bullet": "format",
   "stated lesson": "story", "emotion as body sensation": "story", "setting as mirror": "story",
   "decorative smell": "story", "tidy inner resolution": "story",
+  "quoted text": "quote",
 };
 export const groupOf = (label: string) => GROUPS[label] || "tone";
 export const GROUP_NAMES: Record<string, string> = {

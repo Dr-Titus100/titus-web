@@ -2,6 +2,14 @@
 
 Notable changes to the titus-web site, newest first. The site has no version numbers, so entries are grouped by date.
 
+## 2026-11-10 (evening)
+
+- The Checker leaves quoted text out, the same way the titus-humanizer script does. Patterns inside a quotation are no longer highlighted, quotations get a dashed underline, and the Patterns found list says how many quotations it left as written.
+- The Checker no longer has the Cleaned text tab or the Copy cleaned text button, since it scores text and doesn't change it. Its hidden-character line now says "found" instead of "removed".
+- "Rewrite with your key" on the Checker uses the outline style, like "Use any chatbot".
+- On Any chatbot, the Full rulebook and Short version cards say that both keep quotations as written. Their word and character counts now come from the release files.
+- The Rewrite card on the Overview says quotations stay as they were.
+
 ## 2026-11-10 (later)
 
 - In "The exercise book", the defense room is full of friends and classmates, with more friends, classmates and family watching online, and the talk runs about forty-five minutes.
