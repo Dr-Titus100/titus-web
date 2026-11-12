@@ -49,6 +49,8 @@ const { before, after, spans, patterns, beforeScore, beforeTier, afterScore, aft
     const cps = Array.from(before);
     const cut = (a: number, b?: number) => cps.slice(a, b).join("");
     const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]!));
+    // The pattern name shows as the browser's tooltip on hover, as it did before the demo was regenerated.
+    const attr = (s: string) => esc(s).replace(/"/g, "&quot;");
     const timers: number[] = [];
     const later = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -60,7 +62,7 @@ const { before, after, spans, patterns, beforeScore, beforeTier, afterScore, aft
       [...spans].sort((x, y) => x[0] - y[0]).forEach(([s, e, l], i) => {
         if (e <= last) return;
         const from = Math.max(s, last);
-        html += esc(cut(last, from)) + `<mark data-i="${i}" class="${cls(l)}" data-label="${l}">${esc(cut(from, e))}</mark>`;
+        html += esc(cut(last, from)) + `<mark data-i="${i}" class="${cls(l)}" data-label="${attr(l)}" title="${attr(l)}">${esc(cut(from, e))}</mark>`;
         last = e;
       });
       text.innerHTML = html + esc(cut(last));

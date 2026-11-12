@@ -1,21 +1,17 @@
 name: Build and deploy
 
+# Every action is pinned to a full commit SHA, with the release it matches in a comment.
+# Dependabot (.github/dependabot.yml) opens pull requests when new releases come out.
+
 on:
   push:
     branches: [main, dev]
   pull_request:
-  # titus-humanizer (and future skill repos) send this after each release.
-  repository_dispatch:
-    types: [skill-released]
-  # Nightly fallback, in case a release didn't send the event.
-  schedule:
-    - cron: "17 7 * * *"
   workflow_dispatch:
 
+# Read-only by default. Only the deploy job, which runs on main, gets the Pages permissions.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages-${{ github.ref }}
@@ -25,31 +21,52 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Pulls each skill's files from its latest release, checks the script runs, then builds.
+      # Downloads the skill files at the tag pinned in skills.config.json, checks their SHA-256
+      # checksums, then builds. Nothing downloaded is run here.
       - run: npm run build
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - name: Check wording rules on the built pages
         run: node scripts/check-copy.mjs
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.ref == 'refs/heads/main'
         with:
           path: dist
 
+  # Runs the pinned scoring script on a sample to make sure it works. It runs in its own job with
+  # read-only permissions, and it never writes into the site that gets deployed.
+  check-skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: node scripts/fetch-skills.mjs
+      - run: node scripts/check-skills.mjs
+
   deploy:
     # Only main goes live. dev and pull requests only build, to catch problems early.
     if: github.ref == 'refs/heads/main'
-    needs: build
+    needs: [build, check-skills]
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
