@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { u } from "../lib/url";
 
+// Phones and small windows get the 720p file (about 3.7 MB). Wider screens get the 1080p file (about 8 MB).
 // Captions and the transcript come from one WebVTT file. When the file exists, the video gets a
 // captions track and the page gets a "Read the transcript" panel built from the same cues.
 const vttPath = path.join(process.cwd(), "public/media/titus-humanizer-promo.en.vtt");
@@ -16,6 +17,7 @@ const transcript = vtt
 <div class="video-stage reveal">
   <div class="video-frame" data-scroll-scale>
     <video controls playsinline preload="metadata" poster={u("/media/titus-humanizer-promo-poster.jpg")} aria-label="titus-humanizer tour video">
+      <source src={u("/media/titus-humanizer-promo-720p.mp4")} type="video/mp4" media="(max-width: 900px)" />
       <source src={u("/media/titus-humanizer-promo.mp4")} type="video/mp4" />
       {vtt && <track kind="captions" srclang="en" label="English" src={u("/media/titus-humanizer-promo.en.vtt")} default />}
       Your browser can't play this video. <a href={u("/media/titus-humanizer-promo.mp4")}>Download it</a> instead.

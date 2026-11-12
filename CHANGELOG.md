@@ -4,6 +4,9 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-12
 
+- Phones and small windows get a 720p copy of the tour video, about 3.7 MB instead of 8 MB. Wider screens still get the 1080p file.
+- The site uses Inter on every system, served from the site itself with `font-display: swap`, so text shows right away in a fallback font and switches when Inter arrives. The main file is preloaded. Before, each system used its own font.
+- The blurred, drifting color glow behind every page's headline is gone, and the spinning ring on the empty-state pages no longer spins. On phones, the titus-humanizer bar has a solid background, so only the top bar is blurred.
 - A "Skip to content" link appears at the top of every page on the first press of Tab, and moves focus to the page's main content.
 - The tabs on the Checker, Any chatbot and Install pages work like standard tabs. Only the selected tab is in the Tab order, the arrow keys move between tabs, and Home and End jump to the first and last. One shared script, `src/scripts/tabs.ts`, runs all three.
 - After a check, screen readers hear a one-line summary, such as "Score 0.80, high. 11 pattern types found. 2 hidden characters removed." The Check text button is described by the status line next to it, so a screen reader also hears whether Python is ready.
