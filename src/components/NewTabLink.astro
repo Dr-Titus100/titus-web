@@ -1,0 +1,10 @@
+---
+// A link that opens in a new tab, and says so: a small arrow icon you can see and text a screen reader reads.
+// Use it only where keeping this page open matters, such as a provider's key page next to a half-filled form.
+interface Props { href: string; class?: string }
+const { href, class: cls } = Astro.props;
+---
+<a href={href} class:list={["newtab", cls]} target="_blank" rel="noopener noreferrer"><slot /><span class="sr-only"> (opens in a new tab)</span><svg class="newtab-icon" width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+<style is:global>
+  .newtab-icon { display: inline-block; margin-left: 3px; vertical-align: 0; }
+</style>

@@ -15,6 +15,7 @@ The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It
 - **Experience** (`/experience/`). Work history with filters for AI, research, industry and teaching, plus education, publications, talks, awards, leadership and skills.
 - **About** (`/about/`). Titus's story, newest chapter first, his photo and the contact form.
 - **Blog** (`/blog/`). Posts from `src/content/blog/`. Stories carry a "Fiction" label so readers know they are reading fiction.
+- **Privacy** (`/privacy/`) and **Terms** (`/terms/`). What each part of the site sends and stores, and the terms for the tools. Update the date at the top of each page when you change it.
 
 ## How the skill files get here
 
@@ -53,6 +54,12 @@ The release workflow in titus-humanizer sends the `skill-released` event, and it
 The next titus-humanizer release then rebuilds the site within a few minutes. Without the secret, the release still works, and the site picks up the new version on its nightly build.
 
 **Replacing an expired token.** Create a new token the same way, then open `SITE_DISPATCH_TOKEN` under Repository secrets in titus-humanizer, choose the pencil icon to edit it and paste the new token.
+
+## Security
+
+- **Content Security Policy.** GitHub Pages can't send custom headers, so `scripts/add-csp.mjs` adds the policy to every built page as a `<meta>` tag. It allows each inline script by its hash, the AI providers only on the Rewrite page, and Web3Forms and hCaptcha only on pages with the contact form. If you add a page that talks to a new host, add the host there.
+- **API keys.** The Rewrite page keeps keys in memory unless the visitor turns on Remember, which is hidden on `github.io`. See the comments in `src/pages/tools/titus-humanizer/rewrite.astro`.
+- **Models.** The suggested models live in `src/data/providers.ts`, with the date they were last checked. Providers retire models, so check their deprecation pages every few months and update `lastVerified`.
 
 ## How changes reach the site
 
