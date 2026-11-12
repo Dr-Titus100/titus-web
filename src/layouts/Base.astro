@@ -35,7 +35,7 @@ const year = new Date().getFullYear();
     <script is:inline>document.documentElement.classList.remove("no-js");</script>
   </head>
   <body>
-    <a class="sr-only" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">Skip to content</a>
     <header class="nav" id="nav">
       <div class="wrap nav-inner">
         <a class="brand" href={u("/")}><span class="brand-dot" aria-hidden="true"></span>Titus Nyarko Nde</a>
@@ -48,14 +48,14 @@ const year = new Date().getFullYear();
       </div>
     </header>
     <slot name="subnav" />
-    <main id="main">
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <footer class="footer">
       <div class="wrap">
-        <div class="footer-cols">
+        <nav class="footer-cols" aria-label="Site map">
           <div>
-            <h4>titus-humanizer</h4>
+            <h2 class="footer-h">titus-humanizer</h2>
             <ul>
               <li><a href={u("/tools/titus-humanizer/")}>Overview</a></li>
               <li><a href={u("/tools/titus-humanizer/checker/")}>Checker</a></li>
@@ -65,19 +65,19 @@ const year = new Date().getFullYear();
             </ul>
           </div>
           <div>
-            <h4>Tools</h4>
+            <h2 class="footer-h">Tools</h2>
             <ul>
               <li><a href={u("/tools/")}>All tools</a></li>
             </ul>
           </div>
           <div>
-            <h4>Writing</h4>
+            <h2 class="footer-h">Writing</h2>
             <ul>
               <li><a href={u("/blog/")}>Blog</a></li>
             </ul>
           </div>
           <div>
-            <h4>Titus</h4>
+            <h2 class="footer-h">Titus</h2>
             <ul>
               <li><a href={u("/about/")}>About</a></li>
               <li><a href={u("/about/#contact")}>Contact</a></li>
@@ -85,7 +85,7 @@ const year = new Date().getFullYear();
               <li><a href="https://github.com/Dr-Titus100">GitHub</a></li>
             </ul>
           </div>
-        </div>
+        </nav>
         <div class="footer-bottom">
           <span>Copyright © {year} Titus Nyarko Nde.</span>
           <span>Text you check on this site stays in your browser.</span>

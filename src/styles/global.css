@@ -5,13 +5,14 @@
   --bg-raised: #ffffff;
   --ink: #1d1d1f;
   --ink-soft: #6e6e73;
-  --ink-faint: #86868b;
+  --ink-faint: #6e6e73;
   --line: #d2d2d7;
   --line-soft: #e8e8ed;
   --accent: #0071e3;
   --accent-ink: #ffffff;
   --accent-soft: rgba(0, 113, 227, 0.1);
   --link: #0066cc;
+  --tag-fiction: #92400e;
   --good: #1a7f37;
   --warn: #b25f00;
   --bad: #c9302c;
@@ -51,9 +52,10 @@
     --ink-faint: #8e8e93;
     --line: #38383a;
     --line-soft: #2c2c2e;
-    --accent: #2997ff;
+    --accent: #0071e3;
     --accent-soft: rgba(41, 151, 255, 0.16);
     --link: #2997ff;
+    --tag-fiction: #fbbf24;
     --good: #30d158;
     --warn: #ffb340;
     --bad: #ff6961;
@@ -71,9 +73,10 @@
   --ink-faint: #8e8e93;
   --line: #38383a;
   --line-soft: #2c2c2e;
-  --accent: #2997ff;
+  --accent: #0071e3;
   --accent-soft: rgba(41, 151, 255, 0.16);
   --link: #2997ff;
+  --tag-fiction: #fbbf24;
   --good: #30d158;
   --warn: #ffb340;
   --bad: #ff6961;
@@ -97,6 +100,8 @@ body {
 }
 img, video { max-width: 100%; display: block; }
 a { color: var(--link); text-decoration: none; }
+/* Links inside running text are underlined, so color isn't the only thing that marks them. */
+main :where(p, li, dd) > a:not(.btn) { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
 a:hover { text-decoration: underline; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 ::selection { background: var(--accent-soft); }
@@ -191,7 +196,7 @@ html.menu-open, html.menu-open body { overflow: hidden; }
 .subnav-links a:not(.btn) { position: relative; display: flex; align-items: center; align-self: stretch; font-size: 12px; color: var(--ink); opacity: 0.8; white-space: nowrap; transition: opacity 0.2s, color 0.2s; }
 .subnav-links a:not(.btn):hover { opacity: 1; text-decoration: none; }
 .subnav-links a:not(.btn)::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--accent); transform: scaleX(0); transition: transform 0.3s var(--ease); }
-.subnav-links a[aria-current="page"] { opacity: 1; color: var(--accent); font-weight: 600; }
+.subnav-links a[aria-current="page"] { opacity: 1; color: var(--ink); font-weight: 600; }
 .subnav-links a[aria-current="page"]::after { transform: scaleX(1); }
 .subnav-links .btn { opacity: 1; font-size: 12px; min-height: 28px; padding: 4px 12px; align-self: center; white-space: nowrap; flex-shrink: 0; }
 @media (max-width: 600px) { .subnav-title { font-size: 17px; } .subnav-links { gap: 16px; } }
@@ -245,6 +250,7 @@ html.menu-open, html.menu-open body { overflow: hidden; }
 .tile .tile-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 24px; color: #fff; margin-bottom: 8px; }
 .tile p { margin: 0; color: var(--ink-soft); }
 .tile .link-arrow { margin-top: auto; color: var(--link); font-weight: 500; }
+.tile-dark .link-arrow { color: #2997ff; }
 .tile-dark { background: #1d1d1f; color: #f5f5f7; }
 .tile-dark p { color: #a1a1a6; }
 
@@ -299,7 +305,7 @@ pre code { background: none; padding: 0; }
 .footer { background: var(--bg-soft); color: var(--ink-soft); font-size: 12px; padding: 36px 0 48px; border-top: 1px solid var(--line-soft); }
 .footer a { color: var(--ink-soft); }
 .footer-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-bottom: 24px; }
-.footer-cols h4 { color: var(--ink); font-size: 12px; font-weight: 600; margin: 0 0 8px; }
+.footer-cols .footer-h { color: var(--ink); font-size: 12px; font-weight: 600; margin: 0 0 8px; }
 .footer-cols ul { list-style: none; margin: 0; padding: 0; }
 .footer-cols li { margin: 0 0 8px; }
 .footer-bottom { border-top: 1px solid var(--line-soft); padding-top: 16px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
@@ -318,6 +324,9 @@ pre code { background: none; padding: 0; }
 .empty .orb { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 28px; background: conic-gradient(from 0deg, #0071e3, #a34dff, #ff4d6d, #0071e3); filter: blur(0.5px); animation: spin 12s linear infinite; mask: radial-gradient(circle, transparent 52%, #000 53%); -webkit-mask: radial-gradient(circle, transparent 52%, #000 53%); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.skip-link { position: absolute; left: 12px; top: -100px; z-index: 1000; padding: 10px 16px; border-radius: 10px; background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 600; text-decoration: none; }
+.skip-link:focus { top: 8px; outline: 2px solid var(--accent); outline-offset: 2px; }
+main:focus { outline: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -330,4 +339,4 @@ pre code { background: none; padding: 0; }
 #video { scroll-margin-top: 96px; }
 
 /* Label for blog posts that are stories, so readers know they are made up. */
-.fiction-tag { display: inline-block; margin-left: 10px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; color: #b45309; background: rgba(245, 158, 11, 0.16); vertical-align: middle; }
+.fiction-tag { display: inline-block; margin-left: 10px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; text-transform: none; color: var(--tag-fiction); background: rgba(245, 158, 11, 0.16); vertical-align: middle; }

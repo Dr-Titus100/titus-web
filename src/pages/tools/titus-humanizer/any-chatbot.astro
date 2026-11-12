@@ -95,12 +95,12 @@ const guides = [
       <div class="center" style="margin-bottom: 28px">
         <div class="segmented" role="tablist" aria-label="Assistant">
           {guides.map((g, i) => (
-            <button role="tab" aria-selected={i === 0 ? "true" : "false"} aria-controls={`g-${g.id}`} data-guide={g.id}>{g.name}</button>
+            <button role="tab" type="button" id={`tab-g-${g.id}`} aria-selected={i === 0 ? "true" : "false"} aria-controls={`g-${g.id}`} tabindex={i === 0 ? 0 : -1} data-guide={g.id}>{g.name}</button>
           ))}
         </div>
       </div>
       {guides.map((g, i) => (
-        <div class="card guide" id={`g-${g.id}`} role="tabpanel" hidden={i !== 0}>
+        <div class="card guide" id={`g-${g.id}`} role="tabpanel" aria-labelledby={`tab-g-${g.id}`} tabindex="0" hidden={i !== 0}>
           <h3 class="h3" style="margin-bottom: 22px">{g.name}</h3>
           <ol class="steps">
             {g.steps.map((s) => <li>{s}</li>)}
@@ -157,10 +157,10 @@ const guides = [
 
 <script>
   import { copyText, toast } from "../../../scripts/site";
-  document.querySelectorAll<HTMLButtonElement>("[data-guide]").forEach((b) => b.addEventListener("click", () => {
-    document.querySelectorAll<HTMLButtonElement>("[data-guide]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+  import { initTabs } from "../../../scripts/tabs";
+  initTabs(document.querySelector<HTMLElement>('[aria-label="Assistant"]')!, (b) => {
     document.querySelectorAll<HTMLElement>(".guide").forEach((p) => { p.hidden = p.id !== `g-${b.dataset.guide}`; });
-  }));
+  });
   const btn = document.getElementById("pb-copy") as HTMLButtonElement;
   btn.addEventListener("click", async () => {
     const text = (document.getElementById("pb-text") as HTMLTextAreaElement).value.trim();
