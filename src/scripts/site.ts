@@ -84,17 +84,41 @@ function scrollScale() {
   update();
 }
 
+// The phone menu: a full-screen panel. While it's open, the page behind it can't scroll or take focus,
+// Tab cycles inside the menu, and Escape, a link or a switch to the desktop layout closes it.
 function nav() {
   const navEl = document.getElementById("nav");
   const toggle = navEl?.querySelector<HTMLButtonElement>(".nav-toggle");
+  const list = document.getElementById("nav-links");
   const onScroll = () => navEl?.classList.toggle("scrolled", window.scrollY > 8);
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
-  toggle?.addEventListener("click", () => {
-    const open = !navEl!.classList.contains("open");
+  if (!navEl || !toggle || !list) return;
+  const phone = window.matchMedia("(max-width: 760px)");
+  const behind = () => [...document.body.children].filter((el) => el !== navEl && !el.contains(navEl) && el.tagName !== "SCRIPT") as HTMLElement[];
+  const links = () => [...list.querySelectorAll<HTMLAnchorElement>("a")];
+
+  function setOpen(open: boolean, restoreFocus = true) {
     navEl!.classList.toggle("open", open);
-    toggle.setAttribute("aria-expanded", String(open));
+    document.documentElement.classList.toggle("menu-open", open);
+    toggle!.setAttribute("aria-expanded", String(open));
+    toggle!.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    behind().forEach((el) => { el.inert = open; });
+    if (open) links()[0]?.focus();
+    else if (restoreFocus) toggle!.focus();
+  }
+  toggle.addEventListener("click", () => setOpen(!navEl.classList.contains("open")));
+  list.addEventListener("click", (e) => { if ((e.target as HTMLElement).closest("a") && navEl.classList.contains("open")) setOpen(false, false); });
+  document.addEventListener("keydown", (e) => {
+    if (!navEl.classList.contains("open")) return;
+    if (e.key === "Escape") { e.preventDefault(); setOpen(false); return; }
+    if (e.key !== "Tab") return;
+    const items = [toggle, ...links()];
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
+  phone.addEventListener("change", () => { if (!phone.matches && navEl.classList.contains("open")) setOpen(false, false); });
 }
 
 function copyButtons() {

@@ -2,6 +2,15 @@
 
 Notable changes to the titus-web site, newest first. The site has no version numbers, so entries are grouped by date.
 
+## 2026-11-12
+
+- The Install page's Claude steps match Claude's current menus: Customize, Skills, the + button, Create skill, Upload a skill. The Claude Code steps create `~/.claude/skills` before copying into it.
+- The Checker downloads Python only when you click into the text box, type, or press a button, instead of as soon as the page opens. A progress bar shows the download in megabytes.
+- Checker highlights can be reached with the keyboard. Tab moves between them and shows each pattern's name, Enter or Space keeps the label open and Escape closes it. Screen readers hear the name as the highlight's description.
+- The overview demo and the before-and-after reports come from the pinned scoring script's own output, built by `scripts/gen-examples.mjs`, instead of labels typed by hand. A line under the demo explains why plain text rarely scores 0.
+- The phone menu is a full-screen panel. Closed, its links can't be reached with Tab. Open, the page behind it doesn't scroll or take focus, focus moves to the first link, and Escape, a link or a wider window closes it and returns focus to the menu button.
+- The Python glue the Checker runs moved from `titus-worker.js` into `public/js/titus_glue.py`, so the example generator can run the same code.
+
 ## 2026-11-10 (evening)
 
 - On the Checker, hovering over a highlight shows the same label as a click, and both outline the exact text the pattern matched, across every line it covers.

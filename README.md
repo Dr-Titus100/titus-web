@@ -72,6 +72,10 @@ npm run build      # builds into dist/
 
 `SKILL_REF=dev npm run dev` uses a branch instead of the latest release, which helps when you test an unreleased skill change. `ALLOW_STALE=1` keeps the last fetched files if GitHub can't be reached.
 
+## The overview demo and examples
+
+The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
+
 ## Adding posts, pages and tools
 
 - **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`, and the home page lists the three newest posts. For a story, also set `fiction: true`, and the post shows a "Fiction" label everywhere it appears.

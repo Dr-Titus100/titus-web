@@ -152,6 +152,8 @@ a:hover { text-decoration: underline; }
   border-bottom: 1px solid transparent; transition: border-color 0.3s;
 }
 .nav.scrolled { border-bottom-color: var(--line-soft); }
+/* While the phone menu is open, the page behind it doesn't scroll. */
+html.menu-open, html.menu-open body { overflow: hidden; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 48px; gap: 18px; }
 .brand { font-weight: 600; font-size: 17px; color: var(--ink); letter-spacing: -0.02em; white-space: nowrap; }
 .brand:hover { text-decoration: none; }
@@ -164,13 +166,16 @@ a:hover { text-decoration: underline; }
 .nav-toggle span { display: block; width: 17px; height: 1.5px; background: currentColor; margin: 5px auto; transition: transform 0.3s var(--ease); }
 @media (max-width: 760px) {
   .nav-toggle { display: block; }
+  /* Closed, the menu is visibility: hidden, so its links can't be tabbed to or read out. */
   .nav-links {
-    position: fixed; inset: 48px 0 auto 0; flex-direction: column; gap: 0; padding: 8px 22px 22px;
-    background: var(--bg); border-bottom: 1px solid var(--line-soft);
-    opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity 0.25s, transform 0.3s var(--ease);
+    position: fixed; inset: 48px 0 0 0; height: calc(100dvh - 48px); overflow-y: auto; flex-direction: column; gap: 0; padding: 8px 22px 22px;
+    background: var(--bg);
+    opacity: 0; visibility: hidden; transform: translateY(-8px); pointer-events: none;
+    transition: opacity 0.25s, transform 0.3s var(--ease), visibility 0s linear 0.3s;
   }
   .nav-links a { display: block; font-size: 24px; font-weight: 600; padding: 10px 14px; margin: 2px -14px; border-radius: 14px; opacity: 1; }
-  .nav.open .nav-links { opacity: 1; transform: none; pointer-events: auto; }
+  .nav.open .nav-links { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition: opacity 0.25s, transform 0.3s var(--ease), visibility 0s; }
+  .nav.open { background: var(--bg); }
   .nav.open .nav-toggle span:first-child { transform: translateY(3.25px) rotate(45deg); }
   .nav.open .nav-toggle span:last-child { transform: translateY(-3.25px) rotate(-45deg); }
 }

@@ -1,21 +1,25 @@
 // Talks to the worker that runs titus_tools.py in the browser.
-type Listener = (state: { ready: boolean; failed: boolean; text: string }) => void;
+export interface LoadState { started: boolean; ready: boolean; failed: boolean; text: string; loaded: number; total: number }
+type Listener = (state: LoadState) => void;
 
 let worker: Worker | null = null;
 let seq = 0;
 const pending = new Map<number, { resolve: (v: any) => void; reject: (e: Error) => void }>();
 const listeners = new Set<Listener>();
-let state = { ready: false, failed: false, text: "Starting" };
+let state: LoadState = { started: false, ready: false, failed: false, text: "Not loaded", loaded: 0, total: 0 };
 
 function start() {
   if (worker) return worker;
   const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
   worker = new Worker(base + "js/titus-worker.js");
+  state = { ...state, started: true, text: "Downloading Python" };
+  listeners.forEach((l) => l(state));
   worker.onmessage = (ev) => {
     const m = ev.data;
     if (m.type === "status") state = { ...state, text: m.text };
-    else if (m.type === "ready") state = { ready: true, failed: false, text: "Ready" };
-    else if (m.type === "failed") state = { ready: false, failed: true, text: m.text };
+    else if (m.type === "progress") state = { ...state, loaded: m.loaded, total: m.total };
+    else if (m.type === "ready") state = { ...state, ready: true, failed: false, text: "Ready" };
+    else if (m.type === "failed") state = { ...state, ready: false, failed: true, text: m.text };
     else if (m.id) {
       const p = pending.get(m.id);
       pending.delete(m.id);
@@ -27,11 +31,14 @@ function start() {
   return worker;
 }
 
+// Listens for loading progress. Nothing downloads until load() or a check starts the worker.
 export function onStatus(l: Listener) {
   listeners.add(l);
   l(state);
-  start();
 }
+
+// Starts downloading Python and the scoring script, about 12 MB the first time.
+export function load() { start(); }
 
 function call<T>(op: string, ...args: string[]): Promise<T> {
   const w = start();
@@ -95,7 +102,7 @@ export function highlight(text: string, spans: Span[]) {
     // so the page can outline the whole matched text when one piece is hovered or clicked.
     const top = covering[0];
     const id = spans.indexOf(top);
-    html += `<mark class="hl hl-${groupOf(top.label)}" data-span="${id}" data-label="${esc(top.label)}" aria-label="${esc(top.label)}">${piece}</mark>`;
+    html += `<mark class="hl hl-${groupOf(top.label)}" data-span="${id}" data-label="${esc(top.label)}" tabindex="0" role="button">${piece}</mark>`;
   }
   return html;
 }
@@ -110,8 +117,8 @@ export function showHidden(text: string, marks: Mark[]) {
     const ch = cut(m.start, m.end);
     const tip = `${m.name} (${m.cp})${m.looks ? `, looks like "${m.looks}"` : ""}`;
     html += m.name === "look-alike letter"
-      ? `<mark class="hid hid-letter" data-label="${esc(tip)}" aria-label="${esc(tip)}">${esc(ch)}</mark>`
-      : `<mark class="hid" data-label="${esc(tip)}" aria-label="${esc(tip)}">${esc(m.cp)}</mark>${ch === "\n" ? "\n" : ""}`;
+      ? `<mark class="hid hid-letter" data-label="${esc(tip)}" tabindex="0" role="button">${esc(ch)}</mark>`
+      : `<mark class="hid" data-label="${esc(tip)}" tabindex="0" role="button">${esc(m.cp)}</mark>${ch === "\n" ? "\n" : ""}`;
     last = m.end;
   }
   return html + esc(cut(last));

@@ -73,7 +73,7 @@ const platforms = [
         <ol class="steps" style="margin-top: 22px">
           <li>Download <a href={skill.zipUrl}>titus-humanizer.zip</a>. Keep it zipped.</li>
           <li>In Settings, open Capabilities and turn on "Create and edit files". Older layouts call it "Code execution and file creation". Skills need it.</li>
-          <li>Open <a href="https://claude.ai/customize/skills">Customize, then Skills</a>, choose "Upload a skill" and select the zip.</li>
+          <li>Open <a href="https://claude.ai/customize/skills">Customize, then Skills</a>. Choose the + button, then Create skill, then Upload a skill, and select the zip.</li>
           <li>Turn the skill on in your skills list. Then ask "Humanize this:" followed by your text.</li>
         </ol>
         <p class="small muted">Team and Enterprise owners may need to allow user-created skills first. Anthropic's guide is <a href="https://support.claude.com/en/articles/12512180-use-skills-in-claude">Use skills in Claude</a>.</p>
@@ -106,6 +106,7 @@ const platforms = [
         <p class="muted">Or copy the skill folder in by hand:</p>
         <div class="copy-block">
           <pre><code id="cc2">git clone https://github.com/Dr-Titus100/titus-humanizer.git
+mkdir -p ~/.claude/skills
 cp -r titus-humanizer/skills/titus-humanizer ~/.claude/skills/</code></pre>
           <button class="btn btn-small btn-quiet" data-copy-from="#cc2">Copy</button>
         </div>

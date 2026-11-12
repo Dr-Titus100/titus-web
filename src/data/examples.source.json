@@ -1,0 +1,23 @@
+{
+  "demo": {
+    "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker. It's a gateway to a seamless experience, fostering alignment across all 12 setup steps. Moreover, it serves as a pivotal tool that empowers new hires and their managers to navigate the first two weeks with confidence. Ultimately, it is a testament to our commitment to people.",
+    "after": "The new onboarding checklist lists all 12 setup steps for a new hire's first two weeks. New hires can tick off each step as they finish it. Their managers see the same list, so both of them know what is left to do."
+  },
+  "examples": [
+    {
+      "tag": "Announcement",
+      "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker — it's a gateway to a more seamless experience, fostering alignment and driving meaningful impact.",
+      "after": "The new onboarding checklist shows new hires which setup steps they have finished."
+    },
+    {
+      "tag": "Email",
+      "before": "I hope this message finds you well! I wanted to reach out to touch base regarding the proposal, which was reviewed by our team last week. It's not just a budget request — it's a roadmap for sustainable growth. Please let me know if you have any questions!",
+      "after": "Our team reviewed the proposal last week. It sets out the budget we're requesting and what it would cover. I'm happy to walk you through the numbers."
+    },
+    {
+      "tag": "Story",
+      "before": "Elena stood at the window as the rain fell, mirroring the storm inside her. Her chest tightened, ice crawled down her spine, and the scent of wet earth and old memories filled her lungs. She realized, at last, that letting go was not the same as forgetting. It was a way of carrying him with her.",
+      "after": "Elena stood at the window and watched the rain. She was afraid. She decided she could let him go without forgetting him."
+    }
+  ]
+}
