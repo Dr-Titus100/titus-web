@@ -287,9 +287,10 @@ const skill = skills["titus-humanizer"];
   });
 
   let skillText = "";
-  async function getSkill() {
+  // The same signal as the model call, so Stop and the timeout also cancel a stalled rulebook download.
+  async function getSkill(signal: AbortSignal) {
     if (!skillText) {
-      const res = await fetch(skillUrl);
+      const res = await fetch(skillUrl, { signal });
       if (!res.ok) throw new Error("rulebook");
       skillText = await res.text();
     }
@@ -395,7 +396,7 @@ const skill = skills["titus-humanizer"];
     $("compare").hidden = true;
     out.scrollIntoView({ behavior: "smooth", block: "start" });
     try {
-      const system = (await getSkill()) + SITE_NOTE;
+      const system = (await getSkill(controller.signal)) + SITE_NOTE;
       const reply = (await callModel(system, PROMPTS[mode](text), controller.signal)).trim();
       let body = reply, notes = "";
       if (mode === "notes" && reply.includes(MARK)) [body, notes] = reply.split(MARK).map((s) => s.trim());
