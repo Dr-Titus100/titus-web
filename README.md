@@ -76,6 +76,13 @@ npm run build      # builds into dist/
 
 The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
 
+## Link previews, icons and the feed
+
+- **Share images.** Link previews use 1200 x 630 images in `public/og/`. After adding a blog post, build the site, start `npx astro preview`, and run `npm run share-images -- http://localhost:4321/titus-web`. That remakes every card, including `public/og/blog/<post>.png` for the new post. Commit the images. A post without its own card uses `public/og/site.png`. The script needs Playwright's Chromium, which `npx playwright install chromium` installs.
+- **Icons.** `npm run icons` makes `favicon.ico`, `apple-touch-icon.png`, `icon-192.png` and `icon-512.png` from `public/favicon.svg`.
+- **Feed, robots and manifest.** `src/pages/rss.xml.ts`, `src/pages/robots.txt.ts` and `src/pages/site.webmanifest.ts` build these files from the site address and base path, so they stay right when the site moves to its own domain. While the site lives at `github.io/titus-web/`, crawlers read the robots file at the domain root, which this repository can't change. The Sitemap line takes effect after the move.
+- **Structured data.** Pass `jsonLd` to the `Base` layout to add JSON-LD to a page. About, the titus-humanizer overview and blog posts use it.
+
 ## Fonts and video files
 
 The site's font is Inter, under the SIL Open Font License. The two variable font files and the license are in `src/fonts/`, and `src/styles/global.css` loads them. They came from the `@fontsource-variable/inter` 5.2.5 package.

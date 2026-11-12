@@ -4,6 +4,20 @@ import { u } from "../lib/url";
 import { links } from "../data/profile";
 import ContactForm from "../components/ContactForm.astro";
 
+const person = {
+  "@type": "Person",
+  name: "Titus Nyarko Nde",
+  jobTitle: "Data scientist",
+  url: new URL(u("/about/"), Astro.site).href,
+  image: new URL(u("/images/titus.jpg"), Astro.site).href,
+  alumniOf: [
+    { "@type": "CollegeOrUniversity", name: "Boise State University" },
+    { "@type": "EducationalOrganization", name: "African Institute for Mathematical Sciences" },
+    { "@type": "CollegeOrUniversity", name: "University for Development Studies" },
+  ],
+  sameAs: [links.linkedin, links.scholar, links.orcid, links.github],
+};
+
 const chapters = [
   {
     when: "2026 – now",
@@ -31,7 +45,7 @@ const chapters = [
   },
 ];
 ---
-<Base title="About" current="about" description="Titus Nyarko Nde is a data scientist with a Ph.D. in Computing from Boise State University. He works on machine learning uncertainty, AI evaluation and AI writing tools.">
+<Base title="About" current="about" image="/og/about.png" imageAlt="Titus Nyarko Nde" type="profile" jsonLd={person} description="Titus Nyarko Nde is a data scientist with a Ph.D. in Computing from Boise State University. He works on machine learning uncertainty, AI evaluation and AI writing tools.">
   <section class="hero about-hero">
     <div class="wrap wrap-narrow">
       <img class="portrait" src={u("/images/titus.jpg")} alt="Titus Nyarko Nde" width="160" height="160" />

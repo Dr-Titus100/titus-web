@@ -7,8 +7,26 @@ interface Props {
   title: string;
   description?: string;
   current?: string;
+  // The link-preview image, a path under public/ (1200 x 630). See scripts/make-share-images.mjs.
+  image?: string;
+  imageAlt?: string;
+  type?: "website" | "article" | "profile";
+  // Structured data for search engines, written into the page as JSON-LD.
+  jsonLd?: Record<string, unknown>;
 }
-const { title, description = "Skills, plugins and writing by Titus Nyarko Nde.", current = "" } = Astro.props;
+const {
+  title,
+  description = "Skills, plugins and writing by Titus Nyarko Nde.",
+  current = "",
+  image = "/og/site.png",
+  imageAlt = "Titus Nyarko Nde, data scientist",
+  type = "website",
+  jsonLd,
+} = Astro.props;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const imageUrl = new URL(u(image), Astro.site).href;
+// "</" can't appear inside a script element, so it's escaped in the JSON.
+const ld = jsonLd ? JSON.stringify({ "@context": "https://schema.org", ...jsonLd }).replace(/</g, "\\u003c") : "";
 const fullTitle = title === "Titus Nyarko Nde" ? title : `Titus Nyarko Nde: ${title}`;
 const links = [
   { href: "/tools/", label: "Tools", key: "tools" },
@@ -28,12 +46,28 @@ const year = new Date().getFullYear();
     <meta name="description" content={description} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:site_name" content="Titus Nyarko Nde" />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href={u("/favicon.ico")} sizes="32x32" />
     <link rel="icon" href={u("/favicon.svg")} type="image/svg+xml" />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="apple-touch-icon" href={u("/apple-touch-icon.png")} />
+    <link rel="manifest" href={u("/site.webmanifest")} />
+    <link rel="alternate" type="application/rss+xml" title="Titus Nyarko Nde: Blog" href={u("/rss.xml")} />
+    <link rel="canonical" href={pageUrl} />
+    {ld && <script type="application/ld+json" set:html={ld} />}
     <script is:inline>document.documentElement.classList.remove("no-js");</script>
   </head>
   <body>

@@ -7,8 +7,21 @@ import PromoVideo from "../../../components/PromoVideo.astro";
 import { u } from "../../../lib/url";
 import skills from "../../../data/skills.generated.json";
 const skill = skills["titus-humanizer"];
+const app = {
+  "@type": "SoftwareApplication",
+  name: "titus-humanizer",
+  description: "An editing skill that rewrites text in plain words, keeps every fact, number and name, removes hidden characters and scores AI-writing patterns from 0 to 1.",
+  url: new URL(u("/tools/titus-humanizer/"), Astro.site).href,
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "Web, Claude, ChatGPT, Claude Code, Codex",
+  softwareVersion: skill.version.replace(/^v/, ""),
+  license: "https://opensource.org/licenses/MIT",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  author: { "@type": "Person", name: "Titus Nyarko Nde", url: new URL(u("/about/"), Astro.site).href },
+  sameAs: [skill.repoUrl],
+};
 ---
-<Base title="Humanizer" current="humanizer" description="titus-humanizer rewrites text so it reads like a careful, plain-spoken person wrote it, and keeps every fact, number and name. Check, rewrite or install it for free.">
+<Base title="Humanizer" current="humanizer" image="/og/titus-humanizer.png" jsonLd={app} imageAlt="The titus-humanizer Checker scoring a sample text 0.80, high, with the patterns it found" description="titus-humanizer rewrites text so it reads like a careful, plain-spoken person wrote it, and keeps every fact, number and name. Check, rewrite or install it for free.">
   <ToolNav slot="subnav" current="overview" />
 
   <section class="hero">

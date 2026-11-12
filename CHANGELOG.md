@@ -4,6 +4,10 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-12
 
+- Shared links show a picture. Each page has `og:image`, `og:url`, `og:site_name` and a large Twitter card. The home page uses a card with my photo and name, About uses a larger photo, the titus-humanizer pages use the Checker scoring the sample text, and each blog post gets a title card. `npm run share-images` remakes them.
+- The site has `robots.txt` with a Sitemap line, `favicon.ico`, a 180 px Apple touch icon and a web manifest with 192 px and 512 px icons. `npm run icons` remakes the icons from `favicon.svg`.
+- Search engines get structured data: `Person` on About, with LinkedIn, Google Scholar, ORCID and GitHub as `sameAs`, `SoftwareApplication` on the titus-humanizer overview, and `BlogPosting` on each post.
+- The blog has an RSS feed at `/rss.xml`, linked from every page's head.
 - Phones and small windows get a 720p copy of the tour video, about 3.7 MB instead of 8 MB. Wider screens still get the 1080p file.
 - The site uses Inter on every system, served from the site itself with `font-display: swap`, so text shows right away in a fallback font and switches when Inter arrives. The main file is preloaded. Before, each system used its own font.
 - The blurred, drifting color glow behind every page's headline is gone, and the spinning ring on the empty-state pages no longer spins. On phones, the titus-humanizer bar has a solid background, so only the top bar is blurred.
