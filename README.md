@@ -72,6 +72,10 @@ npm run build      # builds into dist/
 
 `SKILL_REF=dev npm run dev` uses a branch instead of the latest release, which helps when you test an unreleased skill change. `ALLOW_STALE=1` keeps the last fetched files if GitHub can't be reached.
 
+## Tests
+
+`npm run build`, then `npm test`. Playwright starts `astro preview` itself, or reuses one already running on port 4321. The tests live in `tests/smoke.spec.ts`, and the page list at its top needs each new page added. The first time, install the browser with `npx playwright install chromium`. The Tests workflow runs the same tests on every push and pull request.
+
 ## The overview demo and examples
 
 The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
