@@ -4,11 +4,21 @@
       "slug": "titus-humanizer",
       "name": "titus-humanizer",
       "repo": "Dr-Titus100/titus-humanizer",
+      "ref": "v1.1.0",
       "zipAsset": "titus-humanizer.zip",
       "files": {
-        "SKILL.md": "skills/titus-humanizer/SKILL.md",
-        "titus_tools.py": "skills/titus-humanizer/scripts/titus_tools.py",
-        "gpt-instructions.md": "chatgpt/gpt-instructions.md"
+        "SKILL.md": {
+          "path": "skills/titus-humanizer/SKILL.md",
+          "sha256": "6e6799718bd4ebf91355ed47e7c97bd4724abb3a55e13dd6abdedc0b6e21fb6e"
+        },
+        "titus_tools.py": {
+          "path": "skills/titus-humanizer/scripts/titus_tools.py",
+          "sha256": "1158eef32ab84af52db12e092d7e90d1f6704a81d07a9a21450c40ad2e78c583"
+        },
+        "gpt-instructions.md": {
+          "path": "chatgpt/gpt-instructions.md",
+          "sha256": "8ff61100aa1c1ba63cd99a9583cfdb24a0a71862635d25b837413c68afa6e513"
+        }
       },
       "check": ["python3", "{dir}/titus_tools.py", "score", "{sample}"]
     }

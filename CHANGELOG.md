@@ -2,6 +2,12 @@
 
 Notable changes to the titus-web site, newest first. The site has no version numbers, so entries are grouped by date.
 
+## 2026-11-12
+
+- Skill files are pinned. `skills.config.json` names one release tag for each skill and a SHA-256 checksum for each file, and the build stops if a checksum doesn't match. The build no longer looks up the latest release, and it never runs the downloaded files. A separate read-only CI job runs the scoring script as a check.
+- New releases now arrive as pull requests. The Propose skill updates workflow opens one when titus-humanizer publishes a release, and nothing deploys until it's merged. The nightly build and the rebuild on each release are gone.
+- The build workflow is read-only by default. Only the deploy job, on `main`, gets the Pages permissions. Every action is pinned to a full commit SHA, and Dependabot proposes updates for actions and npm packages.
+
 ## 2026-11-10 (evening)
 
 - On the Checker, hovering over a highlight shows the same label as a click, and both outline the exact text the pattern matched, across every line it covers.
