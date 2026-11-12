@@ -18,41 +18,31 @@ The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It
 
 ## How the skill files get here
 
-The site keeps no copy of any skill. Before each build, `scripts/fetch-skills.mjs` reads `skills.config.json`, finds each skill's latest GitHub release, downloads the files it lists, runs the script once to make sure it works, and writes them to `public/skills/<slug>/`. A broken release stops the build, so it never goes live.
+The site doesn't keep its own copy of a skill. Instead, `skills.config.json` pins each skill to one release tag, such as `v1.1.0`, and lists a SHA-256 checksum for every file the site uses.
 
-The site always uses each skill's **latest release**, never its main branch. Changes in a skill repo show up here only after you publish a new release there. The version label on the Humanizer pages and the zip on the Install page come from that release.
+Before each build, `scripts/fetch-skills.mjs` downloads exactly those files from that tag and compares each checksum. If one doesn't match, the build stops, so a moved tag or a changed release can't reach the site. The build never runs the downloaded files. A separate CI job, `check-skills`, runs the scoring script on a sample with read-only permissions to make sure it works, and the site deploys only if both jobs pass.
 
-A build runs when:
+### How a new skill release reaches the site
 
-- you push to `main` (this deploys) or `dev` (this only builds, as a check),
-- a skill repo publishes a release and sends a `skill-released` event (see below),
-- every night at 07:17 UTC (12:17 AM in Boise during standard time), as a fallback,
-- you start it by hand under Actions.
+1. A skill repo publishes a release.
+2. The **Propose skill updates** workflow (`.github/workflows/skill-update.yml`) notices it. It runs when titus-humanizer sends its `skill-released` event, once a day at 07:17 UTC, and when you start it by hand under Actions.
+3. It opens a pull request that changes the tag and checksums in `skills.config.json`.
+4. You read the release notes and the changes, then merge. Merging deploys the new version.
 
-### Rebuilds after each titus-humanizer release
+For the workflow to open pull requests, turn on **Allow GitHub Actions to create and approve pull requests** under Settings, then Actions, then General. Without it, the workflow opens an issue that names the branch instead. GitHub doesn't run checks on pull requests a workflow opens, so close and reopen the pull request to run them.
 
-The release workflow in titus-humanizer sends the `skill-released` event, and it needs a token with access to this repo. The token is already saved in titus-humanizer as `SITE_DISPATCH_TOKEN`. The steps below are for replacing it, or for setting up a new skill repo the same way.
+To bump a skill by hand, run `node scripts/update-skills.mjs` and commit the changed `skills.config.json`.
 
-**1. The token**
+### The titus-humanizer token
 
-1. On GitHub, click your profile picture, then open Settings, then Developer settings, then Personal access tokens, then Fine-grained tokens. Choose **Generate new token**.
-2. Fill in the form:
-   - **Token name:** `titus-web site rebuild`
-   - **Description:** `Lets the titus-humanizer release workflow rebuild the titus-web site. Saved as SITE_DISPATCH_TOKEN in titus-humanizer.`
-   - **Expiration:** 1 year is a sensible choice. When the token expires, the rebuild step stops working, but the nightly build still picks up new releases. Put a reminder in your calendar to replace the token before it runs out.
-   - **Repository access:** choose **Only select repositories** and pick `Dr-Titus100/titus-web`.
-   - **Permissions:** under Repository permissions, set **Contents** to **Read and write**. GitHub then sets **Metadata** to Read-only on its own. Leave every other permission on No access, including Actions, Pages and Workflows.
-3. Choose **Generate token** and copy it. GitHub shows it only once.
+The titus-humanizer release workflow sends the `skill-released` event with a token saved there as `SITE_DISPATCH_TOKEN`. Sending that event needs **Contents: Read and write** on this repo, which also lets the token push code. Two safer choices:
 
-**2. Where the token goes**
+- **Remove the token.** Delete `SITE_DISPATCH_TOKEN` from titus-humanizer's repository secrets. The daily check still picks up each release within a day.
+- **Keep it, and protect `main`.** Under Settings, then Rules, then Rulesets, add a branch ruleset for `main` that requires a pull request and blocks force pushes, with no bypass list. The token then can't change `main` directly.
 
-1. Open the titus-humanizer repo on GitHub, then Settings. In the left menu, open **Secrets and variables**, then **Actions**.
-2. Stay on the **Secrets** tab. The page has two boxes, Environment secrets and Repository secrets. Use the **Repository secrets** box and choose **New repository secret**.
-3. Set **Name** to `SITE_DISPATCH_TOKEN`, paste the token into **Secret** and choose **Add secret**.
+In titus-humanizer, also add a tag ruleset for `v*` that blocks updates and deletions, so a published release tag can't be moved.
 
-The next titus-humanizer release then rebuilds the site within a few minutes. Without the secret, the release still works, and the site picks up the new version on its nightly build.
-
-**Replacing an expired token.** Create a new token the same way, then open `SITE_DISPATCH_TOKEN` under Repository secrets in titus-humanizer, choose the pencil icon to edit it and paste the new token.
+A build of this site runs when you push to `main` (this deploys) or `dev` (this only builds, as a check), on every pull request, and when you start it by hand under Actions.
 
 ## How changes reach the site
 
@@ -70,7 +60,7 @@ npm run dev        # fetches the skills, then serves the site at http://localhos
 npm run build      # builds into dist/
 ```
 
-`SKILL_REF=dev npm run dev` uses a branch instead of the latest release, which helps when you test an unreleased skill change. `ALLOW_STALE=1` keeps the last fetched files if GitHub can't be reached.
+The first build downloads the pinned skill files. Later builds reuse them while their checksums still match, so you can build offline. To test an unreleased skill change, copy its files into `public/skills/titus-humanizer/` and run `npx astro dev`, which skips the download step.
 
 ## The overview demo and examples
 
@@ -82,9 +72,8 @@ The demo on the overview page and the before-and-after reports come from `src/da
 - **About and Experience.** The facts on both pages, such as roles, education, publications, talks, awards and skills, live in `src/data/profile.ts`. Change the data there, and edit `src/pages/about.astro` or `src/pages/experience.astro` only to change the layout or the story text.
 - **A new skill or plugin.**
   1. Add an entry to `src/data/tools.ts`. Its card then shows up on the Tools page.
-  2. Add it to `skills.config.json` if the site should pull its files from its releases.
+  2. Add it to `skills.config.json` if the site should pull its files from its releases. Run `node scripts/update-skills.mjs` to fill in the tag and checksums.
   3. Add its pages under `src/pages/tools/<name>/`. Copy `src/components/ToolNav.astro` if it needs its own row of tabs, and add it to the top menu in `src/layouts/Base.astro` if it should have one.
-  4. In the new skill's repo, copy the "Rebuild the website" step from titus-humanizer's release workflow and add the same `SITE_DISPATCH_TOKEN` secret.
 
 ## Custom domain
 
