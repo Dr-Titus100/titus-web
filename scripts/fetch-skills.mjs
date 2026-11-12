@@ -1,57 +1,50 @@
-// Pulls each skill's files from its own repo, at its latest release, before the site builds.
-// The site never keeps its own copy of a skill, so a new release reaches the site on the next build.
+// Puts each skill's files in public/skills/<slug>/ before the site builds.
 //
-// Environment:
-//   GITHUB_TOKEN   optional, raises the GitHub API rate limit (set automatically in GitHub Actions)
-//   SKILL_REF      optional, a branch or tag to use for every skill instead of the latest release
-//   ALLOW_STALE=1  optional, keep the files from the last fetch if GitHub can't be reached (local use)
-import { execFileSync } from "node:child_process";
+// Every skill is pinned in skills.config.json to one release tag, with a SHA-256 checksum for each file.
+// The build downloads exactly that tag and stops if any file's checksum doesn't match, so a moved tag,
+// a compromised release or a network problem can't change what the site serves.
+// This script never runs the downloaded files. The "does the script work" check runs in a separate,
+// read-only CI job (scripts/check-skills.mjs).
+//
+// A new release reaches the site only through a pull request that bumps the tag and checksums
+// (scripts/update-skills.mjs, run by .github/workflows/skill-update.yml).
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
 const config = JSON.parse(readFileSync(join(root, "skills.config.json"), "utf8"));
 const dataFile = join(root, "src/data/skills.generated.json");
-const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
-const headers = { "User-Agent": "titus-web-build", Accept: "application/vnd.github+json" };
-if (token) headers.Authorization = `Bearer ${token}`;
+export const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
 
-async function get(url, asJson) {
-  const res = await fetch(url, { headers });
+async function download(url) {
+  const res = await fetch(url, { headers: { "User-Agent": "titus-web-build" } });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-  return asJson ? res.json() : res.text();
+  return Buffer.from(await res.arrayBuffer());
 }
 
 async function fetchSkill(skill) {
-  let ref = process.env.SKILL_REF || "";
-  let release = null;
-  if (!ref) {
-    release = await get(`https://api.github.com/repos/${skill.repo}/releases/latest`, true);
-    ref = release.tag_name;
-  }
   const dir = join(root, "public/skills", skill.slug);
   mkdirSync(dir, { recursive: true });
-  for (const [name, path] of Object.entries(skill.files)) {
-    const text = await get(`https://raw.githubusercontent.com/${skill.repo}/${ref}/${path}`);
-    writeFileSync(join(dir, name), text);
+  for (const [name, file] of Object.entries(skill.files)) {
+    const dest = join(dir, name);
+    // A file already on disk with the right checksum is reused, so offline builds work.
+    if (existsSync(dest) && sha256(readFileSync(dest)) === file.sha256) continue;
+    const body = await download(`https://raw.githubusercontent.com/${skill.repo}/${skill.ref}/${file.path}`);
+    const got = sha256(body);
+    if (got !== file.sha256) {
+      throw new Error(`${skill.slug}/${name} at ${skill.ref} has checksum ${got}, but skills.config.json expects ${file.sha256}. Stopping the build.`);
+    }
+    writeFileSync(dest, body);
   }
-  if (skill.check) {
-    // A broken release stops the build here, so it never reaches visitors.
-    const sample = join(tmpdir(), "titus-web-sample.txt");
-    writeFileSync(sample, "It is not just a tool — it is a game-changer that leverages robust synergy to unlock value for every team in the organization today, and it helps.\n");
-    const [cmd, ...args] = skill.check.map((a) => a.replace("{dir}", dir).replace("{sample}", sample));
-    execFileSync(cmd, args, { stdio: "inherit" });
-  }
-  const asset = release?.assets?.find((a) => a.name === skill.zipAsset);
+  const tag = encodeURIComponent(skill.ref);
   return {
     name: skill.name,
     repo: skill.repo,
-    version: ref,
-    releaseUrl: release ? release.html_url : `https://github.com/${skill.repo}/tree/${ref}`,
-    zipUrl: asset ? asset.browser_download_url : `https://github.com/${skill.repo}/releases/latest`,
+    version: skill.ref,
+    releaseUrl: `https://github.com/${skill.repo}/releases/tag/${tag}`,
+    zipUrl: `https://github.com/${skill.repo}/releases/download/${tag}/${skill.zipAsset}`,
     repoUrl: `https://github.com/${skill.repo}`,
-    fetchedAt: new Date().toISOString(),
   };
 }
 
@@ -59,14 +52,10 @@ const out = {};
 try {
   for (const skill of config.skills) {
     out[skill.slug] = await fetchSkill(skill);
-    console.log(`fetched ${skill.slug} at ${out[skill.slug].version}`);
+    console.log(`${skill.slug} ${skill.ref}: checksums match`);
   }
 } catch (err) {
-  if (process.env.ALLOW_STALE === "1" && existsSync(dataFile)) {
-    console.warn(`Could not fetch skills (${err.message}). Keeping the files from the last fetch.`);
-    process.exit(0);
-  }
-  console.error(`Could not fetch skills: ${err.message}`);
+  console.error(`Could not prepare skills: ${err.message}`);
   process.exit(1);
 }
 mkdirSync(join(root, "src/data"), { recursive: true });
