@@ -139,7 +139,7 @@ import { u } from "../../lib/url";
         const box = document.createElement("div");
         box.className = "mod-reply";
         const label = Object.assign(document.createElement("label"), { htmlFor: `mod-reply-${c.id}`, textContent: `Your reply to ${c.name}` });
-        const text = Object.assign(document.createElement("textarea"), { id: `mod-reply-${c.id}`, maxLength: 2000 });
+        const text = Object.assign(document.createElement("textarea"), { id: `mod-reply-${c.id}`, maxLength: 3000 });
         const buttons = document.createElement("div");
         buttons.className = "btn-row";
         const post = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: "Post reply" });

@@ -23,7 +23,8 @@
 // replies to and whether Titus wrote it.
 
 const NAME_MAX = 60;
-const BODY_MAX = 2000;
+// The longest comment or reply, for readers and Titus alike. The text boxes use the same limit.
+const BODY_MAX = 3000;
 // New comments stop being accepted while this many wait for approval, so a flood can't fill the database.
 const PENDING_MAX = 200;
 // The moderation page lists this many approved comments, newest first.
@@ -151,7 +152,7 @@ async function addComment(request, url, env, ctx) {
   const origin = request.headers.get("Origin");
   if (origin && origin !== url.origin) return json({ error: "origin" }, 403);
   if (!(request.headers.get("Content-Type") || "").includes("application/json")) return json({ error: "type" }, 415);
-  if (Number(request.headers.get("Content-Length") || 0) > 16_000) return json({ error: "size" }, 413);
+  if (Number(request.headers.get("Content-Length") || 0) > 32_000) return json({ error: "size" }, 413);
   if (await overLimit(env.COMMENTS_LIMIT, ip(request))) return json({ error: "busy" }, 429);
 
   let input;

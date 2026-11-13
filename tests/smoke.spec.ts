@@ -127,6 +127,7 @@ test("blog comments list approved comments and replies, and post both", async ({
   await expect(reply.locator(".cm-badge")).toHaveText("Author");
   await expect(page.locator("#comment-1 > .cm-meta .cm-badge")).toHaveCount(0);
 
+  await expect(page.locator("#cm-body")).toHaveAttribute("maxlength", "3000");
   await page.click("#cm-send");
   await expect(page.locator("#cm-form-status")).toHaveText("Please add your name and a comment.");
   await page.fill("#cm-name", "Kofi");
@@ -191,6 +192,7 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
   await expect(page.locator("#mod-pending-empty")).toBeVisible();
   // Reply to Ama. The reply shows at once with the Author label, and it has no Reply button of its own.
   await page.locator("#mod-approved .mod-item", { hasText: "Loved it." }).getByRole("button", { name: "Reply", exact: true }).click();
+  await expect(page.locator("#mod-reply-1")).toHaveAttribute("maxlength", "3000");
   await page.fill("#mod-reply-1", "Thank you, Ama.");
   await page.getByRole("button", { name: "Post reply" }).click();
   await expect(page.locator("#mod-status")).toHaveText("Reply posted.");
