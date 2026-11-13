@@ -54,3 +54,31 @@ for (const file of pages) {
   count++;
 }
 console.log(`Content Security Policy added to ${count} pages.`);
+
+// On Cloudflare (SITE_HOST=cloudflare), the host can send real headers from a _headers file.
+// They add what a <meta> policy can't do: frame-ancestors, so no other site can show these pages
+// inside a frame, plus nosniff, HSTS and a permissions policy. The <meta> policy above still sets
+// which scripts and hosts each page may use. GitHub Pages would serve _headers as a plain file,
+// so it is written only for Cloudflare builds.
+if (process.env.SITE_HOST === "cloudflare") {
+  const headers = `/*
+  Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/vendor/*
+  Cache-Control: public, max-age=86400
+
+/media/*
+  Cache-Control: public, max-age=604800
+`;
+  writeFileSync(join(dist, "_headers"), headers);
+  console.log("Security headers written to _headers for Cloudflare.");
+}

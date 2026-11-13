@@ -120,9 +120,16 @@ If you replace the video, update the captions file in the same commit.
   2. Add it to `skills.config.json` if the site should pull its files from its releases. Run `node scripts/update-skills.mjs` to fill in the tag and checksums.
   3. Add its pages under `src/pages/tools/<name>/`. Copy `src/components/ToolNav.astro` if it needs its own row of tabs, and add it to the top menu in `src/layouts/Base.astro` if it should have one.
 
-## Custom domain
+## Custom domain on Cloudflare
 
-Set `SITE_URL` to the domain and `SITE_BASE` to `/` in the build step of `.github/workflows/deploy.yml`, add the domain under Settings, then Pages, and point your DNS at GitHub as its guide explains.
+The site can also be hosted on Cloudflare, which can send real security headers and builds a preview of every pull request.
+
+- `wrangler.jsonc` tells Cloudflare to upload `dist/` as static files, with no Worker script, and turns on preview links for pull requests.
+- In Cloudflare's build settings, set the build command to `npm run build` and these build variables: `SITE_URL` to the domain (such as `https://example.com`), `SITE_BASE` to `/` and `SITE_HOST` to `cloudflare`.
+- With `SITE_HOST=cloudflare`, `scripts/add-csp.mjs` also writes `dist/_headers`. It blocks framing, turns on HSTS and nosniff, and sets cache times. The Privacy page names Cloudflare as the host, and Rewrite offers Remember my key, because the site has an address of its own.
+- The tests run the same way. For a root-domain build, run them with `SITE_BASE=/`.
+
+After the move, set the repository variable `NEW_SITE_URL` to the new address under Settings, then Secrets and variables, then Actions, then Variables. The next deploy to GitHub Pages then publishes only forwarding pages, built by `scripts/make-forwarders.mjs`. Every old `github.io/titus-web/` address sends visitors and search engines to the same page on the new domain.
 
 ## Writing rules
 
