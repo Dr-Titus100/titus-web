@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- The site lives at https://titusnyarkonde.com, served by Cloudflare, with www.titusnyarkonde.com as a second address. The old github.io address forwards to it.
 - The site is ready to move to its own domain on Cloudflare. `wrangler.jsonc` sets up hosting and preview links for pull requests. A Cloudflare build writes real security headers, names Cloudflare on the Privacy page and offers Remember my key. A repository variable, `NEW_SITE_URL`, switches GitHub Pages to forwarding pages that send every old address to the same page on the new domain. Nothing changes until the domain is set up.
 - The Privacy page explains why Remember my key is off on github.io more precisely. Only the sites I publish under `dr-titus100.github.io` share storage with this one. Sites under other github.io names don't.
 - The Checker runs on Pyodide 314.0.7 with Python 3.14, up from Pyodide 0.29.5 with Python 3.13. Pyodide now runs only in module workers, so the Checker's worker loads as a module and imports `pyodide.mjs`. If the worker can't load at all, the status line says Python couldn't load instead of waiting forever. The first download is about 14 MB, up from about 12 MB, and the scores are the same as before.

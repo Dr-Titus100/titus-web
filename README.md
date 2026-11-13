@@ -1,6 +1,6 @@
 # titus-web
 
-The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It's built with [Astro](https://astro.build) and served free by GitHub Pages at https://dr-titus100.github.io/titus-web/.
+The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It's built with [Astro](https://astro.build) and served free by Cloudflare at https://titusnyarkonde.com/. The old address, https://dr-titus100.github.io/titus-web/, forwards each page to the same page there.
 
 ## What's on it
 
