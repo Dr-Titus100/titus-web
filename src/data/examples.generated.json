@@ -111,13 +111,13 @@
       "tag": "File path",
       "before": "In order to seamlessly navigate the setup process, it is crucial to note that the configuration file, located at ~/projects/app/config/settings.yaml, serves as the backbone of the entire system and plays a pivotal role in every deployment.",
       "after": "The configuration file is at ~/projects/app/config/settings.yaml. Every deployment reads its settings from that file.",
-      "report": "AI-pattern score: 0.53 (medium) before, not scored (18 words, needs at least 30) after\nPatterns before: AI vocabulary x4, inflated significance x1, copula avoidance x1, bureaucratic filler x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 1 file path\nNote: the text is short, so the script dampened the score and it is less reliable."
+      "report": "AI-pattern score: 0.50 (medium) before, not scored (13 words, needs at least 30) after\nPatterns before: AI vocabulary x4, inflated significance x1, copula avoidance x1, bureaucratic filler x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 1 file path\nNote: the text is short, so the script dampened the score and it is less reliable."
     },
     {
       "tag": "Link",
       "before": "We're thrilled to announce that our comprehensive onboarding guide is now live! Dive into the details and discover a wealth of valuable insights at https://example.com/guide — it's truly a must-read resource for anyone looking to elevate their skills.",
       "after": "Our onboarding guide is now online at https://example.com/guide.",
-      "report": "AI-pattern score: 0.52 (medium) before, not scored (11 words, needs at least 30) after\nPatterns before: em dash x1, AI vocabulary x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 1 link\nNote: the text is short, so the script dampened the score and it is less reliable."
+      "report": "AI-pattern score: 0.51 (medium) before, not scored (7 words, needs at least 30) after\nPatterns before: em dash x1, AI vocabulary x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 1 link\nNote: the text is short, so the script dampened the score and it is less reliable."
     },
     {
       "tag": "Emoji",

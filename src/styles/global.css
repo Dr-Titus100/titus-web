@@ -262,6 +262,8 @@ html.menu-open, html.menu-open body { overflow: hidden; }
 .subnav-title { font-size: 21px; font-weight: 600; color: var(--ink); white-space: nowrap; }
 .subnav-title:hover { text-decoration: none; }
 .subnav-right { display: flex; align-items: center; gap: 24px; }
+/* Set by ToolNav's script when the tabs fit directly under the tool's name in the top bar. */
+.subnav-right.aligned { position: absolute; left: var(--tabs-x); }
 .subnav-links { display: flex; gap: 24px; align-items: center; margin: 0; padding: 0; list-style: none; }
 .subnav-links a { font-size: 12px; color: var(--ink); opacity: 0.8; white-space: nowrap; }
 .subnav-links a:hover { opacity: 1; text-decoration: none; }

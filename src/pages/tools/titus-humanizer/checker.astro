@@ -13,7 +13,7 @@ const skill = skills["titus-humanizer"];
     <div class="wrap wrap-text">
       <p class="eyebrow">Checker</p>
       <h1 class="h1">Which phrases sound machine-made?</h1>
-      <p class="lead">Paste any text. The checker scores it from 0 to 1, marks each pattern where it appears and removes hidden characters. Quoted text belongs to the person quoted, so the checker leaves it out of the score. It uses the same scoring script as titus-humanizer {skill.version}, and it runs inside your browser.</p>
+      <p class="lead">Paste any text. The checker scores it from 0 to 1, marks each pattern where it appears and removes hidden characters. Quoted text belongs to the person quoted, so the checker leaves it out of the score, along with code, links, file paths and emoji. It uses the same scoring script as titus-humanizer {skill.version}, and it runs inside your browser.</p>
     </div>
   </section>
 
@@ -267,9 +267,8 @@ const skill = skills["titus-humanizer"];
         list.appendChild(li);
       });
     }
-    const nq = last.quotes.length;
-    const qs = $("quote-summary");
-    qs.textContent = nq ? `Quoted text: ${nq} ${nq === 1 ? "quotation" : "quotations"} left as written and not scored.` : "Quoted text: none.";
+    // The scoring script's own line for the quotations, code, file paths, links and emoji it skips.
+    $("quote-summary").textContent = `${last.skipped || "Left as-is and not scored: none"}.`;
     $("hidden-summary").textContent = `Hidden characters removed: ${last.found_text}.`;
     selectView("patterns");
     announce(r.score === null

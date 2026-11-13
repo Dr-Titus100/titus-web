@@ -4,6 +4,34 @@ import sys, json, re
 sys.path.insert(0, "/home/pyodide")
 import titus_tools as tt
 
+# titus-humanizer after v1.2.0 skips links and file paths in the score, and its score report names
+# everything it left as-is. Until the site pins that release, the glue adds both to the pinned
+# script, the same way the next release does them. Remove this block then.
+if not hasattr(tt, "_blank_links_and_paths"):
+    def _is_path(item):
+        return item.count("/") + item.count("\\") >= 2 or bool(re.search(r"\.\w+$", item))
+
+    def _blank_links_and_paths(text):
+        def link(m):
+            item = tt._trim_link(m.group(0))
+            return " " * len(item) + m.group(0)[len(item):]
+        def path(m):
+            item = m.group(0).rstrip(tt._TRAILING)
+            return " " * len(item) + m.group(0)[len(item):] if _is_path(item) else m.group(0)
+        return tt.KEPT_PATH.sub(path, tt.KEPT_LINK.sub(link, text))
+
+    _strip_code = tt._strip_code
+    tt._strip_code = lambda text: _blank_links_and_paths(_strip_code(text))
+    tt._blank_links_and_paths = _blank_links_and_paths
+if not hasattr(tt, "_skipped_line"):
+    def _skipped_line(text):
+        found = tt.kept_items(text)
+        parts = [f"{len(found[k])} {k if len(found[k]) == 1 or k == 'emoji' else k + 's'}" for k in tt.KEPT_KINDS if found[k]]
+        if not parts:
+            return None
+        return "Left as-is and not scored: " + (parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1])
+    tt._skipped_line = _skipped_line
+
 def _protected(text):
     spans = [(m.start(), m.end()) for m in tt.PROTECTED.finditer(text)]
     return lambda i: any(a <= i < b for a, b in spans)
@@ -76,9 +104,9 @@ def _blank_quotes(text, quotes):
     return "".join(chars)
 
 def _pattern_spans(text):
-    # The same regexes and filters tt.score counts, with code and quoted text blanked out so
-    # positions line up and nothing inside a quotation is marked.
-    body = _blank_quotes(_blank_code(text), _quote_spans(text))
+    # The same regexes and filters tt.score counts, with code, quoted text, links and file paths
+    # blanked out so positions line up and nothing inside them is marked.
+    body = tt._blank_links_and_paths(_blank_quotes(_blank_code(text), _quote_spans(text)))
     spans = []
     for label, rx, w in tt.COMPILED:
         keep = tt.FILTERS.get(label, lambda b, m: True)
@@ -108,6 +136,7 @@ def analyze(text):
         "score": _score_dict(tt.score(cleaned)),
         "spans": _pattern_spans(cleaned),
         "quotes": [{"start": a, "end": b} for a, b in _quote_spans(cleaned)],
+        "skipped": tt._skipped_line(cleaned),
         "min_words": tt.MIN_WORDS,
     })
 
