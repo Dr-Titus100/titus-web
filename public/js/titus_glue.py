@@ -11,6 +11,9 @@ if not hasattr(tt, "_blank_links_and_paths"):
     def _is_path(item):
         return item.count("/") + item.count("\\") >= 2 or bool(re.search(r"\.\w+$", item))
 
+    # A link stops at a space, a quote mark, a backtick or a dash, as in the next release.
+    _LINK = re.compile(r"\b(?:https?|ftp)://[^\s<>\"'`\u2014\u2013\u201c\u201d\u2018\u2019]+|\bwww\.[^\s<>\"'`\u2014\u2013\u201c\u201d\u2018\u2019]+")
+
     def _blank_links_and_paths(text):
         def link(m):
             item = tt._trim_link(m.group(0))
@@ -18,7 +21,7 @@ if not hasattr(tt, "_blank_links_and_paths"):
         def path(m):
             item = m.group(0).rstrip(tt._TRAILING)
             return " " * len(item) + m.group(0)[len(item):] if _is_path(item) else m.group(0)
-        return tt.KEPT_PATH.sub(path, tt.KEPT_LINK.sub(link, text))
+        return tt.KEPT_PATH.sub(path, _LINK.sub(link, text))
 
     _strip_code = tt._strip_code
     tt._strip_code = lambda text: _blank_links_and_paths(_strip_code(text))
