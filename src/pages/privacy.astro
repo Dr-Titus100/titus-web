@@ -2,7 +2,7 @@
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url";
 import { providers } from "../data/providers";
-const updated = "November 12, 2026";
+const updated = "November 13, 2026";
 ---
 <Base title="Privacy" current="" description="What this website does with your text, your API keys and your messages, and what it stores in your browser.">
   <article class="section legal">
@@ -27,7 +27,7 @@ const updated = "November 12, 2026";
           <li><strong>{p.name}</strong> (<code>{p.host}</code>). {p.dataNote} <a href={p.policyUrl}>{p.policyName}</a>.</li>
         ))}
       </ul>
-      <p>Your key stays in the page's memory and is cleared when you reload or close the page. On a site with its own web address, you can choose Remember to save the key in your browser's local storage for 30 days. While the site runs on <code>github.io</code>, that option is turned off, because other sites on <code>github.io</code> could read a saved key. Forget my key removes every saved key at once.</p>
+      <p>Your key stays in the page's memory and is cleared when you reload or close the page. On a site with its own web address, you can choose Remember to save the key in your browser's local storage for 30 days. While the site runs on <code>github.io</code>, that option is turned off. Every site I publish under <code>dr-titus100.github.io</code> shares one storage area, so any of them could read a saved key. Forget my key removes every saved key at once.</p>
 
       <h2>The contact form</h2>
       <p>When you send a message, your name, email address and message go to <a href="https://web3forms.com/">Web3Forms</a>, which emails them to me. Web3Forms says it may keep server logs, which can include your details, for up to two months, on servers in the United States. See the <a href="https://docs.web3forms.com/getting-started/faq">Web3Forms FAQ</a> for its data handling.</p>
