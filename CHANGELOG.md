@@ -2,6 +2,10 @@
 
 Notable changes to the titus-web site, newest first. The site has no version numbers, so entries are grouped by date.
 
+## 2026-11-13
+
+- The tour video has English captions, and a "Read the transcript" panel under it shows the narration by scene.
+
 ## 2026-11-12
 
 - Wording that claimed more than the site can show is fixed. The score note on the Checker and the overview now says the score counts the AI-writing patterns titus-humanizer targets and doesn't measure quality. "Four ways to use it" drops "with no sign-up", since Rewrite needs a provider account. The Tools card on the home page says most tools have a free way to try them in your browser. "How it works" says three steps instead of three levels. The Experience stat says the churn model I built at KCB Bank Rwanda instead of a model the bank adopted.

@@ -1,0 +1,184 @@
+WEBVTT
+
+NOTE Release
+
+00:00:00.000 --> 00:00:05.112
+Meet titus-humanizer, a new editing skill
+for Claude and ChatGPT,
+
+00:00:05.112 --> 00:00:07.000
+now published on GitHub.
+
+NOTE Rewrite
+
+00:00:08.000 --> 00:00:10.177
+Give it a draft that sounds like AI,
+
+00:00:10.177 --> 00:00:15.195
+and it marks each pattern that gives the
+draft away. The stock opener. The em dash.
+
+00:00:15.195 --> 00:00:18.823
+The framing that says it isn't just one
+thing, it's another.
+
+00:00:18.823 --> 00:00:21.000
+And the clause tacked on at the end.
+
+00:00:22.000 --> 00:00:25.000
+Then it rewrites the sentence in plain
+words, and keeps every fact.
+
+NOTE Score
+
+00:00:27.000 --> 00:00:31.000
+Each rewrite comes with a score from zero
+to one, before and after.
+
+00:00:32.000 --> 00:00:37.167
+This sample email from the test suite
+drops from 0.80 to 0.01,
+
+00:00:37.167 --> 00:00:39.000
+with no patterns left.
+
+00:00:39.000 --> 00:00:43.000
+The score counts writing patterns. It
+isn't an AI detector.
+
+NOTE How it works
+
+00:00:44.000 --> 00:00:45.205
+Here's how it works.
+
+00:00:45.205 --> 00:00:49.000
+First, it removes hidden characters, such
+as zero-width spaces.
+
+00:00:50.000 --> 00:00:51.000
+It applies seven hard rules.
+
+00:00:52.000 --> 00:00:56.000
+It fixes wording that's awkward, flowery,
+vague, unnecessary or illogical.
+
+00:00:57.000 --> 00:00:58.000
+It cuts story-level patterns.
+
+00:00:59.000 --> 00:01:01.000
+And it scores the original and the
+rewrite.
+
+NOTE Stories
+
+00:01:03.000 --> 00:01:04.459
+It handles fiction, too.
+
+00:01:04.459 --> 00:01:07.436
+Using the StoryScope study of AI-written
+stories,
+
+00:01:07.436 --> 00:01:11.873
+it cuts weather that mirrors the mood,
+fear told through body sensations,
+
+00:01:11.873 --> 00:01:14.000
+and morals the narrator spells out.
+
+00:01:15.000 --> 00:01:18.000
+The rewrite keeps her decision and names
+the feeling plainly.
+
+NOTE Formats
+
+00:01:20.000 --> 00:01:24.483
+Use it on emails, reports, slide decks,
+résumés, papers and more.
+
+00:01:24.483 --> 00:01:28.000
+Résumé date ranges and bullets come
+through intact.
+
+NOTE Easiest install
+
+00:01:29.000 --> 00:01:34.537
+The simplest way to install is to copy
+this repository's link into Claude,
+
+00:01:34.537 --> 00:01:40.000
+Claude Code, ChatGPT, or Codex, and ask it
+to help you install the skill.
+
+00:01:40.000 --> 00:01:42.273
+It will handle the installation for you,
+
+00:01:42.273 --> 00:01:45.000
+or walk you through any step it can't do
+itself.
+
+00:01:45.000 --> 00:01:48.000
+To install it yourself, follow the steps
+that come next.
+
+NOTE Install in the app
+
+00:01:50.000 --> 00:01:52.065
+To install it in the Claude app,
+
+00:01:52.065 --> 00:01:56.000
+first download the zip file from the
+Releases page on GitHub.
+
+00:01:56.000 --> 00:02:00.000
+In Settings, open Capabilities, and turn
+on Create and edit files.
+
+00:02:00.000 --> 00:02:02.092
+Then open Customize, then Skills.
+
+00:02:02.092 --> 00:02:06.718
+Click plus, choose Create skill, then
+Upload a skill, and select the zip.
+
+00:02:06.718 --> 00:02:09.000
+Turn the skill on, and you're ready.
+
+00:02:09.000 --> 00:02:11.824
+In ChatGPT, go to Skills, select Create,
+
+00:02:11.824 --> 00:02:15.000
+and upload the same zip without unzipping
+it.
+
+00:02:16.000 --> 00:02:17.856
+If your plan doesn't support skills,
+
+00:02:17.856 --> 00:02:21.000
+you can build a Custom GPT from the
+instructions in the repo.
+
+NOTE Install from the command line
+
+00:02:23.000 --> 00:02:23.852
+In Claude Code,
+
+00:02:23.852 --> 00:02:28.000
+two commands add the repo as a plugin
+marketplace and install the plugin.
+
+00:02:29.000 --> 00:02:30.486
+For Codex, clone the repo,
+
+00:02:30.486 --> 00:02:35.000
+and copy the skill folder into the agents
+skills folder in your home directory.
+
+NOTE Get it
+
+00:02:37.000 --> 00:02:41.683
+titus-humanizer works in Claude, Claude
+Code, ChatGPT and Codex.
+
+00:02:41.683 --> 00:02:46.000
+It's free under the MIT license, and the
+link is on screen.
