@@ -148,11 +148,19 @@ def _kept_items(original):
 
 def _kept_line(original, rewrite):
     found = _kept_items(original)
+    # Compare whole items found the same way in the rewrite, so a link or path that gained or lost
+    # characters (guide becoming guide2) counts as changed.
+    after = _kept_items(rewrite)
     kept, changed = [], []
     for kind, items in found.items():
         if not items:
             continue
-        ok = sum(item in rewrite for item in items)
+        pool = list(after[kind])
+        ok = 0
+        for item in items:
+            if item in pool:
+                pool.remove(item)
+                ok += 1
         if kind == "quotation" and ok < len(items):
             continue  # the script's own line covers it
         n = len(items)
