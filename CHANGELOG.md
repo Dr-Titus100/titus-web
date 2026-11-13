@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- The Checker runs on Pyodide 314.0.7 with Python 3.14, up from Pyodide 0.29.5 with Python 3.13. Pyodide now runs only in module workers, so the Checker's worker loads as a module and imports `pyodide.mjs`. If the worker can't load at all, the status line says Python couldn't load instead of waiting forever. The first download is about 14 MB, up from about 12 MB, and the scores are the same as before.
 - The tour video has English captions, and a "Read the transcript" panel under it shows the narration by scene.
 - New layout across the site, built from the approved mockups. Inter in one type scale (80 px page names, 56 px section titles, 40 px tile titles, 17 px body, smaller on phones), an 8 px spacing grid, and sections that alternate white and light gray. Dark mode uses a black page, #1d1d1f sections and #2c2c2e cards with thin borders.
 - The top navigation is 44 px tall with a TN monogram, and the current page shows in full-strength text. On phones it hides while you scroll down a titus-humanizer page and comes back when you scroll up.

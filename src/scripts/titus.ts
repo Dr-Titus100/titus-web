@@ -11,7 +11,7 @@ let state: LoadState = { started: false, ready: false, failed: false, text: "Not
 function start() {
   if (worker) return worker;
   const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-  worker = new Worker(base + "js/titus-worker.js");
+  worker = new Worker(base + "js/titus-worker.js", { type: "module" });
   state = { ...state, started: true, text: "Downloading Python" };
   listeners.forEach((l) => l(state));
   worker.onmessage = (ev) => {
@@ -28,6 +28,15 @@ function start() {
     }
     listeners.forEach((l) => l(state));
   };
+  // A worker that can't load at all, such as a module worker on an old browser, never posts "failed".
+  worker.onerror = (ev) => {
+    ev.preventDefault();
+    if (state.failed) return;
+    state = { ...state, ready: false, failed: true, text: "Python couldn't start in this browser" };
+    pending.forEach((p) => p.reject(new Error(state.text)));
+    pending.clear();
+    listeners.forEach((l) => l(state));
+  };
   return worker;
 }
 
@@ -37,7 +46,7 @@ export function onStatus(l: Listener) {
   l(state);
 }
 
-// Starts downloading Python and the scoring script, about 12 MB the first time.
+// Starts downloading Python and the scoring script, about 14 MB the first time.
 export function load() { start(); }
 
 function call<T>(op: string, ...args: string[]): Promise<T> {

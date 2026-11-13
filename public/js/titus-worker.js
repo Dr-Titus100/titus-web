@@ -1,5 +1,7 @@
 // Runs titus_tools.py, the same script the skill uses, inside the browser with Pyodide.
-// Nothing the visitor types leaves this worker.
+// Nothing the visitor types leaves this worker. It runs as a module worker, which Pyodide needs.
+import { loadPyodide } from "../vendor/pyodide/pyodide.mjs";
+
 const base = self.location.pathname.replace(/js\/titus-worker\.js$/, "");
 let py = null;
 
@@ -36,8 +38,7 @@ async function init() {
   self.postMessage({ type: "status", text: "Downloading Python" });
   await prefetch();
   self.postMessage({ type: "status", text: "Starting Python" });
-  importScripts(base + "vendor/pyodide/pyodide.js");
-  py = await self.loadPyodide({ indexURL: base + "vendor/pyodide/" });
+  py = await loadPyodide({ indexURL: base + "vendor/pyodide/" });
   self.postMessage({ type: "status", text: "Loading titus_tools.py" });
   const res = await fetch(base + "skills/titus-humanizer/titus_tools.py");
   if (!res.ok) throw new Error("Could not load titus_tools.py");
