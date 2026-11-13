@@ -9,7 +9,7 @@ import { u } from "../../lib/url";
   <section class="section">
     <div class="wrap wrap-narrow">
       <h1 class="h1">Comment moderation</h1>
-      <p class="lead">New comments wait here until you approve them. Approved comments show under their post, and you can delete any comment.</p>
+      <p class="lead">New comments and replies wait here until you approve them. Approved ones show under their post. You can reply to any comment, and deleting a comment deletes its replies too.</p>
 
       <form class="card mod-login" id="mod-login" data-api={u("/api/comments/admin")} data-blog={u("/blog/")} novalidate>
         <div class="field">
@@ -47,10 +47,14 @@ import { u } from "../../lib/url";
   .mod-meta { margin: 0 0 8px; font-size: 15px; color: var(--ink-soft); }
   .mod-meta strong { color: var(--ink); margin-right: 8px; }
   .mod-body { margin: 0 0 12px; white-space: pre-line; overflow-wrap: anywhere; }
+  .mod-badge { display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 980px; font-size: 12px; font-weight: 600; color: var(--link); box-shadow: inset 0 0 0 1px var(--link); }
+  .mod-reply { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+  .mod-reply textarea { min-height: 120px; }
 </style>
 
 <script>
-  type Row = { id: number; post: string; name: string; body: string; status: "pending" | "approved"; created: string };
+  type Row = { id: number; post: string; name: string; body: string; status: "pending" | "approved"; created: string;
+    parent: number | null; parentName: string | null; author: boolean };
   const login = document.getElementById("mod-login") as HTMLFormElement;
   const api = login.dataset.api!;
   const blog = login.dataset.blog!;
@@ -96,10 +100,16 @@ import { u } from "../../lib/url";
     meta.className = "mod-meta";
     const who = document.createElement("strong");
     who.textContent = c.name;
+    meta.append(who);
+    if (c.author) {
+      const badge = Object.assign(document.createElement("span"), { className: "mod-badge", textContent: "Author" });
+      meta.append(badge);
+    }
     const link = document.createElement("a");
     link.href = `${blog}${c.post}/`;
     link.textContent = c.post;
-    meta.append(who, `${new Date(c.created).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })} on `, link);
+    const when = new Date(c.created).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+    meta.append(c.parent ? `${when}, replying to ${c.parentName || "a deleted comment"} on ` : `${when} on `, link);
     const body = document.createElement("p");
     body.className = "mod-body";
     body.textContent = c.body;
@@ -120,6 +130,31 @@ import { u } from "../../lib/url";
     });
     row.append(del);
     li.append(meta, body, row);
+    // Your reply shows at once with the Author label. Replying to a waiting comment approves it too.
+    if (!c.author) {
+      const open = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: c.status === "pending" ? "Approve and reply" : "Reply" });
+      row.insertBefore(open, del);
+      open.addEventListener("click", () => {
+        if (li.querySelector(".mod-reply")) return;
+        const box = document.createElement("div");
+        box.className = "mod-reply";
+        const label = Object.assign(document.createElement("label"), { htmlFor: `mod-reply-${c.id}`, textContent: `Your reply to ${c.name}` });
+        const text = Object.assign(document.createElement("textarea"), { id: `mod-reply-${c.id}`, maxLength: 2000 });
+        const buttons = document.createElement("div");
+        buttons.className = "btn-row";
+        const post = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: "Post reply" });
+        const cancel = Object.assign(document.createElement("button"), { type: "button", className: "btn-link", textContent: "Cancel" });
+        cancel.addEventListener("click", () => box.remove());
+        post.addEventListener("click", () => {
+          if (!text.value.trim()) { text.focus(); return; }
+          act("reply", c.id, post, text.value);
+        });
+        buttons.append(post, cancel);
+        box.append(label, text, buttons);
+        li.append(box);
+        text.focus();
+      });
+    }
     return li;
   }
 
@@ -157,13 +192,15 @@ import { u } from "../../lib/url";
     }
   }
 
-  async function act(action: "approve" | "delete", id: number, button: HTMLButtonElement) {
+  async function act(action: "approve" | "delete" | "reply", id: number, button: HTMLButtonElement, body?: string) {
     button.disabled = true;
     try {
-      await call("POST", { action, id });
-      status.textContent = action === "approve" ? "Approved." : "Deleted.";
+      await call("POST", { action, id, ...(body !== undefined ? { body } : {}) });
+      status.textContent = action === "approve" ? "Approved." : action === "reply" ? "Reply posted." : "Deleted.";
     } catch (err) {
       fail(err);
+      // A failed reply keeps its text in the box, so you can try again.
+      if (action === "reply") { button.disabled = false; return; }
     }
     const keep = status.textContent;
     await load();

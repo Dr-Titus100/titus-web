@@ -99,7 +99,7 @@ test("Rewrite switches provider and remembers the choice", async ({ page }) => {
 
 // The comments section is built only for Cloudflare (SITE_HOST=cloudflare), where the Worker answers
 // /api/comments. Here the API is faked. To run this test, build with SITE_HOST=cloudflare first.
-test("blog comments list approved comments and post a new one", async ({ page }) => {
+test("blog comments list approved comments and replies, and post both", async ({ page }) => {
   const errors = collectErrors(page);
   const posted: any[] = [];
   await page.route(/\/api\/comments(\?.*)?$/, async (route) => {
@@ -109,33 +109,55 @@ test("blog comments list approved comments and post a new one", async ({ page })
       return route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ status: "pending" }) });
     }
     expect(new URL(req.url()).searchParams.get("post")).toBe("the-exercise-book");
-    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ comments: [
-      { id: 1, name: "Ama", body: "Loved it.\nThe <b>fish stall</b> part most.", created: "2026-11-12T10:00:00.000Z" },
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ total: 1, count: 2, comments: [
+      { id: 1, name: "Ama", body: "Loved it.\nThe <b>fish stall</b> part most.", created: "2026-11-12T10:00:00.000Z", parent: null, author: false },
+      { id: 2, name: "Titus Nyarko Nde", body: "Thank you, Ama.", created: "2026-11-12T11:00:00.000Z", parent: 1, author: true },
     ] }) });
   });
   await page.goto("blog/the-exercise-book/");
   test.skip((await page.locator("#comments").count()) === 0, "built without SITE_HOST=cloudflare, so there's no comments section");
-  await expect(page.locator(".cm-item")).toHaveCount(1);
-  await expect(page.locator("#cm-count")).toHaveText(" (1)");
+  await expect(page.locator("#cm-list > .cm-item")).toHaveCount(1);
+  await expect(page.locator("#cm-count")).toHaveText(" (2)");
   // Comment text shows as plain text, never as HTML.
-  await expect(page.locator(".cm-body")).toContainText("<b>fish stall</b>");
+  await expect(page.locator(".cm-body").first()).toContainText("<b>fish stall</b>");
   await expect(page.locator(".cm-body b")).toHaveCount(0);
+  // The reply sits under its comment with the Author label.
+  const reply = page.locator("#comment-1 .cm-replies .cm-item");
+  await expect(reply).toHaveCount(1);
+  await expect(reply.locator(".cm-badge")).toHaveText("Author");
+  await expect(page.locator("#comment-1 > .cm-meta .cm-badge")).toHaveCount(0);
+
   await page.click("#cm-send");
   await expect(page.locator("#cm-form-status")).toHaveText("Please add your name and a comment.");
   await page.fill("#cm-name", "Kofi");
   await page.fill("#cm-body", "Great story.");
   await page.click("#cm-send");
-  await expect(page.locator("#cm-form-status")).toContainText("after I read it");
-  expect(posted).toEqual([{ post: "the-exercise-book", name: "Kofi", body: "Great story.", trap: false, token: "" }]);
+  await expect(page.locator("#cm-form-status")).toContainText("Your comment will show up here after I read it");
   await expect(page.locator("#cm-body")).toHaveValue("");
+
+  // Reply to the author's reply. It joins the thread, and the form goes back to a comment afterward.
+  await reply.getByRole("button", { name: "Reply to Titus Nyarko Nde" }).click();
+  await expect(page.locator("#cm-replying")).toBeVisible();
+  await expect(page.locator("#cm-replying-name")).toHaveText("Titus Nyarko Nde");
+  await expect(page.locator("#cm-send")).toHaveText("Post reply");
+  await page.fill("#cm-name", "Esi");
+  await page.fill("#cm-body", "Same here.");
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toContainText("Your reply will show up here after I read it");
+  await expect(page.locator("#cm-replying")).toBeHidden();
+  await expect(page.locator("#cm-send")).toHaveText("Post comment");
+  expect(posted).toEqual([
+    { post: "the-exercise-book", name: "Kofi", body: "Great story.", trap: false, token: "" },
+    { post: "the-exercise-book", name: "Esi", body: "Same here.", trap: false, token: "", parent: 2 },
+  ]);
   expect(errors).toEqual([]);
 });
 
 test("the moderation page lists comments and approves one", async ({ page }) => {
   const errors = collectErrors(page);
   const rows = [
-    { id: 2, post: "the-exercise-book", name: "Kofi", body: "Great story.", status: "pending", created: "2026-11-13T09:00:00.000Z" },
-    { id: 1, post: "the-exercise-book", name: "Ama", body: "Loved it.", status: "approved", created: "2026-11-12T10:00:00.000Z" },
+    { id: 2, post: "the-exercise-book", name: "Kofi", body: "Great story.", status: "pending", created: "2026-11-13T09:00:00.000Z", parent: 1, parentName: "Ama", author: false },
+    { id: 1, post: "the-exercise-book", name: "Ama", body: "Loved it.", status: "approved", created: "2026-11-12T10:00:00.000Z", parent: null, parentName: null, author: false },
   ];
   const actions: any[] = [];
   await page.route(/\/api\/comments\/admin$/, async (route) => {
@@ -146,7 +168,8 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
     if (req.method() === "POST") {
       const body = req.postDataJSON();
       actions.push(body);
-      rows.find((r) => r.id === body.id)!.status = "approved";
+      if (body.action === "approve") rows.find((r) => r.id === body.id)!.status = "approved";
+      if (body.action === "reply") rows.unshift({ id: 3, post: "the-exercise-book", name: "Titus Nyarko Nde", body: body.body, status: "approved", created: "2026-11-13T10:00:00.000Z", parent: 1, parentName: "Ama", author: true });
       return route.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
     }
     return route.fulfill({ contentType: "application/json", body: JSON.stringify({ comments: rows }) });
@@ -160,12 +183,21 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
   await page.fill("#mod-token", "right-token");
   await page.click("#mod-login button[type=submit]");
   await expect(page.locator("#mod-pending .mod-item")).toHaveCount(1);
+  await expect(page.locator("#mod-pending .mod-meta")).toContainText("replying to Ama");
   await expect(page.locator("#mod-approved .mod-item")).toHaveCount(1);
-  await page.locator("#mod-pending .mod-item").getByRole("button", { name: "Approve" }).click();
+  await page.locator("#mod-pending .mod-item").getByRole("button", { name: "Approve", exact: true }).click();
   await expect(page.locator("#mod-status")).toHaveText("Approved.");
   await expect(page.locator("#mod-approved .mod-item")).toHaveCount(2);
   await expect(page.locator("#mod-pending-empty")).toBeVisible();
-  expect(actions).toEqual([{ action: "approve", id: 2 }]);
+  // Reply to Ama. The reply shows at once with the Author label, and it has no Reply button of its own.
+  await page.locator("#mod-approved .mod-item", { hasText: "Loved it." }).getByRole("button", { name: "Reply", exact: true }).click();
+  await page.fill("#mod-reply-1", "Thank you, Ama.");
+  await page.getByRole("button", { name: "Post reply" }).click();
+  await expect(page.locator("#mod-status")).toHaveText("Reply posted.");
+  const mine = page.locator("#mod-approved .mod-item", { hasText: "Thank you, Ama." });
+  await expect(mine.locator(".mod-badge")).toHaveText("Author");
+  await expect(mine.getByRole("button", { name: "Reply", exact: true })).toHaveCount(0);
+  expect(actions).toEqual([{ action: "approve", id: 2 }, { action: "reply", id: 1, body: "Thank you, Ama." }]);
   // The browser logs the 401 answer to the wrong token. Nothing else should show up.
   expect(errors.filter((e) => !e.includes("401"))).toEqual([]);
 });

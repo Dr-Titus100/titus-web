@@ -1,10 +1,13 @@
 // The Cloudflare Worker for titusnyarkonde.com. Static files in dist/ are served as before. This
 // script answers only /api/* (see run_worker_first in wrangler.jsonc), which is the blog comments API.
 //
-//   GET  /api/comments?post=<slug>   approved comments on one post
-//   POST /api/comments               a new comment, held until Titus approves it
+//   GET  /api/comments?post=<slug>   approved comments and replies on one post
+//   POST /api/comments               a new comment or reply, held until Titus approves it
 //   GET  /api/comments/admin         every comment, for the moderation page (needs the admin token)
-//   POST /api/comments/admin         approve or delete one comment (needs the admin token)
+//   POST /api/comments/admin         approve, delete or reply to one comment (needs the admin token)
+//
+// Replies are one level deep. A reply to a reply joins the same thread, under the first comment.
+// Titus's own replies, posted from the moderation page, carry author = 1 and show an "Author" label.
 //
 // Bindings and secrets, set in wrangler.jsonc or the Cloudflare dashboard:
 //   COMMENTS_DB              D1 database. Wrangler creates it on the first deploy. The table is created here.
@@ -16,7 +19,8 @@
 //   NOTIFY_TO                secret, the address that gets those emails. It lives only in Cloudflare, never in
 //                            this repo or on the site. Without it, no emails go out.
 //
-// The database keeps only the post, the name, the comment, its status and the time.
+// The database keeps only the post, the name, the comment, its status, the time, the comment it
+// replies to and whether Titus wrote it.
 
 const NAME_MAX = 60;
 const BODY_MAX = 2000;
@@ -27,6 +31,8 @@ const APPROVED_SHOWN = 500;
 // A post shows at most this many comments, the newest ones.
 const POST_SHOWN = 500;
 const SLUG = /^[a-z0-9][a-z0-9-]{0,99}$/;
+// The name on Titus's replies from the moderation page.
+const AUTHOR_NAME = "Titus Nyarko Nde";
 // The sender of the new-comment emails. titusnyarkonde.com must be set up for sending in Email Service.
 const NOTIFY_FROM = { email: "comments@titusnyarkonde.com", name: "titusnyarkonde.com comments" };
 
@@ -69,8 +75,9 @@ let schemaReady = false;
 async function db(env) {
   if (!env.COMMENTS_DB) return null;
   if (!schemaReady) {
-    await env.COMMENTS_DB.batch([
-      env.COMMENTS_DB.prepare(`CREATE TABLE IF NOT EXISTS comments (
+    const d1 = env.COMMENTS_DB;
+    await d1.batch([
+      d1.prepare(`CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         post TEXT NOT NULL,
         name TEXT NOT NULL,
@@ -78,8 +85,19 @@ async function db(env) {
         status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved')),
         created_at TEXT NOT NULL
       )`),
-      env.COMMENTS_DB.prepare("CREATE INDEX IF NOT EXISTS comments_by_post ON comments (post, status, created_at)"),
+      d1.prepare("CREATE INDEX IF NOT EXISTS comments_by_post ON comments (post, status, created_at)"),
     ]);
+    // Columns added after the first release. Two Workers starting at once may both try to add one,
+    // so "duplicate column" from the slower one is fine.
+    const { results } = await d1.prepare("PRAGMA table_info(comments)").all();
+    const have = new Set(results.map((c) => c.name));
+    const add = [];
+    if (!have.has("parent_id")) add.push("ALTER TABLE comments ADD COLUMN parent_id INTEGER");
+    if (!have.has("author")) add.push("ALTER TABLE comments ADD COLUMN author INTEGER NOT NULL DEFAULT 0");
+    for (const sql of add) {
+      try { await d1.prepare(sql).run(); } catch (err) { if (!/duplicate column/i.test(String(err && err.message))) throw err; }
+    }
+    await d1.prepare("CREATE INDEX IF NOT EXISTS comments_by_parent ON comments (parent_id)").run();
     schemaReady = true;
   }
   return env.COMMENTS_DB;
@@ -96,8 +114,8 @@ const ip = (request) => request.headers.get("CF-Connecting-IP") || "unknown";
 // Removes control characters (keeping line breaks), trims, and joins runs of blank lines.
 function tidy(value, multiline) {
   let s = String(value ?? "").normalize("NFC").replace(/\r\n?/g, "\n");
-  s = s.replace(multiline ? /[\u0000-\u0009\u000B-\u001F\u007F-\u009F​-‏‪-‮⁦-⁩﻿]/g
-    : /[\u0000-\u001F\u007F-\u009F​-‏‪-‮⁦-⁩﻿]/g, "");
+  s = s.replace(multiline ? /[\u0000-\u0009\u000B-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g
+    : /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, "");
   if (!multiline) s = s.replace(/\s+/g, " ");
   return s.replace(/\n{3,}/g, "\n\n").trim();
 }
@@ -107,14 +125,25 @@ async function listApproved(url, env) {
   if (!SLUG.test(post)) return json({ error: "post" }, 400);
   const d1 = await db(env);
   if (!d1) return json({ error: "unavailable" }, 503);
-  // The newest POST_SHOWN comments, put back in reading order, plus the total. So a newly approved
-  // comment always shows, even on a post with a very long thread.
-  const [latest, total] = await d1.batch([
-    d1.prepare("SELECT id, name, body, created_at AS created FROM comments WHERE post = ? AND status = 'approved' ORDER BY created_at DESC, id DESC LIMIT ?")
+  // The newest POST_SHOWN comments, put back in reading order, with their replies, plus the totals.
+  // So a newly approved comment always shows, even on a post with a very long thread.
+  const cols = "SELECT id, name, body, created_at AS created, parent_id AS parent, author FROM comments";
+  const [tops, replies, totals] = await d1.batch([
+    d1.prepare(`${cols} WHERE post = ? AND status = 'approved' AND parent_id IS NULL ORDER BY created_at DESC, id DESC LIMIT ?`)
       .bind(post, POST_SHOWN),
-    d1.prepare("SELECT COUNT(*) AS n FROM comments WHERE post = ? AND status = 'approved'").bind(post),
+    // Only replies in the threads shown, newest first so a new reply is never cut off, then put in reading order below.
+    d1.prepare(`${cols} WHERE post = ? AND status = 'approved' AND parent_id IN (
+        SELECT id FROM comments WHERE post = ? AND status = 'approved' AND parent_id IS NULL ORDER BY created_at DESC, id DESC LIMIT ?
+      ) ORDER BY created_at DESC, id DESC LIMIT 5000`).bind(post, post, POST_SHOWN),
+    d1.prepare("SELECT COUNT(*) AS everything, SUM(parent_id IS NULL) AS top FROM comments WHERE post = ? AND status = 'approved'").bind(post),
   ]);
-  return json({ comments: latest.results.reverse(), total: total.results[0].n });
+  const shown = new Set(tops.results.map((c) => c.id));
+  const tidyRow = (c) => ({ ...c, author: c.author === 1 });
+  return json({
+    comments: [...tops.results.reverse(), ...replies.results.reverse().filter((r) => shown.has(r.parent))].map(tidyRow),
+    total: totals.results[0].top || 0,
+    count: totals.results[0].everything || 0,
+  });
 }
 
 async function addComment(request, url, env, ctx) {
@@ -137,6 +166,8 @@ async function addComment(request, url, env, ctx) {
   if (!SLUG.test(post)) return json({ error: "post" }, 400);
   if (!name || name.length > NAME_MAX) return json({ error: "name" }, 400);
   if (!body || body.length > BODY_MAX) return json({ error: "body" }, 400);
+  const replyTo = input.parent == null ? null : Number(input.parent);
+  if (replyTo !== null && (!Number.isInteger(replyTo) || replyTo < 1)) return json({ error: "parent" }, 400);
 
   // The post must be a real page on the site.
   const page = await env.ASSETS.fetch(new Request(new URL(`/blog/${post}/`, url.origin), { method: "GET" }));
@@ -149,12 +180,24 @@ async function addComment(request, url, env, ctx) {
 
   const d1 = await db(env);
   if (!d1) return json({ error: "unavailable" }, 503);
+  // A reply goes under an approved comment on the same post. A reply to a reply joins that thread.
+  let parent = null;
+  if (replyTo !== null) {
+    const target = await d1.prepare("SELECT id, name, parent_id FROM comments WHERE id = ? AND post = ? AND status = 'approved'")
+      .bind(replyTo, post).first();
+    if (!target) return json({ error: "parent" }, 400);
+    parent = { id: target.parent_id ?? target.id, name: target.name };
+  }
   const waiting = await d1.prepare("SELECT COUNT(*) AS n FROM comments WHERE status = 'pending'").first("n");
   if (waiting >= PENDING_MAX) return json({ error: "full" }, 503);
-  await d1.prepare("INSERT INTO comments (post, name, body, status, created_at) VALUES (?, ?, ?, 'pending', ?)")
-    .bind(post, name, body, new Date().toISOString()).run();
-  // The email goes out after the reply, so a slow or failed send never holds up the reader.
-  ctx.waitUntil(notify(env, url, page, { post, name, body, waiting: waiting + 1 }));
+  // The insert checks the thread again, so a reply can't land in a thread deleted a moment ago.
+  const parentId = parent ? parent.id : null;
+  const saved = await d1.prepare(`INSERT INTO comments (post, name, body, status, created_at, parent_id)
+      SELECT ?, ?, ?, 'pending', ?, ? WHERE ? IS NULL OR EXISTS (SELECT 1 FROM comments WHERE id = ? AND parent_id IS NULL)`)
+    .bind(post, name, body, new Date().toISOString(), parentId, parentId, parentId).run();
+  if (!saved.meta || saved.meta.changes === 0) return json({ error: "parent" }, 400);
+  // The email goes out after the response, so a slow or failed send never holds up the reader.
+  ctx.waitUntil(notify(env, url, page, { post, name, body, waiting: waiting + 1, replyTo: parent && parent.name }));
   return json({ status: "pending" }, 202);
 }
 
@@ -167,7 +210,7 @@ async function notify(env, url, page, c) {
       .replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").trim() || c.post;
     const site = `https://${NOTIFY_FROM.email.split("@")[1]}`;
     const text = [
-      `${c.name} commented on "${title}":`,
+      c.replyTo ? `${c.name} replied to ${c.replyTo} on "${title}":` : `${c.name} commented on "${title}":`,
       "",
       c.body,
       "",
@@ -179,7 +222,7 @@ async function notify(env, url, page, c) {
     await env.NOTIFY_EMAIL.send({
       to: env.NOTIFY_TO,
       from: NOTIFY_FROM,
-      subject: `New comment from ${c.name} on "${title}"`.slice(0, 200),
+      subject: `${c.replyTo ? "New reply" : "New comment"} from ${c.name} on "${title}"`.slice(0, 200),
       text,
     });
   } catch (err) {
@@ -223,13 +266,15 @@ async function admin(request, url, env) {
   if (request.method === "GET") {
     // Every waiting comment (PENDING_MAX keeps that list short), then the newest approved ones.
     // The two lists come separately, so a long approved history never hides a waiting comment.
-    const cols = "SELECT id, post, name, body, status, created_at AS created FROM comments";
+    const cols = `SELECT c.id, c.post, c.name, c.body, c.status, c.created_at AS created, c.parent_id AS parent,
+      c.author, p.name AS parentName FROM comments c LEFT JOIN comments p ON p.id = c.parent_id`;
     const [pending, approved, total] = await d1.batch([
-      d1.prepare(`${cols} WHERE status = 'pending' ORDER BY created_at DESC, id DESC LIMIT ?`).bind(PENDING_MAX * 2),
-      d1.prepare(`${cols} WHERE status = 'approved' ORDER BY created_at DESC, id DESC LIMIT ?`).bind(APPROVED_SHOWN),
+      d1.prepare(`${cols} WHERE c.status = 'pending' ORDER BY c.created_at DESC, c.id DESC LIMIT ?`).bind(PENDING_MAX * 2),
+      d1.prepare(`${cols} WHERE c.status = 'approved' ORDER BY c.created_at DESC, c.id DESC LIMIT ?`).bind(APPROVED_SHOWN),
       d1.prepare("SELECT COUNT(*) AS n FROM comments WHERE status = 'approved'"),
     ]);
-    return json({ comments: [...pending.results, ...approved.results], approvedTotal: total.results[0].n });
+    const rows = [...pending.results, ...approved.results].map((c) => ({ ...c, author: c.author === 1 }));
+    return json({ comments: rows, approvedTotal: total.results[0].n });
   }
 
   let input;
@@ -240,7 +285,24 @@ async function admin(request, url, env) {
   if (input.action === "approve") {
     result = await d1.prepare("UPDATE comments SET status = 'approved' WHERE id = ?").bind(id).run();
   } else if (input.action === "delete") {
-    result = await d1.prepare("DELETE FROM comments WHERE id = ?").bind(id).run();
+    // Deleting a comment deletes its replies too.
+    result = await d1.prepare("DELETE FROM comments WHERE id = ? OR parent_id = ?").bind(id, id).run();
+  } else if (input.action === "reply") {
+    const body = tidy(input.body, true);
+    if (!body || body.length > BODY_MAX) return json({ error: "body" }, 400);
+    const target = await d1.prepare("SELECT id, post, parent_id FROM comments WHERE id = ?").bind(id).first();
+    if (!target) return json({ error: "missing" }, 404);
+    const root = target.parent_id ?? target.id;
+    // Replying to a waiting comment approves it, and its thread's first comment, so the reply has a place to show.
+    const [, saved] = await d1.batch([
+      d1.prepare("UPDATE comments SET status = 'approved' WHERE id IN (?, ?) AND status = 'pending'").bind(target.id, root),
+      // Only while the thread still exists, so the reply never lands in a thread deleted a moment ago.
+      d1.prepare(`INSERT INTO comments (post, name, body, status, created_at, parent_id, author)
+          SELECT ?, ?, ?, 'approved', ?, ?, 1 WHERE EXISTS (SELECT 1 FROM comments WHERE id = ? AND parent_id IS NULL)`)
+        .bind(target.post, AUTHOR_NAME, body, new Date().toISOString(), root, root),
+    ]);
+    if (!saved.meta || saved.meta.changes === 0) return json({ error: "missing" }, 404);
+    return json({ ok: true });
   } else {
     return json({ error: "action" }, 400);
   }

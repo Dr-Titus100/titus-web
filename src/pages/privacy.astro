@@ -48,7 +48,7 @@ const onCloudflare = process.env.SITE_HOST === "cloudflare";
       {onCloudflare && (
         <>
           <h2 id="comments">Comments on blog posts</h2>
-          <p>When you post a comment, your browser sends your name and comment to this site's Worker on Cloudflare. The Worker saves them in a Cloudflare D1 database with the post and the time. The form doesn't ask for your email, and the database doesn't keep your IP address. The Worker uses your IP address only in the moment, to limit how many comments one place can send in a minute. Cloudflare's own logs may record it, as they do for every page you load. The Worker also sends me your name and comment in an email through Cloudflare, so I can read new comments quickly.</p>
+          <p>When you post a comment, your browser sends your name and comment to this site's Worker on Cloudflare. The Worker saves them in a Cloudflare D1 database with the post, the time and, for a reply, the comment you replied to. The form doesn't ask for your email, and the database doesn't keep your IP address. The Worker uses your IP address only in the moment, to limit how many comments one place can send in a minute. Cloudflare's own logs may record it, as they do for every page you load. The Worker also sends me your name and comment in an email through Cloudflare, so I can read new comments quickly.</p>
           {commentsTurnstileKey && (
             <p>To block spam, the form uses Cloudflare Turnstile, which checks your browser to tell people from bots. See the <a href="https://www.cloudflare.com/turnstile-privacy-policy/">Turnstile privacy addendum</a>. The Turnstile script loads only after you click into the form.</p>
           )}

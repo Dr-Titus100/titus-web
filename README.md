@@ -144,6 +144,7 @@ Readers can comment under each blog post on the Cloudflare site. Nobody needs an
 
 - `src/components/Comments.astro` shows the approved comments and the form. It's built only when `SITE_HOST=cloudflare`, because GitHub Pages has no Worker.
 - `worker/index.js` is the API. It saves comments in a Cloudflare D1 database (the post, the name, the comment, its status and the time), and creates the table itself on first use. It limits each IP address to 5 new comments a minute, holds new comments once 200 are waiting, and never stores IP addresses. It only accepts comments on posts that exist.
+- Readers can reply to any comment. Replies are one level deep, so a reply to a reply joins the same thread, and each reply waits for approval too. Titus replies from the moderation page. His replies show at once with an "Author" label, which nobody else can get, and replying to a waiting comment approves it. Deleting a comment deletes its replies.
 - `/admin/comments/` is the moderation page. Search engines are told to skip it, and it does nothing without the admin token.
 
 ### Setting it up on Cloudflare (one time)
