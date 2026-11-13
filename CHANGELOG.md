@@ -4,6 +4,8 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- Readers can comment under blog posts. They type a name and a comment, with no account and no email. A small Cloudflare Worker (`worker/index.js`) stores comments in a Cloudflare D1 database, and each one stays hidden until I approve it on the new moderation page at `/admin/comments/`. The Privacy page has a new Comments section. The README explains the one-time setup on Cloudflare.
+
 - The site uses titus-humanizer v1.2.0. Its script now writes the "Left as-is" line itself, so I removed the site's own copy from `public/js/titus_glue.py`. The reports read the same as before. The Checker and the score also count words with a curly apostrophe, such as "don’t", as one word.
 - The Checker's Patterns found card names everything it left as-is and didn't score, such as "Left as-is and not scored: 1 quotation, 1 code snippet and 1 link". The score also skips links and file paths now, so a word inside a URL or a path doesn't count. Both match the next titus-humanizer release. Until the site pins it, `public/js/titus_glue.py` adds them to the v1.2.0 script.
 - On desktop, the Humanizer tabs start directly under Humanizer in the top bar, so Overview sits below it. When the window is too narrow for that, the tabs stay at the right.

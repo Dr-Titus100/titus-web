@@ -4,7 +4,8 @@
 //
 // Each inline <script> is allowed by its SHA-256 hash, so script-src never needs 'unsafe-inline'.
 // Outside hosts are allowed only on the pages that use them: the AI providers on Rewrite, and
-// Web3Forms and hCaptcha on pages with the contact form.
+// Web3Forms and hCaptcha on pages with the contact form, and Cloudflare Turnstile on blog posts with
+// a comment form, when a Turnstile site key is set. The comments API is on this site, so 'self' covers it.
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -20,6 +21,7 @@ walk(dist);
 
 const PROVIDERS = ["https://api.anthropic.com", "https://api.openai.com", "https://generativelanguage.googleapis.com"];
 const CAPTCHA = ["https://web3forms.com", "https://js.hcaptcha.com", "https://*.hcaptcha.com"];
+const TURNSTILE = "https://challenges.cloudflare.com";
 
 // Links to other sites (LinkedIn, GitHub, ORCID, Google Scholar and the rest) open in a new tab.
 // Done here so it covers every page, blog posts included, and works without JavaScript.
@@ -46,12 +48,14 @@ for (const file of pages) {
     .map((m) => `'sha256-${createHash("sha256").update(m[1], "utf8").digest("base64")}'`);
   const rewrite = html.includes('id="rw-config"');
   const contact = html.includes('id="contact-form"');
+  // The comment form carries data-sitekey="" when Turnstile is off.
+  const turnstile = /id="comment-form"[^>]*data-sitekey="[^"]+"/.test(html);
   const policy = {
     "default-src": ["'self'"],
-    "script-src": ["'self'", "'wasm-unsafe-eval'", ...new Set(hashes), ...(contact ? CAPTCHA : [])],
+    "script-src": ["'self'", "'wasm-unsafe-eval'", ...new Set(hashes), ...(contact ? CAPTCHA : []), ...(turnstile ? [TURNSTILE] : [])],
     "worker-src": ["'self'"],
     "connect-src": ["'self'", ...(rewrite ? PROVIDERS : []), ...(contact ? ["https://api.web3forms.com", "https://*.hcaptcha.com"] : [])],
-    "frame-src": contact ? ["https://*.hcaptcha.com"] : ["'none'"],
+    "frame-src": contact || turnstile ? [...(contact ? ["https://*.hcaptcha.com"] : []), ...(turnstile ? [TURNSTILE] : [])] : ["'none'"],
     "img-src": ["'self'", "data:"],
     "media-src": ["'self'"],
     "font-src": ["'self'"],
