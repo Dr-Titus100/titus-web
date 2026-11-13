@@ -130,35 +130,48 @@ function copyButtons() {
       const src = document.querySelector<HTMLElement>(btn.dataset.copyFrom);
       if (src) return copyText((src as HTMLTextAreaElement).value ?? src.textContent ?? "");
     }
-    if (btn.dataset.copyUrl) {
-      btn.setAttribute("disabled", "");
-      try {
-        const res = await fetch(btn.dataset.copyUrl);
-        await copyText(await res.text(), btn.dataset.copyLabel || "Copied");
-      } finally {
-        btn.removeAttribute("disabled");
-      }
-    }
+    if (btn.dataset.copyUrl) await copyFromUrl(btn.dataset.copyUrl, (t) => t, btn.dataset.copyLabel || "Copied");
   });
+  // Load the files behind copy buttons as soon as the page opens. Safari only lets a page write to the
+  // clipboard during the click itself, so the text has to be ready before the click, not fetched after it.
+  document.querySelectorAll<HTMLElement>("[data-copy-url]").forEach((b) => { loadText(b.dataset.copyUrl!).catch(() => {}); });
 }
 
-// Links that leave this site open in a new tab, so visitors keep their place here.
-function externalLinksInNewTab() {
-  const mark = (a: HTMLAnchorElement) => {
-    if (!/^https?:$/.test(a.protocol) || a.host === location.host) return;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-  };
-  document.querySelectorAll<HTMLAnchorElement>("a[href]").forEach(mark);
-  // Catch links added after load, such as ones written into results.
-  document.addEventListener("click", (e) => {
-    const a = (e.target as Element | null)?.closest?.("a[href]");
-    if (a) mark(a as HTMLAnchorElement);
-  }, true);
+const textCache = new Map<string, Promise<string>>();
+const ready = new Map<string, string>();
+// Fetches a text file once and keeps it. A failed or missing file rejects, so a 404 page is never copied.
+export function loadText(url: string): Promise<string> {
+  let p = textCache.get(url);
+  if (!p) {
+    p = fetch(url)
+      .then((res) => { if (!res.ok) throw new Error(String(res.status)); return res.text(); })
+      .then((t) => { ready.set(url, t); return t; });
+    p.catch(() => textCache.delete(url));
+    textCache.set(url, p);
+  }
+  return p;
+}
+
+// Copies text built from a fetched file. If the file is already loaded, the copy happens inside the click.
+// If not, Safari still accepts a ClipboardItem that waits for the file.
+export async function copyFromUrl(url: string, build: (text: string) => string, label: string) {
+  const fail = () => toast("Couldn't load the rulebook. Try again.");
+  const cached = ready.get(url);
+  if (cached !== undefined) return copyText(build(cached), label);
+  const pending = loadText(url).then(build);
+  if ("ClipboardItem" in window && navigator.clipboard?.write) {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "text/plain": pending.then((t) => new Blob([t], { type: "text/plain" })) })]);
+      toast(label);
+      return;
+    } catch {
+      // Fall through: the file failed, or this browser refused the delayed write.
+    }
+  }
+  try { await copyText(await pending, label); } catch { fail(); }
 }
 
 export function initSite() {
-  externalLinksInNewTab();
   nav();
   splitHeadlines();
   revealOnScroll();
