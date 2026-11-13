@@ -1,4 +1,4 @@
-// Shared behavior for every page: sticky nav, mobile menu, headline and scroll animations, copy buttons.
+// Shared behavior for every page: sticky nav, phone menus, footer columns, scroll reveal and copy buttons.
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export function toast(message: string) {
@@ -26,23 +26,6 @@ export async function copyText(text: string, label = "Copied") {
   toast(label);
 }
 
-function splitHeadlines() {
-  document.querySelectorAll<HTMLElement>("[data-rise]").forEach((el) => {
-    if (reduceMotion) return;
-    const words = (el.textContent || "").trim().split(/\s+/);
-    el.textContent = "";
-    el.classList.add("rise");
-    words.forEach((w, i) => {
-      const span = document.createElement("span");
-      span.className = "w";
-      span.style.animationDelay = `${0.08 * i + 0.1}s`;
-      span.textContent = w;
-      el.appendChild(span);
-      if (i < words.length - 1) el.appendChild(document.createTextNode(" "));
-    });
-  });
-}
-
 function revealOnScroll() {
   const items = document.querySelectorAll<HTMLElement>(".reveal");
   if (reduceMotion || !("IntersectionObserver" in window)) {
@@ -63,38 +46,14 @@ function revealOnScroll() {
   items.forEach((el) => io.observe(el));
 }
 
-// Video and hero media grow into place as they scroll into view.
-function scrollScale() {
-  const frames = document.querySelectorAll<HTMLElement>("[data-scroll-scale]");
-  if (!frames.length || reduceMotion) return;
-  let ticking = false;
-  const update = () => {
-    const vh = window.innerHeight;
-    frames.forEach((el) => {
-      const r = el.getBoundingClientRect();
-      const p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.85)));
-      const scale = 0.86 + 0.14 * p;
-      const tilt = 14 * (1 - p);
-      el.style.transform = `rotateX(${tilt}deg) scale(${scale})`;
-      el.style.opacity = String(0.4 + 0.6 * p);
-    });
-    ticking = false;
-  };
-  window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
-  update();
-}
-
 // The phone menu: a full-screen panel. While it's open, the page behind it can't scroll or take focus,
 // Tab cycles inside the menu, and Escape, a link or a switch to the desktop layout closes it.
 function nav() {
   const navEl = document.getElementById("nav");
   const toggle = navEl?.querySelector<HTMLButtonElement>(".nav-toggle");
   const list = document.getElementById("nav-links");
-  const onScroll = () => navEl?.classList.toggle("scrolled", window.scrollY > 8);
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
   if (!navEl || !toggle || !list) return;
-  const phone = window.matchMedia("(max-width: 760px)");
+  const phone = window.matchMedia("(max-width: 734px)");
   const behind = () => [...document.body.children].filter((el) => el !== navEl && !el.contains(navEl) && el.tagName !== "SCRIPT") as HTMLElement[];
   const links = () => [...list.querySelectorAll<HTMLAnchorElement>("a")];
 
@@ -171,10 +130,53 @@ export async function copyFromUrl(url: string, build: (text: string) => string, 
   try { await copyText(await pending, label); } catch { fail(); }
 }
 
+// On phones, pages with a product bar hide the global nav while you scroll down and bring it back
+// when you scroll up, so only the 52 px product bar stays on screen.
+function navAway() {
+  if (!document.querySelector(".subnav")) return;
+  const phone = window.matchMedia("(max-width: 734px)");
+  const root = document.documentElement;
+  let last = window.scrollY;
+  window.addEventListener("scroll", () => {
+    const y = window.scrollY;
+    if (!phone.matches || root.classList.contains("menu-open")) { root.classList.remove("nav-away"); last = y; return; }
+    if (Math.abs(y - last) < 6) return;
+    root.classList.toggle("nav-away", y > last && y > 120);
+    last = y;
+  }, { passive: true });
+}
+
+// The product bar's section menu on phones: the chevron opens and closes it, and Escape or a
+// click outside closes it.
+function productBar() {
+  const bar = document.querySelector<HTMLElement>(".subnav");
+  const toggle = bar?.querySelector<HTMLButtonElement>(".subnav-toggle");
+  if (!bar || !toggle) return;
+  const setOpen = (open: boolean) => {
+    bar.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close the titus-humanizer menu" : "Open the titus-humanizer menu");
+  };
+  toggle.addEventListener("click", () => setOpen(!bar.classList.contains("open")));
+  document.addEventListener("click", (e) => { if (bar.classList.contains("open") && !bar.contains(e.target as Node)) setOpen(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && bar.classList.contains("open")) { setOpen(false); toggle.focus(); } });
+}
+
+// The footer's site-map columns are open on wide screens and fold into a list of headings on phones.
+function footerColumns() {
+  const cols = [...document.querySelectorAll<HTMLDetailsElement>(".footer-col")];
+  if (!cols.length) return;
+  const phone = window.matchMedia("(max-width: 734px)");
+  const apply = () => cols.forEach((d) => { d.open = !phone.matches; });
+  apply();
+  phone.addEventListener("change", apply);
+}
+
 export function initSite() {
   nav();
-  splitHeadlines();
+  navAway();
+  productBar();
+  footerColumns();
   revealOnScroll();
-  scrollScale();
   copyButtons();
 }

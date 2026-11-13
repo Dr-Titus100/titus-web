@@ -1,0 +1,43 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { u } from "../lib/url";
+const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const groups = [
+  { title: "Main pages", links: [
+    { href: "/", label: "Home" },
+    { href: "/about/", label: "About" },
+    { href: "/about/#contact", label: "Contact" },
+    { href: "/experience/", label: "Experience" },
+    { href: "/tools/", label: "Tools" },
+    { href: "/blog/", label: "Blog" },
+  ] },
+  { title: "titus-humanizer", links: [
+    { href: "/tools/titus-humanizer/", label: "Overview" },
+    { href: "/tools/titus-humanizer/checker/", label: "Checker" },
+    { href: "/tools/titus-humanizer/rewrite/", label: "Rewrite with your key" },
+    { href: "/tools/titus-humanizer/any-chatbot/", label: "Use any chatbot" },
+    { href: "/tools/titus-humanizer/install/", label: "Install" },
+  ] },
+  { title: "Blog posts", links: posts.map((p) => ({ href: `/blog/${p.id}/`, label: p.data.title })) },
+  { title: "Legal", links: [
+    { href: "/privacy/", label: "Privacy" },
+    { href: "/terms/", label: "Terms" },
+  ] },
+];
+---
+<Base title="Site map" description="Every page on Titus Nyarko Nde's website.">
+  <section class="section legal">
+    <div class="wrap wrap-narrow">
+      <h1 class="h1">Site map</h1>
+      {groups.filter((g) => g.links.length).map((g) => (
+        <>
+          <h2>{g.title}</h2>
+          <ul>
+            {g.links.map((l) => <li><a href={u(l.href)}>{l.label}</a></li>)}
+          </ul>
+        </>
+      ))}
+    </div>
+  </section>
+</Base>

@@ -22,8 +22,8 @@ const { before, after, spans, patterns, beforeScore, beforeTier, afterScore, aft
 <style is:global>
   .demo { padding: clamp(24px, 4vw, 44px); max-width: 980px; margin: 0 auto; }
   .demo-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-  .demo-pill { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 5px 10px; border-radius: 980px; background: var(--bg-soft); color: var(--ink-soft); transition: background 0.4s, color 0.4s; }
-  .demo-pill.is-after { background: rgba(52, 199, 89, 0.15); color: var(--good); }
+  .demo-pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 980px; background: var(--bg-soft); color: var(--ink-soft); transition: background 0.4s, color 0.4s; }
+  .demo-pill.is-after { background: rgba(52, 199, 89, 0.15); color: var(--good-on-tint); }
   .demo-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(20px, 4vw, 48px); align-items: center; }
   @media (max-width: 680px) { .demo-body { grid-template-columns: 1fr; justify-items: center; } }
   .demo-text { margin: 0; font-size: clamp(18px, 2.2vw, 24px); line-height: 1.55; letter-spacing: -0.015em; min-height: 7.5em; transition: opacity 0.5s, filter 0.5s, transform 0.5s var(--ease); }

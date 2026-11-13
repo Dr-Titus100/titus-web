@@ -11,14 +11,20 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
     <ComingSoon title="Blog" text="The first posts are coming soon." />
   ) : (
     <>
-      <section class="hero"><div class="wrap wrap-narrow"><h1 class="h1" data-rise>Blog</h1></div></section>
-      <section class="section-tight" style="padding-top: 0">
-        <div class="wrap wrap-narrow">
+      <section class="hero tool-hero">
+        <div class="wrap wrap-text">
+          <h1 class="h1">Blog</h1>
+          <p class="lead">Writing on AI, data science and the tools on this site, and the occasional story.</p>
+        </div>
+      </section>
+      <section class="tool-body">
+        <div class="wrap wrap-text">
           {posts.map((p) => (
-            <a class="card tile reveal post-row" href={u(`/blog/${p.id}/`)}>
-              <p class="small muted" style="margin:0">{fmt(p.data.date)}{p.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
-              <h2 class="h3">{p.data.title}</h2>
+            <a class="card tile post-row" href={u(`/blog/${p.id}/`)}>
+              <p class="small muted"><time datetime={p.data.date.toISOString().slice(0, 10)}>{fmt(p.data.date)}</time>{p.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
+              <h2 class="h-tile">{p.data.title}</h2>
               <p>{p.data.description}</p>
+              <span class="link-arrow">{p.data.fiction ? "Read the story" : "Read the post"}</span>
             </a>
           ))}
         </div>
@@ -26,4 +32,4 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
     </>
   )}
 </Base>
-<style>.post-row { min-height: 0; margin-bottom: 20px; }</style>
+<style>.post-row { margin-bottom: 20px; }</style>
