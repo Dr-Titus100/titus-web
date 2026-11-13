@@ -1,0 +1,14 @@
+// Cloudflare hosting for the built site. Cloudflare's Git integration runs `npm run build`, then
+// `npx wrangler deploy` uploads dist/ as static assets. There is no Worker script.
+// Build variables (set in the Cloudflare dashboard, not here): SITE_URL, SITE_BASE=/ and SITE_HOST=cloudflare.
+{
+  "name": "titus-web",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    // dist/404.html answers unknown paths with a 404 status.
+    "not_found_handling": "404-page"
+  },
+  // A preview link for every pull request, posted on the pull request by Cloudflare.
+  "previews": {}
+}

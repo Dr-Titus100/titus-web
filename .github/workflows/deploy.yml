@@ -34,10 +34,19 @@ jobs:
       - run: npm run build
       - name: Check wording rules on the built pages
         run: node scripts/check-copy.mjs
+      # After the move to Cloudflare, set the repository variable NEW_SITE_URL (Settings, then
+      # Secrets and variables, then Actions, then Variables) to the new address, such as
+      # https://example.com. GitHub Pages then serves only pages that forward each old address
+      # to the same page on the new domain.
+      - name: Build forwarding pages for the old address
+        if: vars.NEW_SITE_URL != ''
+        env:
+          NEW_SITE_URL: ${{ vars.NEW_SITE_URL }}
+        run: node scripts/make-forwarders.mjs
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.ref == 'refs/heads/main'
         with:
-          path: dist
+          path: ${{ vars.NEW_SITE_URL != '' && 'dist-forward' || 'dist' }}
 
   # Runs the pinned scoring script on a sample to make sure it works. It runs in its own job with
   # read-only permissions, and it never writes into the site that gets deployed.

@@ -8,3 +8,5 @@ public/vendor/
 src/data/skills.generated.json
 test-results/
 playwright-report/
+.wrangler/
+dist-forward/
