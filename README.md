@@ -73,6 +73,19 @@ The first build downloads the pinned skill files. Later builds reuse them while 
 
 The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
 
+## Captions for the tour video
+
+The tour video's captions live in `public/media/titus-humanizer-promo.en.vtt`, a WebVTT file. When that file exists, `src/components/PromoVideo.astro` adds an English captions track to the video and a "Read the transcript" panel under it, built from the same cues. Each cue is a time range and the words spoken in it:
+
+```
+WEBVTT
+
+00:00:00.000 --> 00:00:04.500
+The first line of the narration.
+```
+
+If you replace the video, update the captions file in the same commit.
+
 ## Adding posts, pages and tools
 
 - **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`, and the home page lists the three newest posts. For a story, also set `fiction: true`, and the post shows a "Fiction" label everywhere it appears.

@@ -23,7 +23,7 @@ const skill = skills["titus-humanizer"];
       <div class="card checker-card reveal">
         <div class="checker-top">
           <label for="input">Your text</label>
-          <span class="status" id="status" data-state="idle"><span class="dot"></span><span class="status-text">The first check downloads Python, about 12 MB</span></span>
+          <span class="status" id="status" data-state="idle"><span class="dot"></span><span class="status-text" id="status-text">The first check downloads Python, about 12 MB</span></span>
         </div>
         <div class="load" id="load" hidden>
           <progress id="load-bar" max="1" value="0" aria-labelledby="load-text"></progress>
@@ -32,7 +32,7 @@ const skill = skills["titus-humanizer"];
         <textarea id="input" spellcheck="false" placeholder="Paste an email, an essay, a cover letter or a story here."></textarea>
         <div class="checker-actions">
           <div class="btn-row">
-            <button class="btn btn-ghost" id="run">Check text</button>
+            <button class="btn btn-ghost" id="run" type="button" aria-describedby="status-text">Check text</button>
             <button class="btn btn-ghost" id="sample" type="button">Try a sample</button>
             <button class="btn btn-ghost" id="clear" type="button">Clear</button>
           </div>
@@ -44,6 +44,7 @@ const skill = skills["titus-humanizer"];
         </div>
       </div>
 
+      <p class="sr-only" id="announce" role="status" aria-live="polite" aria-atomic="true"></p>
       <div class="results" id="results" hidden>
         <div class="grid results-grid">
           <div class="card score-card">
@@ -67,9 +68,9 @@ const skill = skills["titus-humanizer"];
         <div class="card view-card">
           <div class="view-head">
             <div class="segmented" role="tablist" aria-label="View">
-              <button role="tab" aria-selected="true" data-view="patterns">Highlighted patterns</button>
-              <button role="tab" aria-selected="false" data-view="hidden">Hidden characters</button>
-              <button role="tab" aria-selected="false" data-view="cleaned">Cleaned text</button>
+              <button role="tab" type="button" id="tab-patterns" aria-controls="view" aria-selected="true" tabindex="0" data-view="patterns">Highlighted patterns</button>
+              <button role="tab" type="button" id="tab-hidden" aria-controls="view" aria-selected="false" tabindex="-1" data-view="hidden">Hidden characters</button>
+              <button role="tab" type="button" id="tab-cleaned" aria-controls="view" aria-selected="false" tabindex="-1" data-view="cleaned">Cleaned text</button>
             </div>
             <button class="btn btn-small btn-ghost" id="copy-clean" type="button">Copy cleaned text</button>
           </div>
@@ -81,7 +82,7 @@ const skill = skills["titus-humanizer"];
             <span><i class="hl-story"></i>Story pattern</span>
             <span><i class="hl-quote"></i>Quoted text, not scored</span>
           </div>
-          <div class="view" id="view" tabindex="0"></div>
+          <div class="view" id="view" role="tabpanel" aria-labelledby="tab-patterns" tabindex="0"></div>
           <p class="small muted" id="view-note"></p>
         </div>
 
@@ -154,7 +155,7 @@ const skill = skills["titus-humanizer"];
   .legend .hl-quote { background: transparent; border: 1px dashed var(--ink-soft); }
   mark.hl { color: inherit; border-radius: 4px; padding: 1px 0; box-shadow: inset 0 -2px 0 var(--line); cursor: help; animation: markIn 0.6s var(--ease) backwards; }
   @keyframes markIn { from { background: transparent; box-shadow: inset 0 0 0 transparent; } }
-  mark.hid { background: var(--bad); color: #fff; font-family: var(--mono); font-size: 11px; padding: 1px 5px; border-radius: 5px; margin: 0 1px; vertical-align: 1px; cursor: help; }
+  mark.hid { background: var(--bad); color: var(--bg); font-family: var(--mono); font-size: 11px; padding: 1px 5px; border-radius: 5px; margin: 0 1px; vertical-align: 1px; cursor: help; }
   mark.hid-letter { background: transparent; color: var(--bad); font: inherit; font-size: inherit; padding: 0; margin: 0; box-shadow: inset 0 -2px 0 var(--bad); vertical-align: baseline; }
   .hl-tip { position: absolute; z-index: 50; max-width: min(320px, calc(100vw - 16px)); padding: 6px 10px; border-radius: 8px; background: var(--ink); color: var(--bg); font-size: 13px; line-height: 1.4; box-shadow: 0 6px 20px rgba(0,0,0,0.25); pointer-events: none; }
   .hl-tip[hidden] { display: none; }
@@ -171,6 +172,7 @@ const skill = skills["titus-humanizer"];
   import { onStatus, load, analyze, highlight, showHidden, groupOf, type Analysis } from "../../../scripts/titus";
   import { setRing } from "../../../scripts/ring";
   import { copyText, toast } from "../../../scripts/site";
+  import { initTabs } from "../../../scripts/tabs";
 
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const input = $<HTMLTextAreaElement>("input");
@@ -270,6 +272,19 @@ const skill = skills["titus-humanizer"];
     qs.textContent = nq ? `Quoted text: ${nq} ${nq === 1 ? "quotation" : "quotations"} left as written and not scored.` : "Quoted text: none.";
     $("hidden-summary").textContent = `Hidden characters removed: ${last.found_text}.`;
     selectView("patterns");
+    announce(r.score === null
+      ? `Not scored. The text has ${r.words} words and the score needs at least ${last.min_words}. ${typesText(r.patterns.length)}`
+      : `Score ${r.score.toFixed(2)}, ${r.tier}. ${typesText(r.patterns.length)}${hiddenTotal ? ` ${hiddenTotal} hidden ${hiddenTotal === 1 ? "character" : "characters"} removed.` : ""}`);
+  }
+
+  // A short summary for screen readers, since the results appear without moving focus.
+  function typesText(n: number) {
+    return n ? `${n} pattern ${n === 1 ? "type" : "types"} found.` : "No patterns found.";
+  }
+  function announce(text: string) {
+    const live = $("announce");
+    live.textContent = "";
+    setTimeout(() => { live.textContent = text; }, 50);
   }
 
   const actions = ["run", "sample", "clear"].map((id) => $(id));
@@ -346,13 +361,15 @@ const skill = skills["titus-humanizer"];
   window.addEventListener("resize", hideTip);
 
   // Each new check opens on Highlighted patterns. The other tabs show when clicked.
-  function selectView(name: string) {
-    view = name;
-    document.querySelectorAll("[data-view]").forEach((x) => x.setAttribute("aria-selected", String((x as HTMLElement).dataset.view === name)));
+  const viewTabs = initTabs(document.querySelector<HTMLElement>('[aria-label="View"]')!, (b) => {
+    view = b.dataset.view!;
+    viewEl.setAttribute("aria-labelledby", b.id);
     hideTip();
     render();
+  });
+  function selectView(name: string) {
+    viewTabs.select(viewTabs.tabs.find((t) => t.dataset.view === name)!);
   }
-  document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.addEventListener("click", () => selectView(b.dataset.view!)));
 </script>
 
 <style is:global>

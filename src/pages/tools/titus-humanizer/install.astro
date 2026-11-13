@@ -63,12 +63,12 @@ const platforms = [
       <div class="center" style="margin-bottom: 28px">
         <div class="segmented" role="tablist" aria-label="Platform">
           {platforms.map((p, i) => (
-            <button role="tab" aria-selected={i === 0 ? "true" : "false"} aria-controls={`p-${p.id}`} data-platform={p.id}>{p.name}</button>
+            <button role="tab" type="button" id={`tab-p-${p.id}`} aria-selected={i === 0 ? "true" : "false"} aria-controls={`p-${p.id}`} tabindex={i === 0 ? 0 : -1} data-platform={p.id}>{p.name}</button>
           ))}
         </div>
       </div>
 
-      <div class="card platform" id="p-claude" role="tabpanel">
+      <div class="card platform" id="p-claude" role="tabpanel" aria-labelledby="tab-p-claude" tabindex="0">
         <h3 class="h3">claude.ai and the Claude desktop app</h3>
         <ol class="steps" style="margin-top: 22px">
           <li>Download <a href={skill.zipUrl}>titus-humanizer.zip</a>. Keep it zipped.</li>
@@ -79,7 +79,7 @@ const platforms = [
         <p class="small muted">Team and Enterprise owners may need to allow user-created skills first. Anthropic's guide is <a href="https://support.claude.com/en/articles/12512180-use-skills-in-claude">Use skills in Claude</a>.</p>
       </div>
 
-      <div class="card platform" id="p-chatgpt" role="tabpanel" hidden>
+      <div class="card platform" id="p-chatgpt" role="tabpanel" aria-labelledby="tab-p-chatgpt" tabindex="0" hidden>
         <h3 class="h3">ChatGPT</h3>
         <ol class="steps" style="margin-top: 22px">
           <li>Download <a href={skill.zipUrl}>titus-humanizer.zip</a>. Keep it zipped.</li>
@@ -95,7 +95,7 @@ const platforms = [
         </ol>
       </div>
 
-      <div class="card platform" id="p-claude-code" role="tabpanel" hidden>
+      <div class="card platform" id="p-claude-code" role="tabpanel" aria-labelledby="tab-p-claude-code" tabindex="0" hidden>
         <h3 class="h3">Claude Code</h3>
         <p class="muted" style="margin-top: 12px">Add the repository as a plugin marketplace and install the plugin:</p>
         <div class="copy-block">
@@ -112,7 +112,7 @@ cp -r titus-humanizer/skills/titus-humanizer ~/.claude/skills/</code></pre>
         </div>
       </div>
 
-      <div class="card platform" id="p-codex" role="tabpanel" hidden>
+      <div class="card platform" id="p-codex" role="tabpanel" aria-labelledby="tab-p-codex" tabindex="0" hidden>
         <h3 class="h3">Codex</h3>
         <p class="muted" style="margin-top: 12px">Codex loads skills from <code>~/.agents/skills</code> in your home folder, or from <code>.agents/skills</code> inside a project:</p>
         <div class="copy-block">
@@ -139,8 +139,8 @@ cp -r titus-humanizer/skills/titus-humanizer ~/.agents/skills/</code></pre>
 </style>
 
 <script>
-  document.querySelectorAll<HTMLButtonElement>("[data-platform]").forEach((b) => b.addEventListener("click", () => {
-    document.querySelectorAll<HTMLButtonElement>("[data-platform]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+  import { initTabs } from "../../../scripts/tabs";
+  initTabs(document.querySelector<HTMLElement>('[aria-label="Platform"]')!, (b) => {
     document.querySelectorAll<HTMLElement>(".platform").forEach((p) => { p.hidden = p.id !== `p-${b.dataset.platform}`; });
-  }));
+  });
 </script>

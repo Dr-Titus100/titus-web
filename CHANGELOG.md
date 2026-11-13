@@ -4,6 +4,12 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-12
 
+- A "Skip to content" link appears at the top of every page on the first press of Tab, and moves focus to the page's main content.
+- The tabs on the Checker, Any chatbot and Install pages work like standard tabs. Only the selected tab is in the Tab order, the arrow keys move between tabs, and Home and End jump to the first and last. One shared script, `src/scripts/tabs.ts`, runs all three.
+- After a check, screen readers hear a one-line summary, such as "Score 0.80, high. 11 pattern types found. 2 hidden characters removed." The Check text button is described by the status line next to it, so a screen reader also hears whether Python is ready.
+- The footer column headings are `h2` elements inside a navigation landmark named "Site map", instead of `h4` elements with no heading above them.
+- The tour video can show captions and a transcript. Adding `public/media/titus-humanizer-promo.en.vtt` turns on the captions track and a "Read the transcript" panel built from the same file.
+- Color contrast passes WCAG AA in light and dark mode on every page: the Fiction tag, filled blue buttons in dark mode, links on dark tiles, hidden-character badges and the current page in the titus-humanizer bar. Links inside sentences are underlined, so they don't rely on color alone.
 - The Install page's Claude steps match Claude's current menus: Customize, Skills, the + button, Create skill, Upload a skill. The Claude Code steps create `~/.claude/skills` before copying into it.
 - The Checker downloads Python only when you click into the text box, type, or press a button, instead of as soon as the page opens. A progress bar shows the download in megabytes.
 - Checker highlights can be reached with the keyboard. Tab moves between them and shows each pattern's name, Enter or Space keeps the label open and Escape closes it. Screen readers hear the name as the highlight's description.
