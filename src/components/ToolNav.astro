@@ -25,3 +25,26 @@ const items = [
     </div>
   </div>
 </nav>
+<script is:inline>
+  // On desktop, start the tabs directly under Humanizer in the top bar, so Overview sits below it.
+  // When there isn't room for that, or on phones, the tabs stay at the right as the CSS places them.
+  (() => {
+    const bar = document.currentScript.previousElementSibling;
+    const right = bar.querySelector(".subnav-right");
+    const align = () => {
+      const top = document.querySelector('.nav-links a[href$="/tools/titus-humanizer/"]');
+      right.classList.remove("aligned");
+      if (!top || matchMedia("(max-width: 734px)").matches) return;
+      const inner = bar.querySelector(".subnav-inner").getBoundingClientRect();
+      const title = bar.querySelector(".subnav-title").getBoundingClientRect();
+      const x = top.getBoundingClientRect().left - inner.left;
+      const pad = parseFloat(getComputedStyle(bar.querySelector(".subnav-inner")).paddingRight) || 0;
+      if (inner.left + x < title.right + 24 || x + right.offsetWidth > inner.width - pad) return;
+      right.style.setProperty("--tabs-x", `${x}px`);
+      right.classList.add("aligned");
+    };
+    align();
+    addEventListener("resize", align);
+    if (document.fonts) document.fonts.ready.then(align);
+  })();
+</script>

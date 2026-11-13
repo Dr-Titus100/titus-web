@@ -65,7 +65,7 @@ export interface Score {
   patterns: { label: string; count: number; sample: string }[];
   density?: number; sentence_cv?: number | null; mattr?: number; dampened?: boolean;
 }
-export interface Analysis { cleaned: string; found: Record<string, number>; found_text: string; hidden: Mark[]; score: Score; spans: Span[]; quotes: { start: number; end: number }[]; min_words: number }
+export interface Analysis { cleaned: string; found: Record<string, number>; found_text: string; hidden: Mark[]; score: Score; spans: Span[]; quotes: { start: number; end: number }[]; skipped: string | null; min_words: number }
 export interface Comparison { report: string; cleaned_rewrite: string; before: Score; after: Score; spans_after: Span[] }
 
 export const analyze = (text: string) => call<Analysis>("analyze", text);
