@@ -4,6 +4,8 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-12
 
+- Smoke tests: `npm test` runs Playwright against the built site on a desktop and a 375 px phone. It checks that every page loads with one `h1` and no console errors, has no sideways scrolling and no overlapping controls, that the Checker scores the sample text, and that the Rewrite provider picker remembers its choice. A new Tests workflow runs them on every push and pull request, along with the wording check and `gen-examples.mjs --check`.
+- Code cleanup: the slide-up animation is defined once in `global.css`. The Experience filter and the Rewrite provider picker use a shared `initChoice` helper. The Experience role tags and the link color on dark sections use color tokens. The Checker's and Experience page's stats blocks have their own class names.
 - Shared links show a picture. Each page has `og:image`, `og:url`, `og:site_name` and a large Twitter card. The home page uses a card with my photo and name, About uses a larger photo, the titus-humanizer pages use the Checker scoring the sample text, and each blog post gets a title card. `npm run share-images` remakes them.
 - The site has `robots.txt` with a Sitemap line, `favicon.ico`, a 180 px Apple touch icon and a web manifest with 192 px and 512 px icons. `npm run icons` remakes the icons from `favicon.svg`.
 - Search engines get structured data: `Person` on About, with LinkedIn, Google Scholar, ORCID and GitHub as `sameAs`, `SoftwareApplication` on the titus-humanizer overview, and `BlogPosting` on each post.

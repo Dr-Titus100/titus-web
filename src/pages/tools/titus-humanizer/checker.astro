@@ -48,7 +48,7 @@ const skill = skills["titus-humanizer"];
         <div class="grid results-grid">
           <div class="card score-card">
             <ScoreRing id="ring" />
-            <dl class="stats">
+            <dl class="checker-stats">
               <div><dt>Words</dt><dd id="s-words">0</dd></div>
               <div><dt>Sentences</dt><dd id="s-sents">0</dd></div>
               <div><dt>Patterns per 100 words</dt><dd id="s-density">--</dd></div>
@@ -120,14 +120,13 @@ const skill = skills["titus-humanizer"];
   .status[data-state="failed"] .dot { background: var(--bad); animation: none; }
   @keyframes pulse { 50% { opacity: 0.3; transform: scale(0.8); } }
   .results { margin-top: 28px; animation: resultsIn 0.8s var(--ease); }
-  @keyframes resultsIn { from { opacity: 0; transform: translateY(24px); } }
   .results-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-bottom: 20px; }
   @media (max-width: 820px) { .results-grid { grid-template-columns: 1fr; } }
   .score-card { display: flex; flex-direction: column; align-items: center; gap: 22px; }
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin: 0; width: 100%; }
-  .stats div { border-top: 1px solid var(--line-soft); padding-top: 10px; }
-  .stats dt { font-size: 12px; color: var(--ink-soft); }
-  .stats dd { margin: 2px 0 0; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .checker-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin: 0; width: 100%; }
+  .checker-stats div { border-top: 1px solid var(--line-soft); padding-top: 10px; }
+  .checker-stats dt { font-size: 12px; color: var(--ink-soft); }
+  .checker-stats dd { margin: 2px 0 0; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .patterns { list-style: none; padding: 0; margin: 16px 0; }
   .patterns li { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line-soft); opacity: 0; transform: translateX(-10px); animation: itemIn 0.5s var(--ease) forwards; }
   @keyframes itemIn { to { opacity: 1; transform: none; } }

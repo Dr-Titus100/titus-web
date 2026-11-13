@@ -10,7 +10,8 @@
     "build": "npm run prepare-site && astro build && node scripts/add-csp.mjs",
     "preview": "astro preview",
     "share-images": "node scripts/make-share-images.mjs",
-    "icons": "node scripts/make-icons.mjs"
+    "icons": "node scripts/make-icons.mjs",
+    "test": "playwright test"
   },
   "repository": {
     "type": "git",

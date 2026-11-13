@@ -6,3 +6,5 @@ dist/
 public/skills/
 public/vendor/
 src/data/skills.generated.json
+test-results/
+playwright-report/

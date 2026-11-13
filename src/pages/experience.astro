@@ -29,7 +29,7 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
 
   <section class="section-tight" style="padding-top: 0">
     <div class="wrap">
-      <div class="stats reveal">
+      <div class="exp-stats reveal">
         <div><strong>0.986</strong><span>AUC of the churn model KCB Bank Rwanda adopted</span></div>
         <div><strong>100+</strong><span>citations of the micro-credit scoring paper in Risks</span></div>
         <div><strong>250+</strong><span>LLM evaluation tasks graded at Mercor</span></div>
@@ -162,11 +162,11 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
 </Base>
 
 <style is:global>
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  .stats > div { background: var(--bg-soft); border-radius: 22px; padding: 26px 22px; display: flex; flex-direction: column; gap: 8px; }
-  .stats strong { font-size: clamp(32px, 4vw, 44px); letter-spacing: -0.03em; line-height: 1; }
-  .stats span { color: var(--ink-soft); font-size: 15px; line-height: 1.4; }
-  @media (max-width: 860px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .exp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .exp-stats > div { background: var(--bg-soft); border-radius: 22px; padding: 26px 22px; display: flex; flex-direction: column; gap: 8px; }
+  .exp-stats strong { font-size: clamp(32px, 4vw, 44px); letter-spacing: -0.03em; line-height: 1; }
+  .exp-stats span { color: var(--ink-soft); font-size: 15px; line-height: 1.4; }
+  @media (max-width: 860px) { .exp-stats { grid-template-columns: repeat(2, 1fr); } }
 
   .timeline { list-style: none; margin: 0; padding: 0; position: relative; }
   .timeline::before { content: ""; position: absolute; left: 172px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--accent), transparent); opacity: 0.35; }
@@ -176,10 +176,10 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
   .role-when { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding-top: 24px; text-align: right; }
   .role-dates { font-size: 14px; font-weight: 600; }
   .role-tag { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(127,127,127,0.12); }
-  .tag-ai { color: #7c3aed; background: rgba(124,58,237,0.12); }
-  .tag-research { color: #0a84ff; background: rgba(10,132,255,0.12); }
-  .tag-industry { color: #c2410c; background: rgba(234,88,12,0.12); }
-  .tag-teaching { color: #15803d; background: rgba(22,163,74,0.12); }
+  .tag-ai { color: var(--tag-ai); background: color-mix(in srgb, var(--tag-ai) 12%, transparent); }
+  .tag-research { color: var(--tag-research); background: color-mix(in srgb, var(--tag-research) 12%, transparent); }
+  .tag-industry { color: var(--tag-industry); background: color-mix(in srgb, var(--tag-industry) 12%, transparent); }
+  .tag-teaching { color: var(--tag-teaching); background: color-mix(in srgb, var(--tag-teaching) 12%, transparent); }
   .role-card h3 { margin: 0; }
   .role-org { margin: 6px 0 0; font-weight: 500; }
   .role-points { margin: 16px 0 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 10px; }
@@ -213,9 +213,8 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
 </style>
 
 <script>
-  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
-  buttons.forEach((b) => b.addEventListener("click", () => {
-    buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  import { initChoice } from "../scripts/choice";
+  initChoice(document.querySelector<HTMLElement>('[aria-label="Filter roles"]')!, (b) => {
     const f = b.dataset.filter;
     document.querySelectorAll<HTMLElement>(".role").forEach((r) => {
       const show = f === "all" || r.dataset.tag === f;
@@ -223,5 +222,5 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
       r.classList.remove("enter");
       if (show) { void r.offsetWidth; r.classList.add("enter"); r.classList.add("in"); }
     });
-  }));
+  });
 </script>

@@ -158,7 +158,6 @@ const skill = skills["titus-humanizer"];
   @media (max-width: 860px) { .rw-grid { grid-template-columns: 1fr; } }
   #text { min-height: 300px; }
   .out { margin-top: 28px; display: grid; gap: 20px; animation: resultsIn 0.8s var(--ease); }
-  @keyframes resultsIn { from { opacity: 0; transform: translateY(24px); } }
   .out-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
   .out-text { white-space: pre-wrap; font-size: 18px; line-height: 1.65; }
   .out-text.typing::after { content: ""; display: inline-block; width: 2px; height: 1.1em; background: var(--accent); vertical-align: -3px; margin-left: 2px; animation: blink 1s steps(1) infinite; }
@@ -181,6 +180,7 @@ const skill = skills["titus-humanizer"];
   import { compare } from "../../../scripts/titus";
   import { setRing } from "../../../scripts/ring";
   import { copyText, toast } from "../../../scripts/site";
+  import { initChoice } from "../../../scripts/choice";
 
   type P = "gemini" | "anthropic" | "openai";
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -239,7 +239,6 @@ const skill = skills["titus-humanizer"];
   function selectProvider(p: P) {
     provider = p;
     const cfg = PROVIDERS[p];
-    document.querySelectorAll<HTMLButtonElement>("#providers button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.p === p)));
     $("prov-help").textContent = cfg.keyHint;
     $("models").replaceChildren(...cfg.models.map((m) => Object.assign(document.createElement("option"), { value: m })));
     let model = "";
@@ -256,8 +255,8 @@ const skill = skills["titus-humanizer"];
     describeStorage();
     try { localStorage.setItem("th.provider", p); } catch {}
   }
-  document.querySelectorAll<HTMLButtonElement>("#providers button").forEach((b) => b.addEventListener("click", () => selectProvider(b.dataset.p as P)));
-  selectProvider(provider);
+  const providerChoice = initChoice($("providers"), (b) => selectProvider(b.dataset.p as P));
+  providerChoice.select(providerChoice.buttons.find((b) => b.dataset.p === provider)!);
 
   const saveKey = () => {
     const k = keyEl.value.trim();

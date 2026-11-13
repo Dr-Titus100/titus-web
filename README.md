@@ -69,6 +69,10 @@ npm run build      # builds into dist/
 
 The first build downloads the pinned skill files. Later builds reuse them while their checksums still match, so you can build offline. To test an unreleased skill change, copy its files into `public/skills/titus-humanizer/` and run `npx astro dev`, which skips the download step.
 
+## Tests
+
+`npm run build`, then `npm test`. Playwright starts `astro preview` itself, or reuses one already running on port 4321. The tests live in `tests/smoke.spec.ts`, and the page list at its top needs each new page added. The first time, install the browser with `npx playwright install chromium`. The Tests workflow runs the same tests on every push and pull request.
+
 ## The overview demo and examples
 
 The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
