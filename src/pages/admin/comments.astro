@@ -31,6 +31,7 @@ import { u } from "../../lib/url";
         <h2 class="mod-heading">Approved <span id="mod-approved-count"></span></h2>
         <ol class="mod-list" id="mod-approved"></ol>
         <p class="small muted" id="mod-approved-empty" hidden>No approved comments yet.</p>
+        <p class="small muted" id="mod-approved-more" hidden></p>
       </div>
     </div>
   </section>
@@ -122,12 +123,22 @@ import { u } from "../../lib/url";
     return li;
   }
 
-  function fill(rows: Row[]) {
+  function fill(rows: Row[], approvedTotal?: number) {
     for (const kind of ["pending", "approved"] as const) {
       const these = rows.filter((r) => r.status === kind);
       document.getElementById(`mod-${kind}`)!.replaceChildren(...these.map(item));
       document.getElementById(`mod-${kind}-count`)!.textContent = `(${these.length})`;
       document.getElementById(`mod-${kind}-empty`)!.hidden = these.length > 0;
+    }
+    // Only the newest approved comments come back. Older ones stay on their posts.
+    const shown = rows.filter((r) => r.status === "approved").length;
+    const more = document.getElementById("mod-approved-more")!;
+    if (approvedTotal && approvedTotal > shown) {
+      document.getElementById("mod-approved-count")!.textContent = `(${approvedTotal})`;
+      more.textContent = `This list shows the newest ${shown}. Older approved comments still show on their posts. To delete one of those, use the D1 console in the Cloudflare dashboard.`;
+      more.hidden = false;
+    } else {
+      more.hidden = true;
     }
     lists.hidden = false;
   }
@@ -139,7 +150,7 @@ import { u } from "../../lib/url";
       store.set(token);
       forget.hidden = false;
       status.textContent = "";
-      fill(out.comments || []);
+      fill(out.comments || [], out.approvedTotal);
     } catch (err) {
       lists.hidden = true;
       fail(err);

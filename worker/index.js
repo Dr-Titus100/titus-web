@@ -19,6 +19,8 @@ const NAME_MAX = 60;
 const BODY_MAX = 2000;
 // New comments stop being accepted while this many wait for approval, so a flood can't fill the database.
 const PENDING_MAX = 200;
+// The moderation page lists this many approved comments, newest first.
+const APPROVED_SHOWN = 500;
 const SLUG = /^[a-z0-9][a-z0-9-]{0,99}$/;
 
 export default {
@@ -177,10 +179,15 @@ async function admin(request, url, env) {
   if (!d1) return json({ error: "unavailable" }, 503);
 
   if (request.method === "GET") {
-    const { results } = await d1
-      .prepare("SELECT id, post, name, body, status, created_at AS created FROM comments ORDER BY created_at DESC, id DESC LIMIT 1000")
-      .all();
-    return json({ comments: results });
+    // Every waiting comment (PENDING_MAX keeps that list short), then the newest approved ones.
+    // The two lists come separately, so a long approved history never hides a waiting comment.
+    const cols = "SELECT id, post, name, body, status, created_at AS created FROM comments";
+    const [pending, approved, total] = await d1.batch([
+      d1.prepare(`${cols} WHERE status = 'pending' ORDER BY created_at DESC, id DESC LIMIT ?`).bind(PENDING_MAX * 2),
+      d1.prepare(`${cols} WHERE status = 'approved' ORDER BY created_at DESC, id DESC LIMIT ?`).bind(APPROVED_SHOWN),
+      d1.prepare("SELECT COUNT(*) AS n FROM comments WHERE status = 'approved'"),
+    ]);
+    return json({ comments: [...pending.results, ...approved.results], approvedTotal: total.results[0].n });
   }
 
   let input;
