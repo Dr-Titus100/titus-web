@@ -289,4 +289,4 @@ export const contactFormKey = "48ee3263-5462-45f5-90f8-58a6f2bc0f49";
 // The public site key of a Cloudflare Turnstile widget for blog comments. Leave it empty to turn the
 // check off. When you fill it in, also set the widget's secret key as TURNSTILE_SECRET on the Worker.
 // With both set, comments that pass the check show at once. Without them, every comment waits for approval.
-export const commentsTurnstileKey = "";
+export const commentsTurnstileKey = "0x4AAAAAAF_-rkxdFpu6_f11";
