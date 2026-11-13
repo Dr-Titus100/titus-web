@@ -22,7 +22,7 @@ const skill = skills["titus-humanizer"];
       <div class="card checker-card">
         <div class="checker-top">
           <label for="input">Your text</label>
-          <span class="status" id="status" data-state="idle"><span class="dot"></span><span class="status-text" id="status-text">The first check downloads Python, about 14 MB</span></span>
+          <span class="status" id="status" data-state="idle"><span class="dot"></span><span class="status-text" id="status-text"></span></span>
         </div>
         <div class="load" id="load" hidden>
           <progress id="load-bar" max="1" value="0" aria-labelledby="load-text"></progress>
@@ -32,8 +32,8 @@ const skill = skills["titus-humanizer"];
         <div class="checker-actions">
           <div class="btn-row">
             <button class="btn" id="run" type="button" aria-describedby="status-text">Check text</button>
-            <button class="btn-link" id="sample" type="button">Try a sample</button>
-            <button class="btn-link" id="clear" type="button">Clear</button>
+            <button class="btn" id="sample" type="button">Try a sample</button>
+            <button class="btn" id="clear" type="button">Clear</button>
           </div>
           <span class="small muted" id="count">0 words</span>
         </div>
@@ -71,7 +71,7 @@ const skill = skills["titus-humanizer"];
               <button role="tab" type="button" id="tab-hidden" aria-controls="view" aria-selected="false" tabindex="-1" data-view="hidden">Hidden characters</button>
               <button role="tab" type="button" id="tab-cleaned" aria-controls="view" aria-selected="false" tabindex="-1" data-view="cleaned">Cleaned text</button>
             </div>
-            <button class="btn btn-small btn-quiet" id="copy-clean" type="button">Copy cleaned text</button>
+            <button class="btn btn-small" id="copy-clean" type="button">Copy cleaned text</button>
           </div>
           <div class="legend" id="legend">
             <span><i class="hl-rule"></i>Hard rule</span>
@@ -90,13 +90,13 @@ const skill = skills["titus-humanizer"];
           <p class="lead">Use your own Claude, OpenAI or Gemini key on this site, or paste the rules into any chatbot you already use.</p>
           <div class="btn-row center next-actions">
             <a class="btn" href={u("/tools/titus-humanizer/rewrite/")}>Rewrite with your key</a>
-            <a class="link-arrow" href={u("/tools/titus-humanizer/any-chatbot/")}>Use any chatbot</a>
+            <a class="btn" href={u("/tools/titus-humanizer/any-chatbot/")}>Use any chatbot</a>
           </div>
         </div>
       </div>
 
       <p class="small muted center tool-footnote">
-        The score counts the AI-writing patterns titus-humanizer targets. It doesn't measure quality, and it isn't the output of GPTZero, Turnitin or any other detector, and a low score doesn't prove a person wrote the text.
+        The score counts the AI-writing patterns titus-humanizer targets. It isn't the output of GPTZero, Turnitin, or any other detector, and a low score doesn't prove a person wrote the text. A low score means plainer, better writing. It does not target AI watermarks, but it helps to reduce them. AI watermarks are invisible to the eye and build up statistically throughout the text, so they are hard to target. A text can look completely normal and still contain AI watermarks, and the only way to find one is with a detector that knows the AI company’s secret key.
       </p>
     </div>
   </section>
@@ -113,7 +113,7 @@ const skill = skills["titus-humanizer"];
   .status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft); }
   .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); animation: pulse 1.2s ease-in-out infinite; }
   .status[data-state="ready"] .dot { background: var(--good); animation: none; }
-  .status[data-state="idle"] .dot { background: var(--ink-faint); animation: none; }
+  .status[data-state="idle"] { display: none; }
   .load { display: flex; align-items: center; gap: 12px; margin: 6px 0 10px; }
   .load progress { flex: 1; height: 6px; appearance: none; border: 0; border-radius: 3px; background: var(--line-soft); overflow: hidden; }
   .load progress::-webkit-progress-bar { background: var(--line-soft); }
@@ -192,7 +192,7 @@ const skill = skills["titus-humanizer"];
   const mb = (n: number) => (n / 1e6).toFixed(1);
   onStatus((s) => {
     status.dataset.state = s.ready ? "ready" : s.failed ? "failed" : s.started ? "loading" : "idle";
-    status.querySelector(".status-text")!.textContent = s.ready ? "Ready" : s.failed ? "Could not load Python" : s.started ? s.text : "The first check downloads Python, about 14 MB";
+    status.querySelector(".status-text")!.textContent = s.ready ? "Ready" : s.failed ? "Could not load Python" : s.started ? s.text : "";
     const showBar = s.started && !s.ready && !s.failed && s.total > 0;
     $("load").hidden = !showBar;
     if (showBar) {
@@ -211,12 +211,12 @@ const skill = skills["titus-humanizer"];
     if (view === "patterns") {
       const quoteSpans = last.quotes.map((q) => ({ ...q, label: "quoted text", weight: 0 }));
       el.innerHTML = highlight(last.cleaned, [...last.spans, ...quoteSpans]);
-      const notes = [last.spans.length ? "Hover over, click or tap a highlight to see the pattern's name. With a keyboard, press Tab to move between highlights." : "No patterns to highlight."];
+      const notes = [last.spans.length ? "Hover over, click or tap a highlight to see the pattern's name. After you click one, the arrow keys move to the next or previous highlight. Tab and Shift+Tab move between highlights too." : "No patterns to highlight."];
       if (last.quotes.length) notes.push("Quoted text has a dashed underline. It stays as written, so nothing inside it is marked.");
       $("view-note").textContent = notes.join(" ");
     } else if (view === "hidden") {
       el.innerHTML = last.hidden.length ? showHidden(original, last.hidden) : "";
-      $("view-note").textContent = last.hidden.length ? "Red badges show where each hidden character was. Underlined letters were look-alikes from another alphabet." : "No hidden characters found.";
+      $("view-note").textContent = last.hidden.length ? "Red badges show where each hidden character was. Underlined letters were look-alikes from another alphabet. Click one, then use the arrow keys to move between them." : "No hidden characters found.";
     } else {
       el.textContent = last.cleaned;
       $("view-note").textContent = "This is your text with the hidden characters removed. Patterns are left for you or a rewrite to fix.";
@@ -295,7 +295,8 @@ const skill = skills["titus-humanizer"];
   // Hovering over a highlight, or clicking or tapping it, shows the pattern's name in a small label
   // and outlines the exact text that pattern matched. A click keeps it open until the next click.
   // Highlights are focusable buttons too: Tab shows the label, Enter or Space keeps it open,
-  // and Escape closes it. The label is tied to the focused highlight with aria-describedby.
+  // and Escape closes it. Once one has focus, the arrow keys step to the next or previous
+  // highlight and keep its label open. The label is tied to the focused highlight with aria-describedby.
   const tip = document.createElement("div");
   tip.className = "hl-tip";
   tip.id = "hl-tip";
@@ -349,6 +350,26 @@ const skill = skills["titus-humanizer"];
   viewEl.addEventListener("keydown", (e) => {
     const m = markAt(e.target);
     if (e.key === "Escape") { hideTip(); return; }
+    if (m && /^Arrow(Right|Down|Left|Up)$/.test(e.key)) {
+      // One stop per highlight: a span that wraps or overlaps another is split into several pieces.
+      const seen = new Set<string>();
+      const stops = [...viewEl.querySelectorAll<HTMLElement>("mark.hl, mark.hid")].filter((x) => {
+        const key = x.dataset.span;
+        if (key == null) return true;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      const here = stops.findIndex((x) => x === m || (m.dataset.span != null && x.dataset.span === m.dataset.span));
+      const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : -1;
+      const next = stops[here + step];
+      e.preventDefault();
+      if (!next) return;
+      next.focus();
+      showTip(next, middle(next));
+      pinned = next;
+      return;
+    }
     if (!m || (e.key !== "Enter" && e.key !== " ")) return;
     e.preventDefault();
     if (pinned === m) { pinned = null; tip.hidden = true; clearActive(); }

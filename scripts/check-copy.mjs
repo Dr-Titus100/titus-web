@@ -8,7 +8,9 @@ const files = [];
 const walk = (d) => readdirSync(d).forEach((f) => { const p = join(d, f); statSync(p).isDirectory() ? (f !== "vendor" && f !== "skills" && walk(p)) : p.endsWith(".html") && files.push(p); });
 walk(dist);
 
-const examples = ["isn't just a tracker", "It's not just a budget request", "Elena stood", "In today's fast-paced"];
+// The "before" examples break the rules on purpose, and a quotation stays exactly as the person wrote it.
+const examples = ["isn't just a tracker", "It's not just a budget request", "Elena stood", "In today's fast-paced",
+  "isn't just a fix", "is crucial to note", "comprehensive onboarding guide", "didn't just meet expectations", "We are not just building software"];
 let bad = 0;
 for (const f of files) {
   const text = readFileSync(f, "utf8")

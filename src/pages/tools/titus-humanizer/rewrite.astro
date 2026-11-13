@@ -29,7 +29,7 @@ const skill = skills["titus-humanizer"];
             <div class="segmented" role="group" aria-labelledby="prov-label" id="providers">
               <button type="button" data-p="gemini" aria-pressed="true">Gemini</button>
               <button type="button" data-p="anthropic" aria-pressed="false">Claude</button>
-              <button type="button" data-p="openai" aria-pressed="false">OpenAI</button>
+              <button type="button" data-p="openai" aria-pressed="false">ChatGPT</button>
             </div>
           </div>
           <p class="small muted" id="prov-help"></p>
@@ -41,7 +41,7 @@ const skill = skills["titus-humanizer"];
               <label for="key">API key</label>
               <div class="key-row">
                 <input type="password" id="key" autocomplete="off" spellcheck="false" placeholder="Paste your key" aria-describedby="key-where" />
-                <button type="button" class="btn btn-small btn-quiet" id="show-key" aria-pressed="false" aria-controls="key">Show key</button>
+                <button type="button" class="btn btn-small" id="show-key" aria-pressed="false" aria-controls="key">Show key</button>
               </div>
             </div>
             <div class="field">
@@ -60,7 +60,7 @@ const skill = skills["titus-humanizer"];
           </div>
           <div class="notice rw-notice">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1a3 3 0 0 0-3 3v2H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3Zm-1.5 3a1.5 1.5 0 0 1 3 0v2h-3V4Z"/></svg>
-            <span>Your browser sends your key and your text straight to <strong id="prov-name">the provider</strong>. This website has no server of its own, so the text and the key don't pass through it. <span id="prov-data"></span> <a id="prov-policy" href=""></a>. Each request may be billed to your provider account. See the <a href={u("/privacy/")}>Privacy page</a>.</span>
+            <span>Your browser sends your key and your text straight to <strong id="prov-name">the provider</strong>. This website has no server of its own, so the text and the key don't pass through it. <span id="prov-data"></span> <a id="prov-policy" href="" target="_blank" rel="noopener noreferrer"></a>. Each request may be billed to your provider account. See the <a href={u("/privacy/")}>Privacy page</a>.</span>
           </div>
           <p class="small rw-howto"><a class="link-arrow" href="#get-a-key">How to get a key</a></p>
         </div>
@@ -91,7 +91,7 @@ const skill = skills["titus-humanizer"];
         <div class="card out-card">
           <div class="out-head">
             <h2 class="h3" id="out-title">Rewrite</h2>
-            <button class="btn btn-small btn-quiet" id="copy-out" type="button">Copy</button>
+            <button class="btn btn-small" id="copy-out" type="button">Copy</button>
           </div>
           <div class="out-text" id="out-text"></div>
           <div class="out-notes" id="out-notes" hidden></div>
@@ -139,7 +139,7 @@ const skill = skills["titus-humanizer"];
         </div>
         <div class="card reveal" style="--d: 0.12s">
           <p class="eyebrow">Prepaid credits</p>
-          <h3 class="h3">OpenAI</h3>
+          <h3 class="h3">OpenAI ChatGPT</h3>
           <ol class="steps small key-steps">
             <li>Sign up at <NewTabLink href="https://platform.openai.com">platform.openai.com</NewTabLink>.</li>
             <li>Add credits under Billing.</li>

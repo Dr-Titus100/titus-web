@@ -2,7 +2,7 @@
 
 export const links = {
   linkedin: "https://www.linkedin.com/in/titus-n-nde/",
-  github: "https://github.com/Dr-Titus100",
+  github: "https://github.com/Dr-Titus100?tab=repositories",
   scholar: "https://scholar.google.com/citations?user=cLPCRhsAAAAJ",
   orcid: "https://orcid.org/0000-0002-0089-0774",
 };
@@ -27,7 +27,7 @@ export const roles: Role[] = [
     tag: "ai",
     points: [
       "Wrote titus-humanizer, an editing skill for Claude and ChatGPT that rewrites text in plain words and keeps every fact, number and name. It runs in claude.ai, the Claude desktop app, ChatGPT, Claude Code and Codex.",
-      "Turned my AI-trainer grading rubrics, Wikipedia's Signs of AI writing guide and the StoryScope study of AI fiction into seven hard rules, five kinds of weak wording and a set of story-level checks.",
+      "Turned my AI-trainer experience, Wikipedia's Signs of AI writing guide and the StoryScope study of AI fiction into seven hard rules, five kinds of weak wording and a set of story-level checks.",
       "Wrote a Python script with no dependencies that strips hidden characters such as zero-width spaces and scores text from 0 to 1 for AI-writing patterns before and after each rewrite.",
       "Built this website so people without Claude or ChatGPT can use the skill. The checker runs the same Python script in the browser with Pyodide, and the rewrite page works with a visitor's own Gemini, Claude or OpenAI key.",
     ],

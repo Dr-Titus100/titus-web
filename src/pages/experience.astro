@@ -34,7 +34,7 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
       <p class="lead">I've built credit and churn models for lenders, measured uncertainty in galaxy cluster masses and satellite maps, and graded and written training data for large language models. Now I also write AI skills, starting with titus-humanizer.</p>
       <div class="btn-row">
         <a class="btn" href={u("/about/#contact")}>Contact me</a>
-        <a class="link-arrow" href="#work">See my roles</a>
+        <a class="btn" href="#work">See my roles</a>
       </div>
       <ul class="profile-icons" aria-label="Profiles">
         {profiles.map((p) => (
@@ -62,10 +62,11 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
         <p class="lead">The {RECENT} most recent roles are open below. Earlier roles are one click away.</p>
       </div>
       <div class="center role-filter">
-        <div class="segmented" role="group" aria-label="Filter roles">
-          {filters.map((f, i) => <button type="button" aria-pressed={i === 0 ? "true" : "false"} data-filter={f.id}>{f.name}</button>)}
+        <div class="segmented" role="tablist" aria-label="Filter roles">
+          {filters.map((f, i) => <button role="tab" type="button" id={`filter-${f.id}`} aria-controls="roles" aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1} data-filter={f.id}>{f.name}</button>)}
         </div>
       </div>
+      <div id="roles" role="tabpanel" aria-labelledby="filter-all">
       <ol class="timeline">
         {roles.map((r, i) => (
           <li class="role" data-tag={r.tag} data-earlier={i >= RECENT ? "" : undefined} hidden={i >= RECENT}>
@@ -92,8 +93,9 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
           </li>
         ))}
       </ol>
+      </div>
       <div class="center">
-        <button class="btn-link" type="button" id="show-earlier" aria-expanded="false">Show earlier roles ({roles.length - RECENT})</button>
+        <button class="btn-link" type="button" id="show-earlier" aria-expanded="false" data-more={`Show earlier roles (${roles.length - RECENT})`}>Show earlier roles ({roles.length - RECENT})</button>
       </div>
     </div>
   </section>
@@ -140,7 +142,7 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
           </ul>
           {talks.length > TOP_TALKS && (
             <details class="more-list">
-              <summary>See all {talks.length}</summary>
+              <summary><span class="when-closed">See all {talks.length}</span><span class="when-open">Show less</span></summary>
               <ul class="dated">
                 {talks.slice(TOP_TALKS).map(([d, t]) => <li><span class="muted small">{d}</span><span>{t}</span></li>)}
               </ul>
@@ -186,8 +188,8 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
       <h2 class="h2">More about me</h2>
       <div class="btn-row center more-actions">
         <a class="btn" href={u("/about/#contact")}>Contact me</a>
-        <a class="link-arrow" href={u("/about/")}>About</a>
-        <a class="link-arrow" href={u("/tools/")}>Skills and tools I've built</a>
+        <a class="btn" href={u("/about/")}>About</a>
+        <a class="btn" href={u("/tools/")}>Skills and tools I've built</a>
       </div>
     </div>
   </section>
@@ -195,7 +197,7 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
 
 <style is:global>
   .profile-icons { list-style: none; margin: 32px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; font-size: 14px; }
-  .profile-icons a { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-mid); padding: 6px 0; }
+  .profile-icons a { display: inline-flex; align-items: center; gap: 6px; color: var(--link); padding: 6px 0; }
   .profile-icon { display: inline-flex; width: 20px; height: 20px; }
   .profile-icon svg { width: 20px; height: 20px; }
   .stats-section { padding: 0 0 120px; }
@@ -259,6 +261,9 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
   .dated li { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-top: 1px solid var(--line-soft); line-height: 1.45; }
   .dated li span:first-child { padding-top: 2px; }
   .more-list { margin-top: 4px; }
+  .more-list .when-open, .more-list[open] .when-closed { display: none; }
+  .more-list[open] .when-open { display: inline; }
+  .more-list[open] summary::after { content: ""; }
 
   .skills { margin: 0; display: flex; flex-direction: column; }
   .skills > div { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; padding: 16px 0; border-top: 1px solid var(--line-soft); }
@@ -269,7 +274,7 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
 </style>
 
 <script>
-  import { initChoice } from "../scripts/choice";
+  import { initTabs } from "../scripts/tabs";
   const roles = [...document.querySelectorAll<HTMLElement>(".role")];
   const more = document.getElementById("show-earlier") as HTMLButtonElement;
   let filter = "all";
@@ -282,13 +287,20 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
       const folded = filter === "all" && !expanded && r.dataset.earlier !== undefined;
       r.hidden = !match || folded;
     });
-    more.hidden = filter !== "all" || expanded;
+    more.hidden = filter !== "all";
+    more.setAttribute("aria-expanded", String(expanded));
+    more.textContent = expanded ? "Show fewer roles" : more.dataset.more!;
   }
-  initChoice(document.querySelector<HTMLElement>('[aria-label="Filter roles"]')!, (b) => { filter = b.dataset.filter || "all"; render(); });
-  more.addEventListener("click", () => {
-    expanded = true;
-    more.setAttribute("aria-expanded", "true");
+  const panel = document.getElementById("roles")!;
+  initTabs(document.querySelector<HTMLElement>('[aria-label="Filter roles"]')!, (b) => {
+    filter = b.dataset.filter || "all";
+    panel.setAttribute("aria-labelledby", b.id);
     render();
-    roles.find((r) => r.dataset.earlier !== undefined)?.querySelector<HTMLElement>("a, summary")?.focus();
+  });
+  // The button folds the older roles away again. Folding keeps the reader at the button.
+  more.addEventListener("click", () => {
+    expanded = !expanded;
+    render();
+    if (expanded) roles.find((r) => r.dataset.earlier !== undefined)?.querySelector<HTMLElement>("a, summary")?.focus();
   });
 </script>

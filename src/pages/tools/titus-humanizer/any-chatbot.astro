@@ -68,7 +68,7 @@ const guides = [
           <h2 class="h3">Full rulebook</h2>
           <p class="muted">The complete rulebook, about {fullWords.toLocaleString("en-US")} words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity. It tells the assistant to keep every quotation, block quote and line of dialogue exactly as written and to rewrite only the text around them.</p>
           <div class="btn-row copy-actions">
-            <button class="btn" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
+            <button class="btn-link" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
             <a class="link-arrow" href={full} download="SKILL.md">Download</a>
           </div>
         </div>
@@ -148,7 +148,7 @@ const guides = [
 
 <style is:global>
   .copy-card { display: flex; flex-direction: column; gap: 12px; min-height: 280px; }
-  .copy-card .copy-actions { margin-top: auto; }
+  .copy-card .copy-actions { margin-top: auto; column-gap: 28px; }
   .guide-tabs { margin-bottom: 32px; }
   .guide-h { margin-bottom: 24px; }
   .pb-field { margin-top: 16px; }

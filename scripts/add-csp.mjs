@@ -21,9 +21,26 @@ walk(dist);
 const PROVIDERS = ["https://api.anthropic.com", "https://api.openai.com", "https://generativelanguage.googleapis.com"];
 const CAPTCHA = ["https://web3forms.com", "https://js.hcaptcha.com", "https://*.hcaptcha.com"];
 
+// Links to other sites (LinkedIn, GitHub, ORCID, Google Scholar and the rest) open in a new tab.
+// Done here so it covers every page, blog posts included, and works without JavaScript.
+// A link to a file download, such as the release zip, stays in the same tab. Each one gets hidden text,
+// "(opens in a new tab)", so a screen reader says so, as the NewTabLink component does.
+const ownHosts = new Set(["dr-titus100.github.io", "titusnyarkonde.com", "www.titusnyarkonde.com"]);
+try { ownHosts.add(new URL(process.env.SITE_URL || "https://dr-titus100.github.io").host); } catch {}
+const NOTE = '<span class="sr-only"> (opens in a new tab)</span>';
+const external = (html) => html.replace(/<a\b([^>]*?)\bhref="(https?:\/\/[^"]+)"([^>]*)>([\s\S]*?)<\/a>/g, (whole, before, href, after, inner) => {
+  const attrs = before + after;
+  if (/\btarget=/.test(attrs) || /\bdownload\b/.test(attrs) || /\.zip(?:$|[?#])/.test(href)) return whole;
+  let host;
+  try { host = new URL(href).host; } catch { return whole; }
+  if (ownHosts.has(host)) return whole;
+  const rel = /\brel="/.test(attrs) ? "" : ' rel="noopener noreferrer"';
+  return `<a${before}href="${href}"${after} target="_blank"${rel}>${inner}${NOTE}</a>`;
+});
+
 let count = 0;
 for (const file of pages) {
-  let html = readFileSync(file, "utf8");
+  let html = external(readFileSync(file, "utf8"));
   if (html.includes('http-equiv="Content-Security-Policy"')) continue;
   const hashes = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)]
     .map((m) => `'sha256-${createHash("sha256").update(m[1], "utf8").digest("base64")}'`);

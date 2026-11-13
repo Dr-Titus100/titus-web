@@ -1,23 +1,48 @@
 {
-  "demo": {
-    "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker. It's a gateway to a seamless experience, fostering alignment across all 12 setup steps. Moreover, it serves as a pivotal tool that empowers new hires and their managers to navigate the first two weeks with confidence. Ultimately, it is a testament to our commitment to people.",
-    "after": "The new onboarding checklist lists all 12 setup steps for a new hire's first two weeks. New hires can tick off each step as they finish it. Their managers see the same list, so both of them know what is left to do."
+ "demo": {
+  "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker. It's a gateway to a seamless experience, fostering alignment across all 12 setup steps. Moreover, it serves as a pivotal tool that empowers new hires and their managers to navigate the first two weeks with confidence. Ultimately, it is a testament to our commitment to people.",
+  "after": "The new onboarding checklist lists all 12 setup steps for a new hire's first two weeks. New hires can tick off each step as they finish it. Their managers see the same list, so both of them know what is left to do."
+ },
+ "examples": [
+  {
+   "tag": "Announcement",
+   "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker — it's a gateway to a more seamless experience, fostering alignment and driving meaningful impact.",
+   "after": "The new onboarding checklist shows new hires which setup steps they have finished."
   },
-  "examples": [
-    {
-      "tag": "Announcement",
-      "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker — it's a gateway to a more seamless experience, fostering alignment and driving meaningful impact.",
-      "after": "The new onboarding checklist shows new hires which setup steps they have finished."
-    },
-    {
-      "tag": "Email",
-      "before": "I hope this message finds you well! I wanted to reach out to touch base regarding the proposal, which was reviewed by our team last week. It's not just a budget request — it's a roadmap for sustainable growth. Please let me know if you have any questions!",
-      "after": "Our team reviewed the proposal last week. It sets out the budget we're requesting and what it would cover. I'm happy to walk you through the numbers."
-    },
-    {
-      "tag": "Story",
-      "before": "Elena stood at the window as the rain fell, mirroring the storm inside her. Her chest tightened, ice crawled down her spine, and the scent of wet earth and old memories filled her lungs. She realized, at last, that letting go was not the same as forgetting. It was a way of carrying him with her.",
-      "after": "Elena stood at the window and watched the rain. She was afraid. She decided she could let him go without forgetting him."
-    }
-  ]
+  {
+   "tag": "Email",
+   "before": "I hope this message finds you well! I wanted to reach out to touch base regarding the proposal, which was reviewed by our team last week. It's not just a budget request — it's a roadmap for sustainable growth. Please let me know if you have any questions!",
+   "after": "Our team reviewed the proposal last week. It sets out the budget we're requesting and what it would cover. I'm happy to walk you through the numbers."
+  },
+  {
+   "tag": "Story",
+   "before": "Elena stood at the window as the rain fell, mirroring the storm inside her. Her chest tightened, ice crawled down her spine, and the scent of wet earth and old memories filled her lungs. She realized, at last, that letting go was not the same as forgetting. It was a way of carrying him with her.",
+   "after": "Elena stood at the window and watched the rain. She was afraid. She decided she could let him go without forgetting him."
+  },
+  {
+   "tag": "Code",
+   "before": "Moreover, this pivotal update isn't just a fix — it's a game-changer for our entire deployment pipeline, empowering every developer on the team. To unlock its full potential, simply run `npm run build -- --force` before you push your changes to the main branch.",
+   "after": "This update fixes the deployment pipeline. Run `npm run build -- --force` before you push your changes to the main branch."
+  },
+  {
+   "tag": "File path",
+   "before": "In order to seamlessly navigate the setup process, it is crucial to note that the configuration file, located at ~/projects/app/config/settings.yaml, serves as the backbone of the entire system and plays a pivotal role in every deployment.",
+   "after": "The configuration file is at ~/projects/app/config/settings.yaml. Every deployment reads its settings from that file."
+  },
+  {
+   "tag": "Link",
+   "before": "We're thrilled to announce that our comprehensive onboarding guide is now live! Dive into the details and discover a wealth of valuable insights at https://example.com/guide — it's truly a must-read resource for anyone looking to elevate their skills.",
+   "after": "Our onboarding guide is now online at https://example.com/guide."
+  },
+  {
+   "tag": "Emoji",
+   "before": "🎉 Big news, team! Our quarterly results didn't just meet expectations — they shattered them, showcasing the incredible dedication of every single one of you. Let's keep this amazing momentum going into the next quarter! 🚀",
+   "after": "🎉 Our quarterly results beat our targets. Thank you all for the work behind them. 🚀"
+  },
+  {
+   "tag": "Quoted text",
+   "before": "In a testament to her visionary leadership, the CEO delivered a powerful message that resonated deeply with the entire team. She said, \"We are not just building software — we are building the future.\" Her words served as a beacon of inspiration for everyone.",
+   "after": "The CEO spoke to the team. She said, \"We are not just building software — we are building the future.\""
+  }
+ ]
 }
