@@ -14,4 +14,4 @@
 - `npm run build`, then `node scripts/check-copy.mjs`
 - `node scripts/gen-examples.mjs --check` (remove `public/skills/titus-humanizer/__pycache__` and `public/js/__pycache__` afterward)
 - `npx astro preview`, then `npx playwright test`
-- `grep -rl titusnyarkonde@ dist` must print nothing
+- Search `dist` for the résumé email. It must not appear anywhere.
