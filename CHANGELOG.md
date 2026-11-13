@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- The overview's score note now says "The cleanup removes invisible characters, but it does not remove file metadata." The overview and the Checker say "This skill does not target AI watermarks".
 - On the moderation page, Forget the token is now a pill button like Show comments, and it turns blue on hover.
 - The moderation page has a New comment box. I pick a post, write a comment, and it shows on the post at once with my name and the Author label.
 - The Turnstile spam check is on for blog comments. Comments and replies that pass it show at once. A comment posted before the list finishes loading now stays in the list.
