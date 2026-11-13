@@ -4,12 +4,15 @@
 // no secrets, and search engines are told to skip it.
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url";
+import { commentsTurnstileKey } from "../../data/profile";
 ---
 <Base title="Comment moderation" description="Approve or delete comments on the blog." noindex>
   <section class="section">
     <div class="wrap wrap-narrow">
       <h1 class="h1">Comment moderation</h1>
-      <p class="lead">New comments and replies wait here until you approve them. Approved ones show under their post. You can reply to any comment, and deleting a comment deletes its replies too.</p>
+      <p class="lead">{commentsTurnstileKey
+        ? "New comments and replies show on their post as soon as they pass the spam check, and they're listed here under Approved. Older ones from before the check may still wait for you."
+        : "New comments and replies wait here until you approve them. Approved ones show under their post."} You can reply to any comment, and deleting a comment deletes its replies too.</p>
 
       <form class="card mod-login" id="mod-login" data-api={u("/api/comments/admin")} data-blog={u("/blog/")} novalidate>
         <div class="field">

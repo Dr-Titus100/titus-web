@@ -52,7 +52,7 @@ const onCloudflare = process.env.SITE_HOST === "cloudflare";
           {commentsTurnstileKey && (
             <p>To block spam, the form uses Cloudflare Turnstile, which checks your browser to tell people from bots. See the <a href="https://www.cloudflare.com/turnstile-privacy-policy/">Turnstile privacy addendum</a>. The Turnstile script loads only after you click into the form.</p>
           )}
-          <p>Your comment stays hidden until I approve it. After that, anyone who reads the post can see your name and comment. Ask me through the <a href={u("/about/#contact")}>contact form</a> and I'll delete your comment.</p>
+          <p>{commentsTurnstileKey ? "Your comment shows on the post as soon as it passes the spam check, and anyone who reads the post can see your name and comment." : "Your comment stays hidden until I approve it. After that, anyone who reads the post can see your name and comment."} Ask me through the <a href={u("/about/#contact")}>contact form</a> and I'll delete your comment.</p>
         </>
       )}
 

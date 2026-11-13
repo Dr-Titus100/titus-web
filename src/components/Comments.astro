@@ -1,6 +1,7 @@
 ---
 // Reader comments under a blog post. The Worker in worker/index.js stores them in a Cloudflare D1
-// database, and each one waits there until Titus approves it on /admin/comments/. Readers can reply
+// database. With the Turnstile spam check on, a comment shows as soon as it passes the check. Without it,
+// each one waits until Titus approves it on /admin/comments/. Titus can delete any comment there. Readers can reply
 // to any comment. Replies are one level deep, and Titus's own replies carry an "Author" label.
 import { u } from "../lib/url";
 import { commentsTurnstileKey } from "../data/profile";
@@ -29,7 +30,7 @@ const { post } = Astro.props;
       <button class="btn" type="submit" id="cm-send">Post comment</button>
       <span class="small muted" id="cm-form-status" role="status" aria-live="polite"></span>
     </div>
-    <p class="small muted cm-note">I read every comment before it shows up here. The site keeps your name, your comment and the time in a Cloudflare database. It doesn't ask for your email and doesn't store your IP address. The <a href={u("/privacy/#comments")}>Privacy page</a> has the details.</p>
+    <p class="small muted cm-note">{commentsTurnstileKey ? "Your comment shows up here as soon as you post it. I read every one and remove spam." : "I read every comment before it shows up here."} The site keeps your name, your comment and the time in a Cloudflare database. It doesn't ask for your email and doesn't store your IP address. The <a href={u("/privacy/#comments")}>Privacy page</a> has the details.</p>
   </form>
 </section>
 
@@ -125,7 +126,14 @@ const { post } = Astro.props;
       return li;
     };
 
+    // What the list shows now, so a new comment can join it without loading everything again.
+    let shown: Comment[] = [];
+    let shownTotal = 0;
+    let shownAll = 0;
     const show = (comments: Comment[], total: number, all: number) => {
+      shown = comments;
+      shownTotal = total;
+      shownAll = all;
       const tops = comments.filter((c) => !c.parent);
       list.replaceChildren(...tops.map((c) => {
         const li = item(c);
@@ -199,7 +207,15 @@ const { post } = Astro.props;
         const wasReply = replyTo !== null;
         form.reset();
         setReply(null);
-        say(wasReply ? "Thanks. Your reply will show up here after I read it." : "Thanks. Your comment will show up here after I read it.", "ok");
+        // A comment that passed the spam check is live, so it joins the list at once.
+        const added: Comment | undefined = out.status === "approved" && out.comment ? out.comment : undefined;
+        if (added) {
+          show([...shown, added], shownTotal + (added.parent ? 0 : 1), Math.max(shownAll, shown.length) + 1);
+          say(wasReply ? "Thanks. Your reply is up." : "Thanks. Your comment is up.", "ok");
+          document.getElementById(`comment-${added.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          say(wasReply ? "Thanks. Your reply will show up here after I read it." : "Thanks. Your comment will show up here after I read it.", "ok");
+        }
       } catch (err: any) {
         const why: Record<string, string> = {
           busy: "Too many comments came from here in a short time.",

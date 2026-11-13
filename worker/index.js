@@ -2,7 +2,8 @@
 // script answers only /api/* (see run_worker_first in wrangler.jsonc), which is the blog comments API.
 //
 //   GET  /api/comments?post=<slug>   approved comments and replies on one post
-//   POST /api/comments               a new comment or reply, held until Titus approves it
+//   POST /api/comments               a new comment or reply. It shows at once when the spam check is on,
+//                                    and otherwise waits until Titus approves it
 //   GET  /api/comments/admin         every comment, for the moderation page (needs the admin token)
 //   POST /api/comments/admin         approve, delete or reply to one comment (needs the admin token)
 //
@@ -14,7 +15,8 @@
 //   COMMENTS_LIMIT           rate limiter for new comments, keyed by the visitor's IP address. The address is never stored.
 //   ADMIN_LIMIT              rate limiter for the moderation API, keyed the same way.
 //   COMMENTS_ADMIN_TOKEN     secret, at least 32 characters. The moderation page sends it. Without it, moderation is off.
-//   TURNSTILE_SECRET         optional secret. When set, every new comment must pass a Turnstile check.
+//   TURNSTILE_SECRET         optional secret. When set, every new comment must pass a Turnstile check, and
+//                            comments that pass show at once. Without it, every new comment waits for approval.
 //   NOTIFY_EMAIL             Cloudflare Email Service binding, for the email Titus gets about each new comment.
 //   NOTIFY_TO                secret, the address that gets those emails. It lives only in Cloudflare, never in
 //                            this repo or on the site. Without it, no emails go out.
@@ -25,7 +27,8 @@
 const NAME_MAX = 60;
 // The longest comment or reply, for readers and Titus alike. The text boxes use the same limit.
 const BODY_MAX = 3000;
-// New comments stop being accepted while this many wait for approval, so a flood can't fill the database.
+// Without the spam check, new comments stop being accepted while this many wait for approval, so a
+// flood can't fill the database.
 const PENDING_MAX = 200;
 // The moderation page lists this many approved comments, newest first.
 const APPROVED_SHOWN = 500;
@@ -160,6 +163,8 @@ async function addComment(request, url, env, ctx) {
   if (!input || typeof input !== "object") return json({ error: "invalid" }, 400);
   // People never see the hidden "trap" checkbox. Bots that tick every box get a quiet success.
   if (input.trap) return json({ status: "pending" }, 202);
+  // With the spam check on, a comment that passes it shows at once. Titus can still delete it.
+  const live = Boolean(env.TURNSTILE_SECRET);
 
   const post = String(input.post || "");
   const name = tidy(input.name, false);
@@ -174,7 +179,7 @@ async function addComment(request, url, env, ctx) {
   const page = await env.ASSETS.fetch(new Request(new URL(`/blog/${post}/`, url.origin), { method: "GET" }));
   if (page.status !== 200) return json({ error: "post" }, 400);
 
-  if (env.TURNSTILE_SECRET) {
+  if (live) {
     const ok = await turnstile(env.TURNSTILE_SECRET, String(input.token || ""), ip(request));
     if (!ok) return json({ error: "check" }, 400);
   }
@@ -190,19 +195,23 @@ async function addComment(request, url, env, ctx) {
     parent = { id: target.parent_id ?? target.id, name: target.name };
   }
   const waiting = await d1.prepare("SELECT COUNT(*) AS n FROM comments WHERE status = 'pending'").first("n");
-  if (waiting >= PENDING_MAX) return json({ error: "full" }, 503);
+  if (!live && waiting >= PENDING_MAX) return json({ error: "full" }, 503);
   // The insert checks the thread again, so a reply can't land in a thread deleted a moment ago.
   const parentId = parent ? parent.id : null;
+  const status = live ? "approved" : "pending";
+  const created = new Date().toISOString();
   const saved = await d1.prepare(`INSERT INTO comments (post, name, body, status, created_at, parent_id)
-      SELECT ?, ?, ?, 'pending', ?, ? WHERE ? IS NULL OR EXISTS (SELECT 1 FROM comments WHERE id = ? AND parent_id IS NULL)`)
-    .bind(post, name, body, new Date().toISOString(), parentId, parentId, parentId).run();
+      SELECT ?, ?, ?, ?, ?, ? WHERE ? IS NULL OR EXISTS (SELECT 1 FROM comments WHERE id = ? AND parent_id IS NULL)`)
+    .bind(post, name, body, status, created, parentId, parentId, parentId).run();
   if (!saved.meta || saved.meta.changes === 0) return json({ error: "parent" }, 400);
   // The email goes out after the response, so a slow or failed send never holds up the reader.
-  ctx.waitUntil(notify(env, url, page, { post, name, body, waiting: waiting + 1, replyTo: parent && parent.name }));
-  return json({ status: "pending" }, 202);
+  ctx.waitUntil(notify(env, url, page, { post, name, body, live, waiting: live ? waiting : waiting + 1, replyTo: parent && parent.name }));
+  if (!live) return json({ status: "pending" }, 202);
+  // The page adds the new comment to the list straight away, without loading them all again.
+  return json({ status: "approved", comment: { id: saved.meta.last_row_id, name, body, created, parent: parentId, author: false } }, 201);
 }
 
-// Emails Titus about a new comment, with the text and a link to the moderation page. Errors only
+// Emails Titus about a new comment, with the text, a link to the post and a link to the moderation page. Errors only
 // go to the Worker's logs: the comment is already saved, and it shows on the moderation page anyway.
 async function notify(env, url, page, c) {
   if (!env.NOTIFY_EMAIL || !env.NOTIFY_TO) return;
@@ -215,10 +224,10 @@ async function notify(env, url, page, c) {
       "",
       c.body,
       "",
-      `Approve or delete it: ${site}/admin/comments/`,
-      `The post: ${site}/blog/${c.post}/`,
-      "",
-      c.waiting === 1 ? "This is the only comment waiting for you." : `${c.waiting} comments are waiting for you.`,
+      c.live ? `It's on the post now: ${site}/blog/${c.post}/` : `The post: ${site}/blog/${c.post}/`,
+      c.live ? `To delete it: ${site}/admin/comments/` : `Approve or delete it: ${site}/admin/comments/`,
+      // Older comments from before the spam check may still be waiting.
+      ...(c.waiting ? ["", c.waiting === 1 ? "One comment is waiting for your approval." : `${c.waiting} comments are waiting for your approval.`] : []),
     ].join("\n");
     await env.NOTIFY_EMAIL.send({
       to: env.NOTIFY_TO,
