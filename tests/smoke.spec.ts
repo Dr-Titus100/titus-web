@@ -154,6 +154,43 @@ test("blog comments list approved comments and replies, and post both", async ({
   expect(errors).toEqual([]);
 });
 
+// With the spam check on, the Worker answers 201 with the saved comment, and the page shows it at once.
+test("a comment that passes the spam check shows at once", async ({ page }) => {
+  const errors = collectErrors(page);
+  let next = 10;
+  await page.route(/\/api\/comments(\?.*)?$/, async (route) => {
+    const req = route.request();
+    if (req.method() === "POST") {
+      const sent = req.postDataJSON();
+      const comment = { id: next++, name: sent.name, body: sent.body, created: "2026-11-13T12:00:00.000Z", parent: sent.parent ?? null, author: false };
+      return route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ status: "approved", comment }) });
+    }
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ total: 1, count: 1, comments: [
+      { id: 1, name: "Ama", body: "Loved it.", created: "2026-11-12T10:00:00.000Z", parent: null, author: false },
+    ] }) });
+  });
+  await page.goto("blog/the-exercise-book/");
+  test.skip((await page.locator("#comments").count()) === 0, "built without SITE_HOST=cloudflare, so there's no comments section");
+  await expect(page.locator("#cm-list > .cm-item")).toHaveCount(1);
+  await page.fill("#cm-name", "Kofi");
+  await page.fill("#cm-body", "Great story.");
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toHaveText("Thanks. Your comment is up.");
+  await expect(page.locator("#cm-list > .cm-item")).toHaveCount(2);
+  await expect(page.locator("#comment-10 > .cm-body")).toHaveText("Great story.");
+  await expect(page.locator("#cm-count")).toHaveText(" (2)");
+
+  await page.locator("#comment-1 > .cm-reply-btn").click();
+  await page.fill("#cm-name", "Esi");
+  await page.fill("#cm-body", "Same here.");
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toHaveText("Thanks. Your reply is up.");
+  await expect(page.locator("#comment-1 .cm-replies #comment-11")).toContainText("Same here.");
+  await expect(page.locator("#cm-list > .cm-item")).toHaveCount(2);
+  await expect(page.locator("#cm-count")).toHaveText(" (3)");
+  expect(errors).toEqual([]);
+});
+
 test("the moderation page lists comments and approves one", async ({ page }) => {
   const errors = collectErrors(page);
   const rows = [
