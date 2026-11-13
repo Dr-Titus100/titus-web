@@ -1,0 +1,35 @@
+---
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url";
+const updated = "November 12, 2026";
+---
+<Base title="Terms" current="" description="The terms for using this website and the titus-humanizer tools on it.">
+  <article class="section legal">
+    <div class="wrap wrap-narrow">
+      <p class="eyebrow">Last updated {updated}</p>
+      <h1 class="h1">Terms</h1>
+      <p class="lead">These terms cover this website and the titus-humanizer tools on it. By using the site, you agree to them.</p>
+
+      <h2>The tools come with no warranty</h2>
+      <p>The Checker, the Rewrite page, the rulebook and the titus-humanizer skill are free, and they're provided as they are, with no warranty of any kind. I'm not liable for any loss that comes from using them. Check every rewrite before you use it, since an AI model can change a fact or a meaning.</p>
+
+      <h2>The score isn't an AI detector</h2>
+      <p>The score counts the writing patterns titus-humanizer targets. It doesn't measure quality, and it doesn't tell you who or what wrote a text. A high score doesn't prove a text came from AI, and a low score doesn't prove a person wrote it. Don't use it to accuse anyone of using AI or to decide a grade, a hiring choice or a disciplinary matter.</p>
+
+      <h2>Your API key and your provider</h2>
+      <p>On the Rewrite page you use your own API key. Your provider's terms apply to those requests, and any charges go to your provider account. Keep your key private, and turn it off with the provider if you think someone else has it.</p>
+
+      <h2>Licenses</h2>
+      <p>titus-humanizer is open source under the <a href="https://github.com/Dr-Titus100/titus-humanizer/blob/main/LICENSE">MIT License</a>, so you can use, change and share it under that license. The writing on this site, including the blog posts, the About and Experience pages and the photos, belongs to Titus Nyarko Nde. Please ask before you republish it.</p>
+
+      <h2>Fair use of the site</h2>
+      <p>Please don't overload the site or the contact form, send spam through the form or try to break the tools.</p>
+
+      <h2>Privacy</h2>
+      <p>The <a href={u("/privacy/")}>Privacy page</a> explains what each part of the site sends and stores.</p>
+
+      <h2>Changes and contact</h2>
+      <p>I may update these terms. The date at the top shows the latest change. Questions are welcome through the <a href={u("/about/#contact")}>contact form</a>.</p>
+    </div>
+  </article>
+</Base>
