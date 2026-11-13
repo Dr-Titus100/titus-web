@@ -1,0 +1,105 @@
+{
+  "version": "v1.1.0",
+  "demo": {
+    "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker. It's a gateway to a seamless experience, fostering alignment across all 12 setup steps. Moreover, it serves as a pivotal tool that empowers new hires and their managers to navigate the first two weeks with confidence. Ultimately, it is a testament to our commitment to people.",
+    "after": "The new onboarding checklist lists all 12 setup steps for a new hire's first two weeks. New hires can tick off each step as they finish it. Their managers see the same list, so both of them know what is left to do.",
+    "spans": [
+      [
+        70,
+        96,
+        "reject-then-assert"
+      ],
+      [
+        328,
+        342,
+        "inflated significance"
+      ],
+      [
+        131,
+        142,
+        "tacked-on -ing clause"
+      ],
+      [
+        193,
+        202,
+        "copula avoidance"
+      ],
+      [
+        310,
+        320,
+        "canned ending"
+      ],
+      [
+        30,
+        39,
+        "AI vocabulary"
+      ],
+      [
+        112,
+        120,
+        "AI vocabulary"
+      ],
+      [
+        133,
+        142,
+        "AI vocabulary"
+      ],
+      [
+        205,
+        212,
+        "AI vocabulary"
+      ],
+      [
+        223,
+        231,
+        "AI vocabulary"
+      ],
+      [
+        264,
+        276,
+        "AI vocabulary"
+      ],
+      [
+        330,
+        339,
+        "AI vocabulary"
+      ],
+      [
+        0,
+        39,
+        "stock opener"
+      ],
+      [
+        180,
+        188,
+        "sentence-initial connector"
+      ]
+    ],
+    "patterns": 14,
+    "beforeScore": 0.62,
+    "beforeTier": "high",
+    "afterScore": 0.21,
+    "afterTier": "low",
+    "afterPatterns": 0
+  },
+  "examples": [
+    {
+      "tag": "Announcement",
+      "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker — it's a gateway to a more seamless experience, fostering alignment and driving meaningful impact.",
+      "after": "The new onboarding checklist shows new hires which setup steps they have finished.",
+      "report": "AI-pattern score: not scored (28 words, needs at least 30) before, not scored (13 words, needs at least 30) after\nPatterns before: AI vocabulary x3, em dash x1, reject-then-assert x1, tacked-on -ing clause x1, stock opener x1\nPatterns left after: none\nHidden characters removed: none"
+    },
+    {
+      "tag": "Email",
+      "before": "I hope this message finds you well! I wanted to reach out to touch base regarding the proposal, which was reviewed by our team last week. It's not just a budget request — it's a roadmap for sustainable growth. Please let me know if you have any questions!",
+      "after": "Our team reviewed the proposal last week. It sets out the budget we're requesting and what it would cover. I'm happy to walk you through the numbers.",
+      "report": "AI-pattern score: 0.56 (medium) before, not scored (27 words, needs at least 30) after\nPatterns before: em dash x1, reject-then-assert x1, passive voice (heuristic) x1, chatbot residue x1\nPatterns left after: none\nHidden characters removed: none\nNote: the text is short, so the script dampened the score and it is less reliable."
+    },
+    {
+      "tag": "Story",
+      "before": "Elena stood at the window as the rain fell, mirroring the storm inside her. Her chest tightened, ice crawled down her spine, and the scent of wet earth and old memories filled her lungs. She realized, at last, that letting go was not the same as forgetting. It was a way of carrying him with her.",
+      "after": "Elena stood at the window and watched the rain. She was afraid. She decided she could let him go without forgetting him.",
+      "report": "AI-pattern score: 0.60 (high) before, not scored (22 words, needs at least 30) after\nPatterns before: emotion as body sensation x2, setting as mirror x1, decorative smell x1\nPatterns left after: none\nHidden characters removed: none\nNote: the text is short, so the script dampened the score and it is less reliable."
+    }
+  ]
+}

@@ -23,12 +23,16 @@ const skill = skills["titus-humanizer"];
       <div class="card checker-card reveal">
         <div class="checker-top">
           <label for="input">Your text</label>
-          <span class="status" id="status" data-state="loading"><span class="dot"></span><span class="status-text">Starting</span></span>
+          <span class="status" id="status" data-state="idle"><span class="dot"></span><span class="status-text">The first check downloads Python, about 12 MB</span></span>
+        </div>
+        <div class="load" id="load" hidden>
+          <progress id="load-bar" max="1" value="0" aria-labelledby="load-text"></progress>
+          <span class="small muted" id="load-text"></span>
         </div>
         <textarea id="input" spellcheck="false" placeholder="Paste an email, an essay, a cover letter or a story here."></textarea>
         <div class="checker-actions">
           <div class="btn-row">
-            <button class="btn btn-ghost" id="run" disabled>Check text</button>
+            <button class="btn btn-ghost" id="run">Check text</button>
             <button class="btn btn-ghost" id="sample" type="button">Try a sample</button>
             <button class="btn btn-ghost" id="clear" type="button">Clear</button>
           </div>
@@ -107,6 +111,12 @@ const skill = skills["titus-humanizer"];
   .status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft); }
   .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); animation: pulse 1.2s ease-in-out infinite; }
   .status[data-state="ready"] .dot { background: var(--good); animation: none; }
+  .status[data-state="idle"] .dot { background: var(--ink-faint); animation: none; }
+  .load { display: flex; align-items: center; gap: 12px; margin: 6px 0 10px; }
+  .load progress { flex: 1; height: 6px; appearance: none; border: 0; border-radius: 3px; background: var(--line-soft); overflow: hidden; }
+  .load progress::-webkit-progress-bar { background: var(--line-soft); }
+  .load progress::-webkit-progress-value { background: var(--accent); transition: width 0.2s; }
+  .load progress::-moz-progress-bar { background: var(--accent); }
   .status[data-state="failed"] .dot { background: var(--bad); animation: none; }
   @keyframes pulse { 50% { opacity: 0.3; transform: scale(0.8); } }
   .results { margin-top: 28px; animation: resultsIn 0.8s var(--ease); }
@@ -151,13 +161,14 @@ const skill = skills["titus-humanizer"];
   mark.hl, mark.hid { cursor: pointer; }
   /* The full text of the pattern under the pointer or the last click. */
   mark.hl.active { outline: 2px solid var(--ink); outline-offset: 1px; }
+  mark.hl:focus-visible, mark.hid:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
   mark.hid.active { outline: 2px solid var(--bad); outline-offset: 1px; }
   .summary-line { font-weight: 600; }
   .next { text-align: center; margin: 80px auto 0; max-width: 720px; }
 </style>
 
 <script>
-  import { onStatus, analyze, highlight, showHidden, groupOf, type Analysis } from "../../../scripts/titus";
+  import { onStatus, load, analyze, highlight, showHidden, groupOf, type Analysis } from "../../../scripts/titus";
   import { setRing } from "../../../scripts/ring";
   import { copyText, toast } from "../../../scripts/site";
 
@@ -174,11 +185,21 @@ const skill = skills["titus-humanizer"];
   const words = (t: string) => (t.match(/[A-Za-z0-9À-ɏ']+/g) || []).length;
   input.addEventListener("input", () => { $("count").textContent = `${words(input.value)} words`; });
 
+  // Python (about 12 MB) downloads only once the visitor shows they want to check something:
+  // focusing or typing in the box, or pressing a button.
+  const mb = (n: number) => (n / 1e6).toFixed(1);
   onStatus((s) => {
-    status.dataset.state = s.ready ? "ready" : s.failed ? "failed" : "loading";
-    status.querySelector(".status-text")!.textContent = s.ready ? "Ready" : s.failed ? "Could not load Python" : `${s.text}`;
-    run.disabled = !s.ready;
+    status.dataset.state = s.ready ? "ready" : s.failed ? "failed" : s.started ? "loading" : "idle";
+    status.querySelector(".status-text")!.textContent = s.ready ? "Ready" : s.failed ? "Could not load Python" : s.started ? s.text : "The first check downloads Python, about 12 MB";
+    const showBar = s.started && !s.ready && !s.failed && s.total > 0;
+    $("load").hidden = !showBar;
+    if (showBar) {
+      ($("load-bar") as HTMLProgressElement).value = s.loaded / s.total;
+      $("load-text").textContent = s.loaded < s.total ? `${mb(s.loaded)} of ${mb(s.total)} MB` : "Starting Python";
+    }
   });
+  input.addEventListener("focus", load, { once: true });
+  input.addEventListener("input", load, { once: true });
 
   function render() {
     if (!last) return;
@@ -188,7 +209,7 @@ const skill = skills["titus-humanizer"];
     if (view === "patterns") {
       const quoteSpans = last.quotes.map((q) => ({ ...q, label: "quoted text", weight: 0 }));
       el.innerHTML = highlight(last.cleaned, [...last.spans, ...quoteSpans]);
-      const notes = [last.spans.length ? "Hover over, click or tap a highlight to see the pattern's name." : "No patterns to highlight."];
+      const notes = [last.spans.length ? "Hover over, click or tap a highlight to see the pattern's name. With a keyboard, press Tab to move between highlights." : "No patterns to highlight."];
       if (last.quotes.length) notes.push("Quoted text has a dashed underline. It stays as written, so nothing inside it is marked.");
       $("view-note").textContent = notes.join(" ");
     } else if (view === "hidden") {
@@ -255,25 +276,34 @@ const skill = skills["titus-humanizer"];
   actions.forEach((b) => b.addEventListener("click", () => actions.forEach((x) => x.classList.toggle("picked", x === b))));
   run.addEventListener("click", check);
   input.addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !run.disabled) check(); });
-  $("sample").addEventListener("click", () => { input.value = SAMPLE; input.dispatchEvent(new Event("input")); if (!run.disabled) check(); });
+  $("sample").addEventListener("click", () => { input.value = SAMPLE; input.dispatchEvent(new Event("input")); check(); });
   $("clear").addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); $("results").hidden = true; input.focus(); });
   $("copy-clean").addEventListener("click", () => last && copyText(last.cleaned, "Cleaned text copied"));
   // Hovering over a highlight, or clicking or tapping it, shows the pattern's name in a small label
   // and outlines the exact text that pattern matched. A click keeps it open until the next click.
+  // Highlights are focusable buttons too: Tab shows the label, Enter or Space keeps it open,
+  // and Escape closes it. The label is tied to the focused highlight with aria-describedby.
   const tip = document.createElement("div");
   tip.className = "hl-tip";
+  tip.id = "hl-tip";
+  tip.setAttribute("role", "tooltip");
   tip.hidden = true;
   document.body.appendChild(tip);
   let pinned: HTMLElement | null = null;
   const viewEl = $("view");
   const clearActive = () => viewEl.querySelectorAll("mark.active").forEach((x) => x.classList.remove("active"));
-  const hideTip = () => { tip.hidden = true; pinned = null; clearActive(); };
+  const hideTip = () => {
+    tip.hidden = true; pinned = null; clearActive();
+    viewEl.querySelectorAll("[aria-describedby='hl-tip']").forEach((x) => x.removeAttribute("aria-describedby"));
+  };
   const markAt = (t: EventTarget | null) => (t as HTMLElement | null)?.closest?.<HTMLElement>("mark.hl, mark.hid") || null;
   function showTip(m: HTMLElement, clientY: number) {
     clearActive();
     const id = m.dataset.span;
     const parts = id != null ? viewEl.querySelectorAll<HTMLElement>(`mark.hl[data-span="${id}"]`) : [m];
     parts.forEach((x) => x.classList.add("active"));
+    viewEl.querySelectorAll("[aria-describedby='hl-tip']").forEach((x) => x.removeAttribute("aria-describedby"));
+    m.setAttribute("aria-describedby", "hl-tip");
     tip.textContent = m.dataset.label || "";
     tip.hidden = false;
     // A highlight that wraps has one box per line, so use the line under the pointer.
@@ -299,6 +329,17 @@ const skill = skills["titus-humanizer"];
     e.stopPropagation();
     showTip(m, e.clientY);
     pinned = m;
+  });
+  const middle = (m: HTMLElement) => { const r = m.getClientRects()[0] || m.getBoundingClientRect(); return r.top + r.height / 2; };
+  viewEl.addEventListener("focusin", (e) => { const m = markAt(e.target); if (m && pinned !== m) { pinned = null; showTip(m, middle(m)); } });
+  viewEl.addEventListener("focusout", (e) => { if (!pinned && !markAt(e.relatedTarget)) hideTip(); });
+  viewEl.addEventListener("keydown", (e) => {
+    const m = markAt(e.target);
+    if (e.key === "Escape") { hideTip(); return; }
+    if (!m || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault();
+    if (pinned === m) { pinned = null; tip.hidden = true; clearActive(); }
+    else { showTip(m, middle(m)); pinned = m; }
   });
   document.addEventListener("click", (e) => { if (!$("view").contains(e.target as Node)) hideTip(); });
   viewEl.addEventListener("scroll", hideTip);

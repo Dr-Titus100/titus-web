@@ -4,6 +4,12 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-12
 
+- The Install page's Claude steps match Claude's current menus: Customize, Skills, the + button, Create skill, Upload a skill. The Claude Code steps create `~/.claude/skills` before copying into it.
+- The Checker downloads Python only when you click into the text box, type, or press a button, instead of as soon as the page opens. A progress bar shows the download in megabytes.
+- Checker highlights can be reached with the keyboard. Tab moves between them and shows each pattern's name, Enter or Space keeps the label open and Escape closes it. Screen readers hear the name as the highlight's description.
+- The overview demo and the before-and-after reports come from the pinned scoring script's own output, built by `scripts/gen-examples.mjs`, instead of labels typed by hand. A line under the demo explains why plain text rarely scores 0.
+- The phone menu is a full-screen panel. Closed, its links can't be reached with Tab. Open, the page behind it doesn't scroll or take focus, focus moves to the first link, and Escape, a link or a wider window closes it and returns focus to the menu button.
+- The Python glue the Checker runs moved from `titus-worker.js` into `public/js/titus_glue.py`, so the example generator can run the same code.
 - New Privacy and Terms pages, linked from the footer, the contact form, the Checker and the Rewrite page.
 - Rewrite keeps API keys in the page's memory by default, so a reload clears them. Remember my key saves a key for 30 days, and it's hidden while the site runs on github.io, where other project sites share the same origin. Keys that earlier versions saved are removed. A Forget my key button clears every saved key, and a Show key button reveals the masked field.
 - Rewrite says exactly what goes to which provider, links each provider's data policy, notes that Google may use free-tier text, and warns that requests can be billed. The page hides its key field when another site shows it in a frame.
