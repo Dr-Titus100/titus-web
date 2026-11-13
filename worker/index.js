@@ -21,6 +21,8 @@ const BODY_MAX = 2000;
 const PENDING_MAX = 200;
 // The moderation page lists this many approved comments, newest first.
 const APPROVED_SHOWN = 500;
+// A post shows at most this many comments, the newest ones.
+const POST_SHOWN = 500;
 const SLUG = /^[a-z0-9][a-z0-9-]{0,99}$/;
 
 export default {
@@ -100,10 +102,14 @@ async function listApproved(url, env) {
   if (!SLUG.test(post)) return json({ error: "post" }, 400);
   const d1 = await db(env);
   if (!d1) return json({ error: "unavailable" }, 503);
-  const { results } = await d1
-    .prepare("SELECT id, name, body, created_at AS created FROM comments WHERE post = ? AND status = 'approved' ORDER BY created_at, id LIMIT 500")
-    .bind(post).all();
-  return json({ comments: results });
+  // The newest POST_SHOWN comments, put back in reading order, plus the total. So a newly approved
+  // comment always shows, even on a post with a very long thread.
+  const [latest, total] = await d1.batch([
+    d1.prepare("SELECT id, name, body, created_at AS created FROM comments WHERE post = ? AND status = 'approved' ORDER BY created_at DESC, id DESC LIMIT ?")
+      .bind(post, POST_SHOWN),
+    d1.prepare("SELECT COUNT(*) AS n FROM comments WHERE post = ? AND status = 'approved'").bind(post),
+  ]);
+  return json({ comments: latest.results.reverse(), total: total.results[0].n });
 }
 
 async function addComment(request, url, env) {

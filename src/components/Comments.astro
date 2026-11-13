@@ -68,7 +68,7 @@ const { post } = Astro.props;
     const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     // Comment text goes in with textContent, so nothing a reader types runs as HTML.
-    const show = (comments: Comment[]) => {
+    const show = (comments: Comment[], total = comments.length) => {
       list.replaceChildren(...comments.map((c) => {
         const li = document.createElement("li");
         li.className = "cm-item";
@@ -86,14 +86,19 @@ const { post } = Astro.props;
         li.append(meta, body);
         return li;
       }));
-      count.textContent = comments.length ? ` (${comments.length})` : "";
-      status.textContent = comments.length ? "" : "No comments yet.";
-      status.hidden = comments.length > 0;
+      count.textContent = comments.length ? ` (${Math.max(total, comments.length)})` : "";
+      // A very long thread shows only its newest comments, and says so.
+      const partial = total > comments.length;
+      status.textContent = !comments.length ? "No comments yet." : partial ? `These are the newest ${comments.length} comments.` : "";
+      status.hidden = comments.length > 0 && !partial;
     };
 
     fetch(`${api}?post=${encodeURIComponent(post)}`, { headers: { Accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((out) => show(Array.isArray(out.comments) ? out.comments : []))
+      .then((out) => {
+        const comments = Array.isArray(out.comments) ? out.comments : [];
+        show(comments, typeof out.total === "number" ? out.total : comments.length);
+      })
       .catch(() => { status.textContent = "Comments couldn't load right now. Try reloading the page in a minute."; });
 
     // The optional Turnstile check loads only when someone starts writing a comment.
