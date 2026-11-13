@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- On the moderation page, Forget the token is now a pill button like Show comments, and it turns blue on hover.
 - The moderation page has a New comment box. I pick a post, write a comment, and it shows on the post at once with my name and the Author label.
 - The Turnstile spam check is on for blog comments. Comments and replies that pass it show at once. A comment posted before the list finishes loading now stays in the list.
 - With the Turnstile spam check on, comments and replies show on the post as soon as they pass it, and the new comment appears in the list right away. I can still delete any of them from the moderation page, and I still get an email for each one. Without the check, they wait for my approval as before.
