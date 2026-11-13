@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url";
 import { providers } from "../data/providers";
+import { commentsTurnstileKey } from "../data/profile";
 const updated = "November 13, 2026";
 // SITE_HOST=cloudflare is set in Cloudflare's build settings. Builds for GitHub Pages leave it unset.
 const onCloudflare = process.env.SITE_HOST === "cloudflare";
@@ -27,7 +28,7 @@ const onCloudflare = process.env.SITE_HOST === "cloudflare";
       <p>The Checker runs the titus-humanizer scoring script inside your browser. Your browser downloads the Python runtime and the script from this site once, about 14 MB, and keeps them in its cache. The text you check stays in your browser. It isn't sent to this site or anywhere else, and the site doesn't save it.</p>
 
       <h2>Rewrite with your key</h2>
-      <p>When you choose Rewrite, your browser sends your API key, your text and the titus-humanizer rulebook straight to the AI provider you picked. This site has no server of its own, so none of it passes through the site. What the provider does with it is set by the provider's own terms:</p>
+      <p>When you choose Rewrite, your browser sends your API key, your text and the titus-humanizer rulebook straight to the AI provider you picked. None of it passes through this site. What the provider does with it is set by the provider's own terms:</p>
       <ul>
         {Object.values(providers).map((p) => (
           <li><strong>{p.name}</strong> (<code>{p.host}</code>). {p.dataNote} <a href={p.policyUrl}>{p.policyName}</a>.</li>
@@ -43,6 +44,17 @@ const onCloudflare = process.env.SITE_HOST === "cloudflare";
       <p>When you send a message, your name, email address and message go to <a href="https://web3forms.com/">Web3Forms</a>, which emails them to me. Web3Forms says it may keep server logs, which can include your details, for up to two months, on servers in the United States. See the <a href="https://docs.web3forms.com/getting-started/faq">Web3Forms FAQ</a> for its data handling.</p>
       <p>To block spam, the form uses hCaptcha through Web3Forms. hCaptcha receives information about your browser and how you use the page so it can tell people from bots. See the <a href="https://www.hcaptcha.com/privacy">hCaptcha privacy policy</a>. The hCaptcha script loads only after you click into the form.</p>
       <p>I use your message and email address only to reply to you. Your message stays in my email inbox. Ask me through the form or by email and I'll delete it.</p>
+
+      {onCloudflare && (
+        <>
+          <h2 id="comments">Comments on blog posts</h2>
+          <p>When you post a comment, your browser sends your name and comment to this site's Worker on Cloudflare. The Worker saves them in a Cloudflare D1 database with the post and the time. The form doesn't ask for your email, and the database doesn't keep your IP address. The Worker uses your IP address only in the moment, to limit how many comments one place can send in a minute. Cloudflare's own logs may record it, as they do for every page you load.</p>
+          {commentsTurnstileKey && (
+            <p>To block spam, the form uses Cloudflare Turnstile, which checks your browser to tell people from bots. See the <a href="https://www.cloudflare.com/turnstile-privacy-policy/">Turnstile privacy addendum</a>. The Turnstile script loads only after you click into the form.</p>
+          )}
+          <p>Your comment stays hidden until I approve it. After that, anyone who reads the post can see your name and comment. Ask me through the <a href={u("/about/#contact")}>contact form</a> and I'll delete your comment.</p>
+        </>
+      )}
 
       <h2>What this site stores in your browser</h2>
       <ul>

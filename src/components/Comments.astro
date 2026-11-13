@@ -1,0 +1,164 @@
+---
+// Reader comments under a blog post. The Worker in worker/index.js stores them in a Cloudflare D1
+// database, and each one waits there until Titus approves it on /admin/comments/.
+import { u } from "../lib/url";
+import { commentsTurnstileKey } from "../data/profile";
+interface Props { post: string }
+const { post } = Astro.props;
+---
+<section class="comments" id="comments" aria-labelledby="comments-title" data-post={post} data-api={u("/api/comments")}>
+  <h2 class="comments-title" id="comments-title">Comments<span id="cm-count"></span></h2>
+  <p class="small muted" id="cm-status" role="status" aria-live="polite">Loading comments...</p>
+  <ol class="cm-list" id="cm-list"></ol>
+
+  <form class="card cm-form" id="comment-form" data-sitekey={commentsTurnstileKey} novalidate>
+    <h3 class="cm-form-title">Leave a comment</h3>
+    <div class="field">
+      <label for="cm-name">Your name</label>
+      <input type="text" id="cm-name" name="name" autocomplete="name" required maxlength="60" />
+    </div>
+    <div class="field">
+      <label for="cm-body">Your comment</label>
+      <textarea id="cm-body" name="body" required maxlength="2000"></textarea>
+    </div>
+    <input type="checkbox" name="trap" class="cm-trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
+    <div class="cm-check" id="cm-check"></div>
+    <div class="btn-row">
+      <button class="btn" type="submit" id="cm-send">Post comment</button>
+      <span class="small muted" id="cm-form-status" role="status" aria-live="polite"></span>
+    </div>
+    <p class="small muted cm-note">I read every comment before it shows up here. The site keeps your name, your comment and the time in a Cloudflare database. It doesn't ask for your email and doesn't store your IP address. The <a href={u("/privacy/#comments")}>Privacy page</a> has the details.</p>
+  </form>
+</section>
+
+<style is:global>
+  .comments { margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line-soft); }
+  .comments-title { font-size: 28px; letter-spacing: -0.02em; margin: 0 0 12px; }
+  .cm-list { list-style: none; margin: 0 0 32px; padding: 0; display: flex; flex-direction: column; gap: 24px; }
+  .cm-list:empty { display: none; }
+  .cm-item { padding-bottom: 20px; border-bottom: 1px solid var(--line-soft); }
+  .cm-item:last-child { border-bottom: 0; padding-bottom: 0; }
+  .cm-meta { margin: 0 0 6px; font-size: 15px; color: var(--ink-soft); }
+  .cm-meta strong { color: var(--ink); font-weight: 600; margin-right: 8px; }
+  .cm-body { margin: 0; font-size: 17px; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+  .cm-form { display: flex; flex-direction: column; gap: 16px; }
+  .cm-form .field { margin: 0; }
+  .cm-form textarea { min-height: 160px; }
+  .cm-form-title { font-size: 21px; margin: 0; }
+  .cm-trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .cm-check:empty { display: none; }
+  .cm-note { margin: 0; }
+  #cm-form-status.ok { color: var(--good); }
+  #cm-form-status.err { color: var(--bad); }
+</style>
+
+<script>
+  type Comment = { id: number; name: string; body: string; created: string };
+  const box = document.getElementById("comments");
+  if (box) {
+    const api = box.dataset.api!;
+    const post = box.dataset.post!;
+    const list = document.getElementById("cm-list")!;
+    const count = document.getElementById("cm-count")!;
+    const status = document.getElementById("cm-status")!;
+    const form = document.getElementById("comment-form") as HTMLFormElement;
+    const send = document.getElementById("cm-send") as HTMLButtonElement;
+    const formStatus = document.getElementById("cm-form-status")!;
+    const say = (text: string, kind = "") => { formStatus.textContent = text; formStatus.className = `small muted ${kind}`; };
+    const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+    // Comment text goes in with textContent, so nothing a reader types runs as HTML.
+    const show = (comments: Comment[]) => {
+      list.replaceChildren(...comments.map((c) => {
+        const li = document.createElement("li");
+        li.className = "cm-item";
+        const meta = document.createElement("p");
+        meta.className = "cm-meta";
+        const who = document.createElement("strong");
+        who.textContent = c.name;
+        const when = document.createElement("time");
+        when.dateTime = c.created;
+        when.textContent = day(c.created);
+        meta.append(who, when);
+        const body = document.createElement("p");
+        body.className = "cm-body";
+        body.textContent = c.body;
+        li.append(meta, body);
+        return li;
+      }));
+      count.textContent = comments.length ? ` (${comments.length})` : "";
+      status.textContent = comments.length ? "" : "No comments yet.";
+      status.hidden = comments.length > 0;
+    };
+
+    fetch(`${api}?post=${encodeURIComponent(post)}`, { headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((out) => show(Array.isArray(out.comments) ? out.comments : []))
+      .catch(() => { status.textContent = "Comments couldn't load right now. Try reloading the page in a minute."; });
+
+    // The optional Turnstile check loads only when someone starts writing a comment.
+    const sitekey = form.dataset.sitekey || "";
+    let token = "";
+    let widget: string | undefined;
+    let checkLoaded = false;
+    const w = window as any;
+    const loadCheck = () => {
+      if (!sitekey || checkLoaded) return;
+      checkLoaded = true;
+      w.onCommentCheckReady = () => {
+        widget = w.turnstile.render("#cm-check", {
+          sitekey,
+          callback: (t: string) => { token = t; },
+          "expired-callback": () => { token = ""; },
+          "error-callback": () => { token = ""; },
+        });
+      };
+      const s = document.createElement("script");
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onCommentCheckReady";
+      s.async = true;
+      document.body.appendChild(s);
+    };
+    form.addEventListener("focusin", loadCheck);
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const name = String(data.get("name") || "").trim();
+      const body = String(data.get("body") || "").trim();
+      if (!name || !body) { say("Please add your name and a comment.", "err"); return; }
+      if (sitekey && !token) { say("Please finish the check above the Post comment button.", "err"); return; }
+      if (!navigator.onLine) { say("You're offline. Your comment is still here. Connect and try again.", "err"); return; }
+      send.disabled = true;
+      say("Posting...");
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 20000);
+      try {
+        const res = await fetch(api, {
+          method: "POST",
+          signal: controller.signal,
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ post, name, body, trap: data.get("trap") !== null, token }),
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || "server");
+        form.reset();
+        say("Thanks. Your comment will show up here after I read it.", "ok");
+      } catch (err: any) {
+        const why: Record<string, string> = {
+          busy: "Too many comments came from here in a short time.",
+          check: "The spam check didn't pass.",
+          full: "Comments are paused for a while.",
+          name: "The name is too long.",
+          body: "The comment is too long.",
+        };
+        const reason = controller.signal.aborted ? "The site didn't answer in time." : why[err?.message] || "The comment couldn't be saved.";
+        say(`${reason} Your comment is still here. Try again in a minute.`, "err");
+      } finally {
+        window.clearTimeout(timer);
+        send.disabled = false;
+        token = "";
+        if (widget !== undefined) w.turnstile?.reset?.(widget);
+      }
+    });
+  }
+</script>

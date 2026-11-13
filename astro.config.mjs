@@ -10,5 +10,6 @@ export default defineConfig({
   site,
   base,
   trailingSlash: "always",
-  integrations: [sitemap()],
+  // The comment moderation page stays out of the sitemap.
+  integrations: [sitemap({ filter: (page) => !page.includes("/admin/") })],
 });

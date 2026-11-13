@@ -1,0 +1,177 @@
+---
+// Titus's moderation page for blog comments. It works only on the Cloudflare site, where the Worker
+// checks the admin token (the COMMENTS_ADMIN_TOKEN secret) on every request. The page itself holds
+// no secrets, and search engines are told to skip it.
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url";
+---
+<Base title="Comment moderation" description="Approve or delete comments on the blog." noindex>
+  <section class="section">
+    <div class="wrap wrap-narrow">
+      <h1 class="h1">Comment moderation</h1>
+      <p class="lead">New comments wait here until you approve them. Approved comments show under their post, and you can delete any comment.</p>
+
+      <form class="card mod-login" id="mod-login" data-api={u("/api/comments/admin")} data-blog={u("/blog/")} novalidate>
+        <div class="field">
+          <label for="mod-token">Admin token</label>
+          <input type="password" id="mod-token" autocomplete="current-password" required />
+        </div>
+        <div class="btn-row">
+          <button class="btn" type="submit">Show comments</button>
+          <button class="btn-link" type="button" id="mod-forget" hidden>Forget the token</button>
+          <span class="small muted" id="mod-status" role="status" aria-live="polite"></span>
+        </div>
+        <p class="small muted mod-note">The token is the COMMENTS_ADMIN_TOKEN secret on the Worker. This tab keeps it until you close it.</p>
+      </form>
+
+      <div id="mod-lists" hidden>
+        <h2 class="mod-heading">Waiting for approval <span id="mod-pending-count"></span></h2>
+        <ol class="mod-list" id="mod-pending"></ol>
+        <p class="small muted" id="mod-pending-empty" hidden>Nothing is waiting.</p>
+        <h2 class="mod-heading">Approved <span id="mod-approved-count"></span></h2>
+        <ol class="mod-list" id="mod-approved"></ol>
+        <p class="small muted" id="mod-approved-empty" hidden>No approved comments yet.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .mod-login { margin-top: 40px; display: flex; flex-direction: column; gap: 16px; }
+  .mod-login .field, .mod-note { margin: 0; }
+  .mod-heading { font-size: 28px; letter-spacing: -0.02em; margin: 48px 0 16px; }
+  .mod-heading span { color: var(--ink-soft); font-weight: 400; }
+  .mod-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+  .mod-item { background: var(--card); border: 1px solid var(--card-line); border-radius: 16px; padding: 20px 24px; }
+  .mod-meta { margin: 0 0 8px; font-size: 15px; color: var(--ink-soft); }
+  .mod-meta strong { color: var(--ink); margin-right: 8px; }
+  .mod-body { margin: 0 0 12px; white-space: pre-line; overflow-wrap: anywhere; }
+</style>
+
+<script>
+  type Row = { id: number; post: string; name: string; body: string; status: "pending" | "approved"; created: string };
+  const login = document.getElementById("mod-login") as HTMLFormElement;
+  const api = login.dataset.api!;
+  const blog = login.dataset.blog!;
+  const tokenInput = document.getElementById("mod-token") as HTMLInputElement;
+  const forget = document.getElementById("mod-forget") as HTMLButtonElement;
+  const status = document.getElementById("mod-status")!;
+  const lists = document.getElementById("mod-lists")!;
+  const KEY = "comments-admin-token";
+  const store = {
+    get: () => { try { return sessionStorage.getItem(KEY) || ""; } catch { return ""; } },
+    set: (v: string) => { try { sessionStorage.setItem(KEY, v); } catch {} },
+    clear: () => { try { sessionStorage.removeItem(KEY); } catch {} },
+  };
+  let token = store.get();
+
+  const problem: Record<string, string> = {
+    token: "That token doesn't match the one on the Worker.",
+    "admin-off": "Moderation is off until the Worker has a COMMENTS_ADMIN_TOKEN secret of at least 32 characters.",
+    busy: "Too many tries in a short time. Wait a minute.",
+    unavailable: "The Worker can't reach the comments database.",
+    missing: "That comment is already gone. The list is now up to date.",
+  };
+
+  async function call(method: "GET" | "POST", body?: object) {
+    const res = await fetch(api, {
+      method,
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || "server");
+    return out;
+  }
+
+  const fail = (err: any) => {
+    status.textContent = problem[err?.message] || "The request didn't work. Try again in a minute.";
+  };
+
+  function item(c: Row) {
+    const li = document.createElement("li");
+    li.className = "mod-item";
+    const meta = document.createElement("p");
+    meta.className = "mod-meta";
+    const who = document.createElement("strong");
+    who.textContent = c.name;
+    const link = document.createElement("a");
+    link.href = `${blog}${c.post}/`;
+    link.textContent = c.post;
+    meta.append(who, `${new Date(c.created).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })} on `, link);
+    const body = document.createElement("p");
+    body.className = "mod-body";
+    body.textContent = c.body;
+    const row = document.createElement("div");
+    row.className = "btn-row";
+    if (c.status === "pending") {
+      const approve = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: "Approve" });
+      approve.addEventListener("click", () => act("approve", c.id, approve));
+      row.append(approve);
+    }
+    const del = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: "Delete" });
+    // The first click asks, the second deletes. Nothing is deleted by a single stray click.
+    del.addEventListener("click", () => {
+      if (del.dataset.armed) return act("delete", c.id, del);
+      del.dataset.armed = "1";
+      del.textContent = "Delete for good";
+      window.setTimeout(() => { delete del.dataset.armed; del.textContent = "Delete"; }, 5000);
+    });
+    row.append(del);
+    li.append(meta, body, row);
+    return li;
+  }
+
+  function fill(rows: Row[]) {
+    for (const kind of ["pending", "approved"] as const) {
+      const these = rows.filter((r) => r.status === kind);
+      document.getElementById(`mod-${kind}`)!.replaceChildren(...these.map(item));
+      document.getElementById(`mod-${kind}-count`)!.textContent = `(${these.length})`;
+      document.getElementById(`mod-${kind}-empty`)!.hidden = these.length > 0;
+    }
+    lists.hidden = false;
+  }
+
+  async function load() {
+    status.textContent = "Loading...";
+    try {
+      const out = await call("GET");
+      store.set(token);
+      forget.hidden = false;
+      status.textContent = "";
+      fill(out.comments || []);
+    } catch (err) {
+      lists.hidden = true;
+      fail(err);
+    }
+  }
+
+  async function act(action: "approve" | "delete", id: number, button: HTMLButtonElement) {
+    button.disabled = true;
+    try {
+      await call("POST", { action, id });
+      status.textContent = action === "approve" ? "Approved." : "Deleted.";
+    } catch (err) {
+      fail(err);
+    }
+    const keep = status.textContent;
+    await load();
+    status.textContent = keep;
+  }
+
+  login.addEventListener("submit", (e) => {
+    e.preventDefault();
+    token = tokenInput.value.trim() || token;
+    tokenInput.value = "";
+    if (!token) { status.textContent = "Enter the admin token first."; return; }
+    load();
+  });
+  forget.addEventListener("click", () => {
+    store.clear();
+    token = "";
+    forget.hidden = true;
+    lists.hidden = true;
+    status.textContent = "This tab no longer has the token.";
+  });
+  if (token) load();
+</script>

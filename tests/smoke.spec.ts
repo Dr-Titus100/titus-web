@@ -16,6 +16,7 @@ const pages = [
   "privacy/",
   "terms/",
   "site-map/",
+  "admin/comments/",
 ];
 
 function collectErrors(page: Page) {
@@ -24,6 +25,12 @@ function collectErrors(page: Page) {
   page.on("pageerror", (e) => errors.push(e.message));
   return errors;
 }
+
+// The comments API lives in the Cloudflare Worker, which `astro preview` doesn't run. Blog posts built
+// with SITE_HOST=cloudflare ask it for comments, so every test gets an empty answer here.
+test.beforeEach(async ({ page }) => {
+  await page.route(/\/api\/comments\?/, (route) => route.fulfill({ contentType: "application/json", body: '{"comments":[]}' }));
+});
 
 for (const path of pages) {
   test(`/${path} loads with one h1 and no errors`, async ({ page }) => {
@@ -88,4 +95,77 @@ test("Rewrite switches provider and remembers the choice", async ({ page }) => {
   await page.reload();
   await expect(page.locator('#providers [data-p="anthropic"]')).toHaveAttribute("aria-pressed", "true");
   expect(errors).toEqual([]);
+});
+
+// The comments section is built only for Cloudflare (SITE_HOST=cloudflare), where the Worker answers
+// /api/comments. Here the API is faked. To run this test, build with SITE_HOST=cloudflare first.
+test("blog comments list approved comments and post a new one", async ({ page }) => {
+  const errors = collectErrors(page);
+  const posted: any[] = [];
+  await page.route(/\/api\/comments(\?.*)?$/, async (route) => {
+    const req = route.request();
+    if (req.method() === "POST") {
+      posted.push(req.postDataJSON());
+      return route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ status: "pending" }) });
+    }
+    expect(new URL(req.url()).searchParams.get("post")).toBe("the-exercise-book");
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ comments: [
+      { id: 1, name: "Ama", body: "Loved it.\nThe <b>fish stall</b> part most.", created: "2026-11-12T10:00:00.000Z" },
+    ] }) });
+  });
+  await page.goto("blog/the-exercise-book/");
+  test.skip((await page.locator("#comments").count()) === 0, "built without SITE_HOST=cloudflare, so there's no comments section");
+  await expect(page.locator(".cm-item")).toHaveCount(1);
+  await expect(page.locator("#cm-count")).toHaveText(" (1)");
+  // Comment text shows as plain text, never as HTML.
+  await expect(page.locator(".cm-body")).toContainText("<b>fish stall</b>");
+  await expect(page.locator(".cm-body b")).toHaveCount(0);
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toHaveText("Please add your name and a comment.");
+  await page.fill("#cm-name", "Kofi");
+  await page.fill("#cm-body", "Great story.");
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toContainText("after I read it");
+  expect(posted).toEqual([{ post: "the-exercise-book", name: "Kofi", body: "Great story.", trap: false, token: "" }]);
+  await expect(page.locator("#cm-body")).toHaveValue("");
+  expect(errors).toEqual([]);
+});
+
+test("the moderation page lists comments and approves one", async ({ page }) => {
+  const errors = collectErrors(page);
+  const rows = [
+    { id: 2, post: "the-exercise-book", name: "Kofi", body: "Great story.", status: "pending", created: "2026-11-13T09:00:00.000Z" },
+    { id: 1, post: "the-exercise-book", name: "Ama", body: "Loved it.", status: "approved", created: "2026-11-12T10:00:00.000Z" },
+  ];
+  const actions: any[] = [];
+  await page.route(/\/api\/comments\/admin$/, async (route) => {
+    const req = route.request();
+    if (req.headers()["authorization"] !== "Bearer right-token") {
+      return route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ error: "token" }) });
+    }
+    if (req.method() === "POST") {
+      const body = req.postDataJSON();
+      actions.push(body);
+      rows.find((r) => r.id === body.id)!.status = "approved";
+      return route.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
+    }
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ comments: rows }) });
+  });
+  await page.goto("admin/comments/");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+  await page.fill("#mod-token", "wrong-token");
+  await page.click("#mod-login button[type=submit]");
+  await expect(page.locator("#mod-status")).toHaveText("That token doesn't match the one on the Worker.");
+  await expect(page.locator("#mod-lists")).toBeHidden();
+  await page.fill("#mod-token", "right-token");
+  await page.click("#mod-login button[type=submit]");
+  await expect(page.locator("#mod-pending .mod-item")).toHaveCount(1);
+  await expect(page.locator("#mod-approved .mod-item")).toHaveCount(1);
+  await page.locator("#mod-pending .mod-item").getByRole("button", { name: "Approve" }).click();
+  await expect(page.locator("#mod-status")).toHaveText("Approved.");
+  await expect(page.locator("#mod-approved .mod-item")).toHaveCount(2);
+  await expect(page.locator("#mod-pending-empty")).toBeVisible();
+  expect(actions).toEqual([{ action: "approve", id: 2 }]);
+  // The browser logs the 401 answer to the wrong token. Nothing else should show up.
+  expect(errors.filter((e) => !e.includes("401"))).toEqual([]);
 });

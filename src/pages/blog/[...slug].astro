@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Comments from "../../components/Comments.astro";
 import { getCollection, render } from "astro:content";
 import { u } from "../../lib/url";
 import fs from "node:fs";
@@ -17,6 +18,8 @@ const at = all.findIndex((p) => p.id === post.id);
 const older = at > 0 ? all[at - 1] : undefined;
 const newer = at < all.length - 1 ? all[at + 1] : undefined;
 const { Content } = await render(post);
+// Comments need the Worker and database that only the Cloudflare host has (SITE_HOST=cloudflare).
+const comments = process.env.SITE_HOST === "cloudflare";
 // Each post can have its own link-preview card at public/og/blog/<post>.png (scripts/make-share-images.mjs).
 const ownImage = `/og/blog/${post.id}.png`;
 const image = fs.existsSync(path.join(process.cwd(), "public", ownImage)) ? ownImage : "/og/site.png";
@@ -41,6 +44,7 @@ const date = post.data.date.toLocaleDateString("en-US", { year: "numeric", month
       <p class="lead">{post.data.description}</p>
       <p class="byline small muted">By Titus Nyarko Nde<br /><time datetime={post.data.date.toISOString().slice(0, 10)}>{date}</time> · {minutes}-minute read</p>
       <div class="prose"><Content /></div>
+      {comments && <Comments post={post.id} />}
       <nav class="post-nav" aria-label="More posts">
         {older && <a href={u(`/blog/${older.id}/`)}><span class="small muted">Older post</span>{older.data.title}</a>}
         {newer && <a href={u(`/blog/${newer.id}/`)}><span class="small muted">Newer post</span>{newer.data.title}</a>}

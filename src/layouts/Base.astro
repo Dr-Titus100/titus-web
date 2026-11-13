@@ -16,6 +16,8 @@ interface Props {
   type?: "website" | "article" | "profile";
   // Structured data for search engines, written into the page as JSON-LD.
   jsonLd?: Record<string, unknown>;
+  // Keeps the page out of search results, as on the comment moderation page.
+  noindex?: boolean;
 }
 const {
   title,
@@ -25,6 +27,7 @@ const {
   imageAlt = "Titus Nyarko Nde, data scientist",
   type = "website",
   jsonLd,
+  noindex = false,
 } = Astro.props;
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 const imageUrl = new URL(u(image), Astro.site).href;
@@ -71,6 +74,7 @@ const footerCols = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />

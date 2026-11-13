@@ -14,7 +14,7 @@ The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It
   - **Install.** Steps for Claude, ChatGPT, Claude Code and Codex, the zip download, the promo video and the examples.
 - **Experience** (`/experience/`). Work history with filters for AI, research, industry and teaching, plus education, publications, talks, awards, leadership and skills.
 - **About** (`/about/`). Titus's story, newest chapter first, his photo and the contact form.
-- **Blog** (`/blog/`). Posts from `src/content/blog/`. Stories carry a "Fiction" label so readers know they are reading fiction.
+- **Blog** (`/blog/`). Posts from `src/content/blog/`. Stories carry a "Fiction" label so readers know they are reading fiction. On Cloudflare, each post ends with reader comments, which show up after Titus approves them on `/admin/comments/`. See [Blog comments](#blog-comments).
 - **Privacy** (`/privacy/`) and **Terms** (`/terms/`). What each part of the site sends and stores, and the terms for the tools. Update the date at the top of each page when you change it.
 
 ## How the skill files get here
@@ -47,7 +47,7 @@ A build of this site runs when you push to `main` (this deploys) or `dev` (this 
 
 ## Security
 
-- **Content Security Policy.** GitHub Pages can't send custom headers, so `scripts/add-csp.mjs` adds the policy to every built page as a `<meta>` tag. It allows each inline script by its hash, the AI providers only on the Rewrite page, and Web3Forms and hCaptcha only on pages with the contact form. If you add a page that talks to a new host, add the host there.
+- **Content Security Policy.** GitHub Pages can't send custom headers, so `scripts/add-csp.mjs` adds the policy to every built page as a `<meta>` tag. It allows each inline script by its hash, the AI providers only on the Rewrite page, Web3Forms and hCaptcha only on pages with the contact form, and Cloudflare Turnstile only on blog posts, when its site key is set. If you add a page that talks to a new host, add the host there.
 - **API keys.** The Rewrite page keeps keys in memory unless the visitor turns on Remember, which is hidden on `github.io`. See the comments in `src/pages/tools/titus-humanizer/rewrite.astro`.
 - **Models.** The suggested models live in `src/data/providers.ts`, with the date they were last checked. Providers retire models, so check their deprecation pages every few months and update `lastVerified`.
 
@@ -131,12 +131,31 @@ If you replace the video, update the captions file in the same commit.
 
 The site can also be hosted on Cloudflare, which can send real security headers and builds a preview of every pull request.
 
-- `wrangler.jsonc` tells Cloudflare to upload `dist/` as static files, with no Worker script, and turns on preview links for pull requests.
+- `wrangler.jsonc` tells Cloudflare to upload `dist/` as static files, together with the small Worker in `worker/index.js` that answers `/api/*` for blog comments. It also turns on preview links for pull requests.
 - In Cloudflare's build settings, set the build command to `npm run build` and these build variables: `SITE_URL` to the domain (such as `https://example.com`), `SITE_BASE` to `/` and `SITE_HOST` to `cloudflare`.
 - With `SITE_HOST=cloudflare`, `scripts/add-csp.mjs` also writes `dist/_headers`. It blocks framing, turns on HSTS and nosniff, and sets cache times. The Privacy page names Cloudflare as the host, and Rewrite offers Remember my key, because the site has an address of its own.
 - The tests run the same way. For a root-domain build, run them with `SITE_BASE=/`.
 
 After the move, set the repository variable `NEW_SITE_URL` to the new address under Settings, then Secrets and variables, then Actions, then Variables. The next deploy to GitHub Pages then publishes only forwarding pages, built by `scripts/make-forwarders.mjs`. Every old `github.io/titus-web/` address sends visitors and search engines to the same page on the new domain.
+
+## Blog comments
+
+Readers can comment under each blog post on the Cloudflare site. Nobody needs an account. A reader types a name and a comment, and the comment waits until Titus approves it.
+
+- `src/components/Comments.astro` shows the approved comments and the form. It's built only when `SITE_HOST=cloudflare`, because GitHub Pages has no Worker.
+- `worker/index.js` is the API. It saves comments in a Cloudflare D1 database (the post, the name, the comment, its status and the time), and creates the table itself on first use. It limits each IP address to 5 new comments a minute, holds new comments once 200 are waiting, and never stores IP addresses. It only accepts comments on posts that exist.
+- `/admin/comments/` is the moderation page. Search engines are told to skip it, and it does nothing without the admin token.
+
+### Setting it up on Cloudflare (one time)
+
+1. Merge the pull request. On that first deploy, Wrangler creates a D1 database called `titus-web-comments` and links it to the Worker. You'll see it under Storage and databases, then D1. If that deploy fails on the database, create the database there by hand with that name, and add its ID to `wrangler.jsonc` as `"database_id"`.
+2. In the Cloudflare dashboard, open Workers and Pages, then `titus-web`, then Settings, then Variables and secrets. Add a secret named `COMMENTS_ADMIN_TOKEN` with a random value of at least 32 characters. A password manager can make one, or run `openssl rand -hex 32`. Moderation stays off until this secret exists.
+3. Open `/admin/comments/` on the site, paste the token and choose Show comments. Approve or delete each comment there. The browser tab keeps the token until you close it.
+4. Optional, if spam shows up: create a Turnstile widget for the domain under Turnstile in the dashboard. Put its site key in `commentsTurnstileKey` in `src/data/profile.ts`, and add its secret key to the Worker as a secret named `TURNSTILE_SECRET`. The form then shows a Turnstile check, and the Privacy page mentions it.
+
+Pull request previews may use the same database as the live site, so a comment posted on a preview can show up on the moderation page. Delete it there.
+
+To test the Worker on your computer, build with `SITE_HOST=cloudflare SITE_BASE=/`, then run `npx wrangler dev --var COMMENTS_ADMIN_TOKEN:<a token of 32 or more characters>`. Wrangler makes a local database, so nothing touches the live one.
 
 ## Writing rules
 

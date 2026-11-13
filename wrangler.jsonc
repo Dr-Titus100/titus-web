@@ -1,14 +1,29 @@
 // Cloudflare hosting for the built site. Cloudflare's Git integration runs `npm run build`, then
-// `npx wrangler deploy` uploads dist/ as static assets. There is no Worker script.
+// `npx wrangler deploy` uploads dist/ as static assets along with the Worker in worker/index.js.
 // Build variables (set in the Cloudflare dashboard, not here): SITE_URL, SITE_BASE=/ and SITE_HOST=cloudflare.
 {
   "name": "titus-web",
   "compatibility_date": "2026-11-01",
+  // The Worker answers /api/* only (the blog comments API). Every other path is a static file.
+  "main": "worker/index.js",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
     // dist/404.html answers unknown paths with a 404 status.
     "not_found_handling": "404-page"
   },
+  // Blog comments. There's no database_id on purpose: on the first deploy, Wrangler creates the
+  // database and links it to the Worker, and later deploys keep using it. The Worker creates the table.
+  "d1_databases": [
+    { "binding": "COMMENTS_DB", "database_name": "titus-web-comments" }
+  ],
+  // At most 5 new comments and 60 moderation requests a minute from one IP address.
+  "ratelimits": [
+    { "name": "COMMENTS_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } },
+    { "name": "ADMIN_LIMIT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } }
+  ],
+  "observability": { "enabled": true },
   // A preview link for every pull request, posted on the pull request by Cloudflare.
   "previews": {}
 }
