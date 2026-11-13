@@ -8,7 +8,9 @@
     "prepare-site": "npm run fetch-skills && npm run copy-pyodide",
     "dev": "npm run prepare-site && astro dev",
     "build": "npm run prepare-site && astro build && node scripts/add-csp.mjs",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "share-images": "node scripts/make-share-images.mjs",
+    "icons": "node scripts/make-icons.mjs"
   },
   "repository": {
     "type": "git",
@@ -21,10 +23,14 @@
   },
   "homepage": "https://github.com/Dr-Titus100/titus-web#readme",
   "dependencies": {
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.4.7",
     "pyodide": "^0.29.5"
   },
   "private": true,
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
 }

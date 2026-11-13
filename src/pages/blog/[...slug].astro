@@ -2,15 +2,31 @@
 import Base from "../../layouts/Base.astro";
 import { getCollection, render } from "astro:content";
 import { u } from "../../lib/url";
+import fs from "node:fs";
+import path from "node:path";
 export async function getStaticPaths() {
   const posts = await getCollection("blog", (p) => !p.data.draft);
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 const { post } = Astro.props;
 const { Content } = await render(post);
+// Each post can have its own link-preview card at public/og/blog/<post>.png (scripts/make-share-images.mjs).
+const ownImage = `/og/blog/${post.id}.png`;
+const image = fs.existsSync(path.join(process.cwd(), "public", ownImage)) ? ownImage : "/og/site.png";
+const posting = {
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.date.toISOString().slice(0, 10),
+  url: new URL(u(`/blog/${post.id}/`), Astro.site).href,
+  mainEntityOfPage: new URL(u(`/blog/${post.id}/`), Astro.site).href,
+  image: new URL(u(image), Astro.site).href,
+  ...(post.data.fiction ? { genre: "Fiction" } : {}),
+  author: { "@type": "Person", name: "Titus Nyarko Nde", url: new URL(u("/about/"), Astro.site).href },
+};
 const date = post.data.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 ---
-<Base title={post.data.title} current="blog" description={post.data.description}>
+<Base title={post.data.title} current="blog" description={post.data.description} image={image} imageAlt={`${post.data.title}, by Titus Nyarko Nde`} type="article" jsonLd={posting}>
   <article class="section">
     <div class="wrap wrap-narrow">
       <p class="eyebrow"><a href={u("/blog/")}>Blog</a>, {date}{post.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
