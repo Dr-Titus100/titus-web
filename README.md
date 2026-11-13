@@ -101,9 +101,13 @@ The tour video's captions live in `public/media/titus-humanizer-promo.en.vtt`, a
 ```
 WEBVTT
 
+NOTE Release
+
 00:00:00.000 --> 00:00:04.500
 The first line of the narration.
 ```
+
+A `NOTE` line starts a new section of the transcript, and its text becomes the section's title. The cues under it join into one paragraph.
 
 If you replace the video, update the captions file in the same commit.
 

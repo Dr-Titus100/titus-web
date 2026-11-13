@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- The tour video has English captions, and a "Read the transcript" panel under it shows the narration by scene.
 - New layout across the site, built from the approved mockups. Inter in one type scale (80 px page names, 56 px section titles, 40 px tile titles, 17 px body, smaller on phones), an 8 px spacing grid, and sections that alternate white and light gray. Dark mode uses a black page, #1d1d1f sections and #2c2c2e cards with thin borders.
 - The top navigation is 44 px tall with a TN monogram, and the current page shows in full-strength text. On phones it hides while you scroll down a titus-humanizer page and comes back when you scroll up.
 - The titus-humanizer bar is 52 px tall with a "Try it free" button that opens the Checker. On phones its pages fold into a menu behind a chevron.

@@ -8,11 +8,19 @@ import { u } from "../lib/url";
 // captions track and the page gets a "Read the transcript" panel built from the same cues.
 const vttPath = path.join(process.cwd(), "public/media/titus-humanizer-promo.en.vtt");
 const vtt = fs.existsSync(vttPath) ? fs.readFileSync(vttPath, "utf8") : "";
-const transcript = vtt
-  .split(/\r?\n\r?\n/)
-  .map((block) => block.split(/\r?\n/).filter((l) => l && !/^WEBVTT/.test(l) && !/-->/.test(l) && !/^\d+$/.test(l) && !/^NOTE\b/.test(l)).join(" "))
-  .map((t) => t.replace(/<[^>]+>/g, "").trim())
-  .filter(Boolean);
+// A NOTE block in the file starts a new section of the transcript, titled with the NOTE's text.
+// Cue text after it joins into one paragraph.
+const transcript: { title: string; text: string }[] = [];
+for (const block of vtt.split(/\r?\n\r?\n/)) {
+  const lines = block.split(/\r?\n/).filter(Boolean);
+  if (!lines.length || /^WEBVTT/.test(lines[0])) continue;
+  if (/^NOTE\b/.test(lines[0])) { transcript.push({ title: lines[0].replace(/^NOTE\s*/, ""), text: "" }); continue; }
+  const words = lines.filter((l) => !/-->/.test(l) && !/^\d+$/.test(l)).join(" ").replace(/<[^>]+>/g, "").trim();
+  if (!words) continue;
+  if (!transcript.length) transcript.push({ title: "", text: "" });
+  const last = transcript[transcript.length - 1];
+  last.text = (last.text + " " + words).trim();
+}
 ---
 <div class="video-stage">
   <div class="video-frame" data-video>
@@ -31,7 +39,7 @@ const transcript = vtt
     <details class="transcript" id="transcript">
       <summary>Read the transcript</summary>
       <div class="transcript-body">
-        {transcript.map((t) => <p>{t}</p>)}
+        {transcript.filter((t) => t.text).map((t) => (<>{t.title && <h3 class="transcript-h">{t.title}</h3>}<p>{t.text}</p></>))}
       </div>
     </details>
   )}
@@ -49,7 +57,8 @@ const transcript = vtt
   .transcript summary::after { content: "\00a0\203A"; }
   .transcript[open] summary::after { content: "\00a0\2304"; }
   .transcript-body { text-align: left; color: inherit; line-height: 1.6; }
-  .transcript-body p { margin: 0 0 10px; }
+  .transcript-body p { margin: 0 0 14px; }
+  .transcript-h { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
 </style>
 
 <script>
