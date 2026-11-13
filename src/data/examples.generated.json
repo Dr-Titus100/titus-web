@@ -1,5 +1,5 @@
 {
-  "version": "v1.1.0",
+  "version": "v1.2.0",
   "demo": {
     "before": "In today's fast-paced digital landscape, our new onboarding checklist isn't just a tracker. It's a gateway to a seamless experience, fostering alignment across all 12 setup steps. Moreover, it serves as a pivotal tool that empowers new hires and their managers to navigate the first two weeks with confidence. Ultimately, it is a testament to our commitment to people.",
     "after": "The new onboarding checklist lists all 12 setup steps for a new hire's first two weeks. New hires can tick off each step as they finish it. Their managers see the same list, so both of them know what is left to do.",

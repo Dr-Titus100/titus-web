@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- The site uses titus-humanizer v1.2.0. Its script now writes the "Left as-is" line itself, so I removed the site's own copy from `public/js/titus_glue.py`. The reports read the same as before. The Checker and the score also count words with a curly apostrophe, such as "don’t", as one word.
 - Every button is an outlined pill with a thin blue ring and blue text, and it fills blue when you hover over or focus it. None starts filled. That covers the Home, About, Experience and Tools pages, the Checker (Check text, Try a sample, Clear, Copy cleaned text, Rewrite with your key, Use any chatbot), Rewrite (Show key, Rewrite), Any chatbot (Copy prompt, Open the Checker), Install (Download, release notes, Copy), the overview (Check your text, Watch the tour, Install) and "Read the transcript". On Any chatbot, Copy full rulebook is a text link like the Download link next to it.
 - The home page buttons are About, Experience, Contact me and See my work, which opens the Tools page. "What you'll find here" and "From the blog", with its All posts button, are back from the earlier layout, using the current card colors. My photo on Home and About has its blue ring again.
 - Links to other sites, such as LinkedIn, GitHub, ORCID and Google Scholar, open in a new tab and tell screen readers so. The profile links on Experience are blue.
