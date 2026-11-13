@@ -191,6 +191,39 @@ test("a comment that passes the spam check shows at once", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+// If the first load is slow and a reader posts before it finishes, the new comment must stay in the list.
+test("a comment posted before the list loads stays in the list", async ({ page }) => {
+  const errors = collectErrors(page);
+  let posted!: () => void;
+  const postDone = new Promise<void>((resolve) => { posted = resolve; });
+  await page.route(/\/api\/comments(\?.*)?$/, async (route) => {
+    const req = route.request();
+    if (req.method() === "POST") {
+      const sent = req.postDataJSON();
+      await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ status: "approved",
+        comment: { id: 10, name: sent.name, body: sent.body, created: "2026-11-13T12:00:00.000Z", parent: null, author: false } }) });
+      posted();
+      return;
+    }
+    await postDone;
+    await new Promise((r) => setTimeout(r, 100));
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ total: 1, count: 1, comments: [
+      { id: 1, name: "Ama", body: "Loved it.", created: "2026-11-12T10:00:00.000Z", parent: null, author: false },
+    ] }) });
+  });
+  await page.goto("blog/the-exercise-book/");
+  test.skip((await page.locator("#comments").count()) === 0, "built without SITE_HOST=cloudflare, so there's no comments section");
+  await page.fill("#cm-name", "Kofi");
+  await page.fill("#cm-body", "Great story.");
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toHaveText("Thanks. Your comment is up.");
+  await expect(page.locator("#comment-1")).toBeVisible();
+  await expect(page.locator("#cm-list > .cm-item")).toHaveCount(2);
+  await expect(page.locator("#comment-10 > .cm-body")).toHaveText("Great story.");
+  await expect(page.locator("#cm-count")).toHaveText(" (2)");
+  expect(errors).toEqual([]);
+});
+
 test("the moderation page lists comments and approves one", async ({ page }) => {
   const errors = collectErrors(page);
   const rows = [
