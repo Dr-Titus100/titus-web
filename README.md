@@ -75,7 +75,7 @@ The first build downloads the pinned skill files. Later builds reuse them while 
 
 ## The overview demo and examples
 
-The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. The site's glue (`public/js/titus_glue.py`) adds one line to the script's report: "Left as-is", which counts the quotations, code snippets, file paths, links and emoji from the original that came through unchanged, or says which ones changed. The Rewrite page's reports get the same line. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
+The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. The site's glue (`public/js/titus_glue.py`) adds a "Left as-is" line to the script's report. It counts the quotations, code snippets, file paths, links and emoji from the original that came through unchanged, or says which ones changed. The Rewrite page's reports get the same line. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
 
 ## Link previews, icons and the feed
 
@@ -142,7 +142,7 @@ After the move, set the repository variable `NEW_SITE_URL` to the new address un
 
 The visible text follows the same rules as titus-humanizer. `scripts/check-copy.mjs` runs after every build and fails it if a page uses an em dash or a semicolon. The check skips code blocks, the "before" examples and quotations kept as written.
 
-Buttons are outlined pills (`.btn` in `src/styles/global.css`): a thin blue ring and blue text, filled blue when you hover over or focus them. Links to other sites open in a new tab. `scripts/add-csp.mjs` adds `target="_blank"`, `rel="noopener noreferrer"` and hidden "(opens in a new tab)" text to every outside link after the build, blog posts included. Links to file downloads, such as the release zip, stay in the same tab.
+Buttons are outlined pills (`.btn` in `src/styles/global.css`) with a thin blue ring and blue text. They fill blue when you hover over or focus them. Links to other sites open in a new tab. `scripts/add-csp.mjs` adds `target="_blank"`, `rel="noopener noreferrer"` and hidden "(opens in a new tab)" text to every outside link after the build, blog posts included. Links to file downloads, such as the release zip, stay in the same tab.
 
 ## Contact form
 
