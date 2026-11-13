@@ -1,5 +1,9 @@
 ---
 import { publicEmail, contactFormKey } from "../data/profile";
+import { u } from "../lib/url";
+// The address is split and put back together in the browser, so it isn't in the page as plain text
+// where address-harvesting bots look for it.
+const [emailUser, emailDomain] = publicEmail.split("@");
 ---
 <form class="card contact-form" id="contact-form" data-key={contactFormKey} novalidate>
   <div class="contact-row">
@@ -17,11 +21,16 @@ import { publicEmail, contactFormKey } from "../data/profile";
     <textarea id="cf-message" name="message" required maxlength="5000" placeholder="What would you like to talk about?"></textarea>
   </div>
   <input type="checkbox" name="botcheck" class="cf-trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
-  <div class="btn-row" style="margin-top: 18px; align-items: center">
+  <!-- Web3Forms' free hCaptcha check. Its script fills in h-captcha-response, which Web3Forms verifies on its server. -->
+  <div class="h-captcha" data-captcha="true"></div>
+  <div class="btn-row cf-actions">
     <button class="btn" type="submit" id="cf-send">Send message</button>
     <span class="small muted" id="cf-status" role="status" aria-live="polite"></span>
   </div>
-  <p class="small muted" style="margin: 18px 0 0">You can also email me at <a href={`mailto:${publicEmail}`}>{publicEmail}</a>.</p>
+  <p class="small muted cf-note">Your name, email and message are sent to <a href="https://web3forms.com/">Web3Forms</a>, which delivers them to my inbox. They're used only to reply to you. The <a href={u("/privacy/")}>Privacy page</a> explains what Web3Forms keeps.</p>
+  <p class="small muted cf-note" id="cf-email-line" data-u={emailUser} data-d={emailDomain}>
+    You can also email me directly. <button type="button" class="cf-reveal" id="cf-reveal">Show my email address</button>
+  </p>
 </form>
 
 <style is:global>
@@ -31,10 +40,13 @@ import { publicEmail, contactFormKey } from "../data/profile";
   .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media (max-width: 640px) { .contact-row { grid-template-columns: 1fr; } }
   .cf-trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .cf-actions { margin-top: 2px; align-items: center; }
+  .cf-note { margin: 0; }
+  .cf-reveal { background: none; border: 0; padding: 0; font: inherit; color: var(--link); cursor: pointer; }
+  .cf-reveal:hover { text-decoration: underline; }
+  .cf-copy { margin-left: 10px; }
   #cf-status.ok { color: var(--good); }
   #cf-status.err { color: var(--bad); }
-  .contact-form.sent { animation: sentPulse 0.7s var(--ease); }
-  @keyframes sentPulse { 40% { transform: scale(0.985); } }
 </style>
 
 <script>
@@ -43,6 +55,29 @@ import { publicEmail, contactFormKey } from "../data/profile";
     const status = document.getElementById("cf-status")!;
     const send = document.getElementById("cf-send") as HTMLButtonElement;
     const say = (text: string, kind = "") => { status.textContent = text; status.className = `small muted ${kind}`; };
+
+    // Load Web3Forms' hCaptcha script only when someone starts filling in the form.
+    let captchaLoaded = false;
+    const loadCaptcha = () => {
+      if (captchaLoaded) return;
+      captchaLoaded = true;
+      const s = document.createElement("script");
+      s.src = "https://web3forms.com/client/script.js";
+      s.async = true;
+      document.body.appendChild(s);
+    };
+    form.addEventListener("focusin", loadCaptcha);
+
+    const line = document.getElementById("cf-email-line")!;
+    document.getElementById("cf-reveal")!.addEventListener("click", () => {
+      const address = `${line.dataset.u}@${line.dataset.d}`;
+      const a = Object.assign(document.createElement("a"), { href: `mailto:${address}`, textContent: address });
+      const copy = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small btn-quiet cf-copy", textContent: "Copy" });
+      copy.dataset.copy = address;
+      line.replaceChildren("You can also email me at ", a, ".", copy);
+      a.focus();
+    });
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const data = new FormData(form);
@@ -54,32 +89,54 @@ import { publicEmail, contactFormKey } from "../data/profile";
         return;
       }
       if (data.get("botcheck")) return;
+      const captcha = String(data.get("h-captcha-response") || "");
+      if (form.querySelector(".h-captcha iframe") && !captcha) {
+        say("Please complete the check above the Send button.", "err");
+        return;
+      }
       const key = form.dataset.key;
       if (!key) {
         say("The form isn't connected yet. Please use the email address below.", "err");
         return;
       }
+      if (!navigator.onLine) {
+        say("You're offline. Your message is still here. Connect and try again.", "err");
+        return;
+      }
       send.disabled = true;
       say("Sending...");
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 20000);
       try {
         const res = await fetch("https://api.web3forms.com/submit", {
           method: "POST",
+          signal: controller.signal,
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify({
             access_key: key,
             subject: `Website message from ${name}`,
             from_name: "titus-web contact form",
             name, email, message,
+            botcheck: false,
+            "h-captcha-response": captcha,
           }),
         });
         const out = await res.json().catch(() => ({}));
-        if (!res.ok || out.success === false) throw new Error(out.message || res.statusText);
+        if (res.status === 429) throw new Error("busy");
+        if (!res.ok || out.success === false) throw new Error(res.status >= 500 ? "server" : "rejected");
         form.reset();
-        form.classList.remove("sent"); void form.offsetWidth; form.classList.add("sent");
+        (window as any).hcaptcha?.reset?.();
         say("Thanks. Your message is on its way.", "ok");
-      } catch {
-        say("The message didn't send. Please try again, or use the email address below.", "err");
+      } catch (err: any) {
+        // The typed message stays in the form, so nothing is lost.
+        const why = controller.signal.aborted ? "The message service didn't answer in time."
+          : err?.message === "busy" ? "Too many messages were sent from here in a short time."
+          : err?.message === "server" ? "The message service is having trouble."
+          : err?.message === "rejected" ? "The message service didn't accept the message."
+          : "The message couldn't be sent.";
+        say(`${why} Your message is still here. Try again in a minute, or use the email address below.`, "err");
       } finally {
+        window.clearTimeout(timer);
         send.disabled = false;
       }
     });
