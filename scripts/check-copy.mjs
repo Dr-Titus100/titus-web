@@ -10,14 +10,15 @@ walk(dist);
 
 // The "before" examples break the rules on purpose, and a quotation stays exactly as the person wrote it.
 const examples = ["isn't just a tracker", "It's not just a budget request", "Elena stood", "In today's fast-paced",
-  "isn't just a fix", "is crucial to note", "comprehensive onboarding guide", "didn't just meet expectations", "We are not just building software"];
+  "isn't just a fix", "is crucial to note", "comprehensive onboarding guide", "didn't just meet expectations", "We are not just building software",
+  "Dr. Mensah wrote in her survey", "not just a usability issue"];
 let bad = 0;
 for (const f of files) {
   const text = readFileSync(f, "utf8")
     .replace(/<(script|style|pre|code|template)[\s\S]*?<\/\1>/g, " ")
     .replace(/<[^>]+(data-before|data-spans)="[^"]*"[^>]*>/g, " ")
     .replace(/<[^>]+>/g, "\n")
-    .replace(/&#39;|&#x27;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '"');
+    .replace(/&#39;|&#x27;/g, "'").replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&").replace(/&quot;/g, '"');
   text.split("\n").forEach((line) => {
     if (examples.some((e) => line.includes(e))) return; // the "before" examples break the rules on purpose
     if (/—/.test(line) || /;\s/.test(line)) {
