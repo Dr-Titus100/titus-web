@@ -22,7 +22,7 @@ const skill = skills["titus-humanizer"];
       <div class="card checker-card">
         <div class="checker-top">
           <label for="input">Your text</label>
-          <span class="status" id="status" data-state="idle"><span class="dot"></span><span class="status-text" id="status-text">The first check downloads Python, about 12 MB</span></span>
+          <span class="status" id="status" data-state="idle"><span class="dot"></span><span class="status-text" id="status-text">The first check downloads Python, about 14 MB</span></span>
         </div>
         <div class="load" id="load" hidden>
           <progress id="load-bar" max="1" value="0" aria-labelledby="load-text"></progress>
@@ -187,12 +187,12 @@ const skill = skills["titus-humanizer"];
   const words = (t: string) => (t.match(/[A-Za-z0-9À-ɏ']+/g) || []).length;
   input.addEventListener("input", () => { $("count").textContent = `${words(input.value)} words`; });
 
-  // Python (about 12 MB) downloads only once the visitor shows they want to check something:
+  // Python (about 14 MB) downloads only once the visitor shows they want to check something:
   // focusing or typing in the box, or pressing a button.
   const mb = (n: number) => (n / 1e6).toFixed(1);
   onStatus((s) => {
     status.dataset.state = s.ready ? "ready" : s.failed ? "failed" : s.started ? "loading" : "idle";
-    status.querySelector(".status-text")!.textContent = s.ready ? "Ready" : s.failed ? "Could not load Python" : s.started ? s.text : "The first check downloads Python, about 12 MB";
+    status.querySelector(".status-text")!.textContent = s.ready ? "Ready" : s.failed ? "Could not load Python" : s.started ? s.text : "The first check downloads Python, about 14 MB";
     const showBar = s.started && !s.ready && !s.failed && s.total > 0;
     $("load").hidden = !showBar;
     if (showBar) {
