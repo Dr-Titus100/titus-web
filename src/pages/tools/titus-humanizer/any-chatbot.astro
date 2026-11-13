@@ -154,7 +154,7 @@ const guides = [
 </style>
 
 <script>
-  import { copyText, toast } from "../../../scripts/site";
+  import { copyFromUrl, loadText, toast } from "../../../scripts/site";
   import { initTabs } from "../../../scripts/tabs";
   initTabs(document.querySelector<HTMLElement>('[aria-label="Assistant"]')!, (b) => {
     document.querySelectorAll<HTMLElement>(".guide").forEach((p) => { p.hidden = p.id !== `g-${b.dataset.guide}`; });
@@ -164,8 +164,7 @@ const guides = [
     const text = (document.getElementById("pb-text") as HTMLTextAreaElement).value.trim();
     if (!text) { toast("Paste some text first"); return; }
     const ask = (document.getElementById("pb-mode") as HTMLSelectElement).value;
-    const rules = await (await fetch(btn.dataset.full!)).text();
-    const prompt = `Follow the titus-humanizer rules below for this whole chat. You can't run the scoring script here, so write "Score: not available" instead of a score and never make one up.\n\n<rules>\n${rules}\n</rules>\n\n${ask}\n\n${text}`;
-    copyText(prompt, "Prompt copied");
+    await copyFromUrl(btn.dataset.full!, (rules) => `Follow the titus-humanizer rules below for this whole chat. You can't run the scoring script here, so write "Score: not available" instead of a score and never make one up.\n\n<rules>\n${rules}\n</rules>\n\n${ask}\n\n${text}`, "Prompt copied");
   });
+  loadText(btn.dataset.full!).catch(() => {});
 </script>

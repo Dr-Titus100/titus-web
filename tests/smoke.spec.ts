@@ -13,6 +13,8 @@ const pages = [
   "tools/titus-humanizer/rewrite/",
   "tools/titus-humanizer/any-chatbot/",
   "tools/titus-humanizer/install/",
+  "privacy/",
+  "terms/",
 ];
 
 function collectErrors(page: Page) {
@@ -72,5 +74,17 @@ test("the Checker scores the sample text", async ({ page }) => {
   await expect(page.locator("#ring")).toContainText(/0\.\d\d/);
   await expect(page.locator("#patterns li")).not.toHaveCount(0);
   await expect(page.locator("#view mark.hl").first()).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("Rewrite switches provider and remembers the choice", async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto("tools/titus-humanizer/rewrite/");
+  await page.click('#providers [data-p="anthropic"]');
+  await expect(page.locator('#providers [data-p="anthropic"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('#providers [data-p="gemini"]')).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#prov-name")).toHaveText("Anthropic Claude");
+  await page.reload();
+  await expect(page.locator('#providers [data-p="anthropic"]')).toHaveAttribute("aria-pressed", "true");
   expect(errors).toEqual([]);
 });
