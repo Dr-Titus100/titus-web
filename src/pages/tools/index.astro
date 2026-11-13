@@ -16,7 +16,7 @@ import { tools } from "../../data/tools";
         {tools.map((t) => (
           <a class="card tile reveal" href={u(t.href)}>
             <span class="tile-icon" style={`background:${t.gradient}`}>T</span>
-            <p class="small muted" style="margin:0">{t.kind}, {t.version}</p>
+            <p class="small muted" style="margin:0">{t.kind}<br />Version {t.version.replace(/^v/, "")}</p>
             <h2 class="h3">{t.name}</h2>
             <p>{t.blurb}</p>
             <span class="link-arrow">Explore</span>

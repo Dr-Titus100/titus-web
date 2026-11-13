@@ -21,7 +21,7 @@ const app = {
   sameAs: [skill.repoUrl],
 };
 ---
-<Base title="Humanizer" current="humanizer" image="/og/titus-humanizer.png" jsonLd={app} imageAlt="The titus-humanizer Checker scoring a sample text 0.80, high, with the patterns it found" description="titus-humanizer rewrites text so it reads like a careful, plain-spoken person wrote it, and keeps every fact, number and name. Check, rewrite or install it for free.">
+<Base fullTitle="titus-humanizer: plain rewrites that keep every fact" title="Humanizer" current="humanizer" image="/og/titus-humanizer.png" jsonLd={app} imageAlt="The titus-humanizer Checker scoring a sample text 0.80, high, with the patterns it found" description="titus-humanizer rewrites text so it reads like a careful, plain-spoken person wrote it, and keeps every fact, number and name. Check, rewrite or install it for free.">
   <ToolNav slot="subnav" current="overview" />
 
   <section class="hero">
@@ -47,7 +47,7 @@ const app = {
   <section class="section">
     <div class="wrap">
       <div class="section-head reveal">
-        <h2 class="h2">Four ways to use it, with no sign-up</h2>
+        <h2 class="h2">Four ways to use it</h2>
         <p class="lead">You don't need Claude or ChatGPT to use it.</p>
       </div>
       <div class="grid grid-2">
@@ -93,7 +93,7 @@ const app = {
     <div class="wrap">
       <div class="section-head reveal">
         <h2 class="h2">How it works</h2>
-        <p class="lead">The skill cleans the text, checks it at three levels, fixes what it finds and then measures the result.</p>
+        <p class="lead">The skill works in three steps. It cleans the text, rewrites what it finds and then measures the result.</p>
       </div>
       <div class="grid grid-3 how">
         <div class="card reveal"><span class="how-n">1</span><h3 class="h3">Clean</h3><p class="muted">It removes characters you can't see, such as zero-width spaces and look-alike letters, and leaves emoji, other alphabets and code alone.</p></div>
@@ -114,7 +114,7 @@ const app = {
         <div class="card reveal" style="--d: 0.08s"><h3 class="h3">Five kinds of weak wording</h3><p class="muted">Awkward, flowery, vague, unnecessary and illogical. Each comes with a test, such as "would you say this out loud to a colleague?"</p></div>
         <div class="card reveal" style="--d: 0.16s"><h3 class="h3">Story patterns</h3><p class="muted">AI stories state their moral, stack body sensations for fear and make the weather match the mood. The skill cuts these and keeps your real details.</p></div>
       </div>
-      <p class="small muted center" style="margin-top: 32px; max-width: 700px; margin-left: auto; margin-right: auto">The score counts AI-writing patterns, so a lower score means plainer, better writing. It isn't a detector, and a low score doesn't prove a person wrote the text. The cleanup removes invisible characters only. AI watermarks and file metadata stay in place.</p>
+      <p class="small muted center" style="margin-top: 32px; max-width: 700px; margin-left: auto; margin-right: auto">The score counts the AI-writing patterns titus-humanizer targets. It doesn't measure quality. It isn't a detector, and a low score doesn't prove a person wrote the text. The cleanup removes invisible characters only. AI watermarks and file metadata stay in place.</p>
     </div>
   </section>
 

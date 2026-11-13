@@ -9,6 +9,13 @@ export async function getStaticPaths() {
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 const { post } = Astro.props;
+// Reading time at about 230 words a minute, rounded up.
+const minutes = Math.max(1, Math.ceil((post.body ?? "").split(/\s+/).filter(Boolean).length / 230));
+// The posts just before and after this one, by date, for the links at the end.
+const all = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+const at = all.findIndex((p) => p.id === post.id);
+const older = at > 0 ? all[at - 1] : undefined;
+const newer = at < all.length - 1 ? all[at + 1] : undefined;
 const { Content } = await render(post);
 // Each post can have its own link-preview card at public/og/blog/<post>.png (scripts/make-share-images.mjs).
 const ownImage = `/og/blog/${post.id}.png`;
@@ -29,14 +36,24 @@ const date = post.data.date.toLocaleDateString("en-US", { year: "numeric", month
 <Base title={post.data.title} current="blog" description={post.data.description} image={image} imageAlt={`${post.data.title}, by Titus Nyarko Nde`} type="article" jsonLd={posting}>
   <article class="section">
     <div class="wrap wrap-narrow">
-      <p class="eyebrow"><a href={u("/blog/")}>Blog</a>, {date}{post.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
+      <p class="eyebrow"><a href={u("/blog/")}>Blog</a>{post.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
       <h1 class="h1">{post.data.title}</h1>
       <p class="lead">{post.data.description}</p>
+      <p class="byline small muted">By Titus Nyarko Nde<br /><time datetime={post.data.date.toISOString().slice(0, 10)}>{date}</time> · {minutes}-minute read</p>
       <div class="prose"><Content /></div>
+      <nav class="post-nav" aria-label="More posts">
+        {older && <a href={u(`/blog/${older.id}/`)}><span class="small muted">Older post</span>{older.data.title}</a>}
+        {newer && <a href={u(`/blog/${newer.id}/`)}><span class="small muted">Newer post</span>{newer.data.title}</a>}
+        <a class="post-back" href={u("/blog/")}>Back to the blog ›</a>
+      </nav>
     </div>
   </article>
 </Base>
 <style is:global>
+  .byline { margin: 20px 0 0; line-height: 1.6; }
+  .post-nav { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 16px; }
+  .post-nav a { display: flex; flex-direction: column; gap: 2px; font-size: 19px; }
+  .post-nav .post-back { font-size: 17px; }
   .prose { margin-top: 48px; font-size: 19px; line-height: 1.65; }
   .prose h2 { font-size: 28px; letter-spacing: -0.02em; margin: 48px 0 12px; }
   .prose h3 { font-size: 22px; margin: 36px 0 10px; }

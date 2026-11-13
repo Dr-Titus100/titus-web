@@ -14,7 +14,7 @@ const platforms = [
   { id: "codex", name: "Codex" },
 ];
 ---
-<Base title="Install titus-humanizer" current="humanizer" image="/og/titus-humanizer.png" imageAlt="The titus-humanizer Checker scoring a sample text 0.80, high, with the patterns it found" description="Install titus-humanizer in Claude, ChatGPT, Claude Code or Codex, and see before-and-after examples.">
+<Base fullTitle="Install titus-humanizer" title="Install titus-humanizer" current="humanizer" image="/og/titus-humanizer.png" imageAlt="The titus-humanizer Checker scoring a sample text 0.80, high, with the patterns it found" description="Install titus-humanizer in Claude, ChatGPT, Claude Code or Codex, and see before-and-after examples.">
   <ToolNav slot="subnav" current="install" />
 
   <section class="hero">
@@ -29,16 +29,6 @@ const platforms = [
     </div>
   </section>
 
-  <section class="section-tight section-dark">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">Watch</p>
-        <h2 class="h2">The tour</h2>
-      </div>
-      <PromoVideo />
-    </div>
-  </section>
-
   <section class="section" id="easy">
     <div class="wrap wrap-narrow">
       <div class="card easy reveal">
@@ -49,7 +39,7 @@ const platforms = [
           <pre><code id="repo-link">{skill.repoUrl}.git</code></pre>
           <button class="btn btn-small btn-quiet" data-copy-from="#repo-link">Copy</button>
         </div>
-        <p class="small muted" style="margin: 0">To install it yourself, follow the steps below.</p>
+        <p class="small muted" style="margin: 0">To install it yourself, follow the steps below. A video tour of every feature is further down.</p>
       </div>
     </div>
   </section>
@@ -124,6 +114,16 @@ cp -r titus-humanizer/skills/titus-humanizer ~/.agents/skills/</code></pre>
       </div>
 
       <p class="center muted" style="margin-top: 36px">Using Gemini, Copilot or something else? <a class="link-arrow" href={u("/tools/titus-humanizer/any-chatbot/")}>Use the rules in any chatbot</a></p>
+    </div>
+  </section>
+
+  <section class="section-tight section-dark">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Watch</p>
+        <h2 class="h2">The tour</h2>
+      </div>
+      <PromoVideo />
     </div>
   </section>
 

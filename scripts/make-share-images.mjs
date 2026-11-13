@@ -79,7 +79,7 @@ for (const f of fs.readdirSync(blogDir).filter((f) => f.endsWith(".md") && !f.st
   const date = new Date(get("date")).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
   const kind = get("fiction") === "true" ? "Fiction" : "Blog";
   await shoot(`blog/${f.replace(/\.md$/, "")}.png`, `<div class="card" style="background:#ffffff; display:block; padding-top: 96px;">
-    <p class="eyebrow">${kind}, ${esc(date)}</p><h1 style="max-width: 1000px">${esc(get("title"))}</h1>
+    <p class="eyebrow">${kind} · ${esc(date)}</p><h1 style="max-width: 1000px">${esc(get("title"))}</h1>
     <p class="sub" style="max-width: 940px">${esc(get("description"))}</p>
     <div class="foot">Titus Nyarko Nde</div></div>`);
 }
