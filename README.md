@@ -73,6 +73,16 @@ The first build downloads the pinned skill files. Later builds reuse them while 
 
 The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
 
+## Fonts and video files
+
+The site's font is Inter, under the SIL Open Font License. The two variable font files and the license are in `src/fonts/`, and `src/styles/global.css` loads them. They came from the `@fontsource-variable/inter` 5.2.5 package.
+
+The tour video has two files in `public/media/`: `titus-humanizer-promo.mp4` at 1080p and `titus-humanizer-promo-720p.mp4` for screens up to 900 px wide. If you replace the video, make the 720p copy with:
+
+```
+ffmpeg -i titus-humanizer-promo.mp4 -vf scale=-2:720 -c:v libx264 -preset slow -crf 26 -pix_fmt yuv420p -movflags +faststart -c:a aac -b:a 96k titus-humanizer-promo-720p.mp4
+```
+
 ## Captions for the tour video
 
 The tour video's captions live in `public/media/titus-humanizer-promo.en.vtt`, a WebVTT file. When that file exists, `src/components/PromoVideo.astro` adds an English captions track to the video and a "Read the transcript" panel under it, built from the same cues. Each cue is a time range and the words spoken in it:
