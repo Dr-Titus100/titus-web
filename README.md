@@ -75,7 +75,7 @@ The first build downloads the pinned skill files. Later builds reuse them while 
 
 ## The overview demo and examples
 
-The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
+The demo on the overview page and the before-and-after reports come from `src/data/examples.generated.json`. That file is the pinned scoring script's own output for the texts in `src/data/examples.source.json`. The site's glue (`public/js/titus_glue.py`) adds one line to the script's report: "Left as-is", which counts the quotations, code snippets, file paths, links and emoji from the original that came through unchanged, or says which ones changed. The Rewrite page's reports get the same line. After you change those texts or bump the skill version, run `node scripts/gen-examples.mjs` (it needs Python 3) and commit both files. `node scripts/gen-examples.mjs --check` fails if the committed file is out of date. The site build only reads the committed file and never runs the script.
 
 ## Link previews, icons and the feed
 
@@ -96,7 +96,7 @@ ffmpeg -i titus-humanizer-promo.mp4 -vf scale=-2:720 -c:v libx264 -preset slow -
 
 ## Captions for the tour video
 
-The tour video's captions live in `public/media/titus-humanizer-promo.en.vtt`, a WebVTT file. When that file exists, `src/components/PromoVideo.astro` adds an English captions track to the video and a "Read the transcript" panel under it, built from the same cues. Each cue is a time range and the words spoken in it:
+The tour video has its captions burned into the picture, so they show in every player without a captions button. The same lines, with their timings, live in `public/media/titus-humanizer-promo.en.vtt`, a WebVTT file. `src/components/PromoVideo.astro` builds the "Read the transcript" panel under the video from that file. It doesn't load the file as a captions track, since that would show every line twice. Each cue is a time range and the words spoken in it:
 
 ```
 WEBVTT
@@ -108,6 +108,13 @@ The first line of the narration.
 ```
 
 A `NOTE` line starts a new section of the transcript, and its text becomes the section's title. The cues under it join into one paragraph.
+
+To replace the video, copy the new file to `public/media/titus-humanizer-promo.mp4` (with `-movflags +faststart`) and make the 720p copy for phones:
+
+```
+ffmpeg -i new.mp4 -c copy -movflags +faststart public/media/titus-humanizer-promo.mp4
+ffmpeg -i new.mp4 -vf scale=-2:720 -c:v libx264 -preset slow -crf 26 -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart public/media/titus-humanizer-promo-720p.mp4
+```
 
 If you replace the video, update the captions file in the same commit.
 
@@ -133,7 +140,9 @@ After the move, set the repository variable `NEW_SITE_URL` to the new address un
 
 ## Writing rules
 
-The visible text follows the same rules as titus-humanizer. `scripts/check-copy.mjs` runs after every build and fails it if a page uses an em dash or a semicolon. The check skips code blocks and the "before" examples.
+The visible text follows the same rules as titus-humanizer. `scripts/check-copy.mjs` runs after every build and fails it if a page uses an em dash or a semicolon. The check skips code blocks, the "before" examples and quotations kept as written.
+
+Buttons are outlined pills (`.btn` in `src/styles/global.css`): a thin blue ring and blue text, filled blue when you hover over or focus them. Links to other sites open in a new tab. `scripts/add-csp.mjs` adds `target="_blank"`, `rel="noopener noreferrer"` and hidden "(opens in a new tab)" text to every outside link after the build, blog posts included. Links to file downloads, such as the release zip, stay in the same tab.
 
 ## Contact form
 

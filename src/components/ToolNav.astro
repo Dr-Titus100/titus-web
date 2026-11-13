@@ -10,11 +10,11 @@ const items = [
   { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
 ];
 ---
-<nav class="subnav" aria-label="titus-humanizer">
+<nav class="subnav" aria-label="Humanizer">
   <div class="wrap wrap-text subnav-inner">
-    <a class="subnav-title" href={u("/tools/titus-humanizer/")}>titus-humanizer</a>
+    <a class="subnav-title" href={u("/tools/titus-humanizer/")}>Humanizer</a>
     <div class="subnav-right">
-      <button class="subnav-toggle" type="button" aria-expanded="false" aria-controls="subnav-links" aria-label="Open the titus-humanizer menu">
+      <button class="subnav-toggle" type="button" aria-expanded="false" aria-controls="subnav-links" aria-label="Open the Humanizer menu">
         <svg width="14" height="8" viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </button>
       <ul class="subnav-links" id="subnav-links">
@@ -22,7 +22,6 @@ const items = [
           <li><a href={u(i.href)} aria-current={current === i.key ? "page" : undefined}>{i.label}</a></li>
         ))}
       </ul>
-      {current !== "checker" && <a class="subnav-cta" href={u("/tools/titus-humanizer/checker/")}>Try it free</a>}
     </div>
   </div>
 </nav>

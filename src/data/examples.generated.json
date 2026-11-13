@@ -100,6 +100,36 @@
       "before": "Elena stood at the window as the rain fell, mirroring the storm inside her. Her chest tightened, ice crawled down her spine, and the scent of wet earth and old memories filled her lungs. She realized, at last, that letting go was not the same as forgetting. It was a way of carrying him with her.",
       "after": "Elena stood at the window and watched the rain. She was afraid. She decided she could let him go without forgetting him.",
       "report": "AI-pattern score: 0.60 (high) before, not scored (22 words, needs at least 30) after\nPatterns before: emotion as body sensation x2, setting as mirror x1, decorative smell x1\nPatterns left after: none\nHidden characters removed: none\nNote: the text is short, so the script dampened the score and it is less reliable."
+    },
+    {
+      "tag": "Code",
+      "before": "Moreover, this pivotal update isn't just a fix — it's a game-changer for our entire deployment pipeline, empowering every developer on the team. To unlock its full potential, simply run `npm run build -- --force` before you push your changes to the main branch.",
+      "after": "This update fixes the deployment pipeline. Run `npm run build -- --force` before you push your changes to the main branch.",
+      "report": "AI-pattern score: 0.52 (medium) before, not scored (16 words, needs at least 30) after\nPatterns before: AI vocabulary x4, em dash x1, reject-then-assert x1, sentence-initial connector x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 1 code snippet\nNote: the text is short, so the script dampened the score and it is less reliable."
+    },
+    {
+      "tag": "File path",
+      "before": "In order to seamlessly navigate the setup process, it is crucial to note that the configuration file, located at ~/projects/app/config/settings.yaml, serves as the backbone of the entire system and plays a pivotal role in every deployment.",
+      "after": "The configuration file is at ~/projects/app/config/settings.yaml. Every deployment reads its settings from that file.",
+      "report": "AI-pattern score: 0.53 (medium) before, not scored (18 words, needs at least 30) after\nPatterns before: AI vocabulary x4, inflated significance x1, copula avoidance x1, bureaucratic filler x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 1 file path\nNote: the text is short, so the script dampened the score and it is less reliable."
+    },
+    {
+      "tag": "Link",
+      "before": "We're thrilled to announce that our comprehensive onboarding guide is now live! Dive into the details and discover a wealth of valuable insights at https://example.com/guide — it's truly a must-read resource for anyone looking to elevate their skills.",
+      "after": "Our onboarding guide is now online at https://example.com/guide.",
+      "report": "AI-pattern score: 0.52 (medium) before, not scored (11 words, needs at least 30) after\nPatterns before: em dash x1, AI vocabulary x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 1 link\nNote: the text is short, so the script dampened the score and it is less reliable."
+    },
+    {
+      "tag": "Emoji",
+      "before": "🎉 Big news, team! Our quarterly results didn't just meet expectations — they shattered them, showcasing the incredible dedication of every single one of you. Let's keep this amazing momentum going into the next quarter! 🚀",
+      "after": "🎉 Our quarterly results beat our targets. Thank you all for the work behind them. 🚀",
+      "report": "AI-pattern score: 0.49 (medium) before, not scored (14 words, needs at least 30) after\nPatterns before: em dash x1, tacked-on -ing clause x1, AI vocabulary x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 2 emoji\nNote: the text is short, so the script dampened the score and it is less reliable."
+    },
+    {
+      "tag": "Quoted text",
+      "before": "In a testament to her visionary leadership, the CEO delivered a powerful message that resonated deeply with the entire team. She said, \"We are not just building software — we are building the future.\" Her words served as a beacon of inspiration for everyone.",
+      "after": "The CEO spoke to the team. She said, \"We are not just building software — we are building the future.\"",
+      "report": "AI-pattern score: 0.49 (medium) before, not scored (8 words, needs at least 30) after\nPatterns before: AI vocabulary x2, inflated significance x1\nPatterns left after: none\nHidden characters removed: none\nLeft as-is: 1 quotation\nNote: the text is short, so the script dampened the score and it is less reliable."
     }
   ]
 }

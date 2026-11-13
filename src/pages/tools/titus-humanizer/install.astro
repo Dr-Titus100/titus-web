@@ -24,7 +24,7 @@ const platforms = [
       <p class="lead">The quickest route is to give your assistant the repository link and let it do the work. To install by hand, one zip file works in claude.ai, the Claude desktop app and ChatGPT, and Claude Code and Codex install it from GitHub.</p>
       <div class="btn-row">
         <a class="btn" href={skill.zipUrl}>Download titus-humanizer.zip</a>
-        <a class="link-arrow" href={skill.releaseUrl}>{skill.version} release notes</a>
+        <a class="btn" href={skill.releaseUrl}>{skill.version} release notes</a>
       </div>
     </div>
   </section>
@@ -36,7 +36,7 @@ const platforms = [
         <h2 class="h3">Your assistant can install it</h2>
         <p class="muted">Copy the repository link below into Claude, Claude Code, ChatGPT or Codex and ask it to help you install the skill. It handles the installation for you, or walks you through any step it can't do itself.</p>
         <div class="copy-block">
-          <div class="copy-head"><span>Repository link</span><button class="btn btn-small btn-quiet" data-copy-from="#repo-link">Copy</button></div>
+          <div class="copy-head"><span>Repository link</span><button class="btn btn-small" data-copy-from="#repo-link">Copy</button></div>
           <pre><code id="repo-link">{skill.repoUrl}.git</code></pre>
         </div>
         <p class="small muted">To install it yourself, follow the steps below. A video tour of every feature is further down.</p>
@@ -88,13 +88,13 @@ const platforms = [
         <h3 class="h3">Claude Code</h3>
         <p class="muted platform-intro">Add the repository as a plugin marketplace and install the plugin:</p>
         <div class="copy-block">
-          <div class="copy-head"><span>Plugin commands</span><button class="btn btn-small btn-quiet" data-copy-from="#cc1">Copy</button></div>
+          <div class="copy-head"><span>Plugin commands</span><button class="btn btn-small" data-copy-from="#cc1">Copy</button></div>
           <pre><code id="cc1">/plugin marketplace add Dr-Titus100/titus-humanizer
 /plugin install titus-humanizer@titus-humanizer</code></pre>
         </div>
         <p class="muted">Or copy the skill folder in by hand:</p>
         <div class="copy-block">
-          <div class="copy-head"><span>Manual install</span><button class="btn btn-small btn-quiet" data-copy-from="#cc2">Copy</button></div>
+          <div class="copy-head"><span>Manual install</span><button class="btn btn-small" data-copy-from="#cc2">Copy</button></div>
           <pre><code id="cc2">git clone https://github.com/Dr-Titus100/titus-humanizer.git
 mkdir -p ~/.claude/skills
 cp -r titus-humanizer/skills/titus-humanizer ~/.claude/skills/</code></pre>
@@ -105,7 +105,7 @@ cp -r titus-humanizer/skills/titus-humanizer ~/.claude/skills/</code></pre>
         <h3 class="h3">Codex</h3>
         <p class="muted platform-intro">Codex loads skills from <code>~/.agents/skills</code> in your home folder, or from <code>.agents/skills</code> inside a project:</p>
         <div class="copy-block">
-          <div class="copy-head"><span>Terminal</span><button class="btn btn-small btn-quiet" data-copy-from="#cx1">Copy</button></div>
+          <div class="copy-head"><span>Terminal</span><button class="btn btn-small" data-copy-from="#cx1">Copy</button></div>
           <pre><code id="cx1">git clone https://github.com/Dr-Titus100/titus-humanizer.git
 mkdir -p ~/.agents/skills
 cp -r titus-humanizer/skills/titus-humanizer ~/.agents/skills/</code></pre>

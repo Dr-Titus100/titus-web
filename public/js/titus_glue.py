@@ -111,9 +111,81 @@ def analyze(text):
         "min_words": tt.MIN_WORDS,
     })
 
+# Things the rewrite must carry over exactly: quoted text, code, file paths, links and emoji.
+# This adds one "Left as-is" line to the script's report, after checking that each item from the
+# original appears unchanged in the rewrite. When every quotation came through, it takes the place
+# of the script's own "Quoted text" line. When one changed, the script's line stays, since it says
+# what to restore.
+_CODE = re.compile(r"`{3}.*?`{3}|`[^`\n]+`", re.S)
+_LINK = re.compile(r"\b(?:https?|ftp)://[^\s<>\"']+|\bwww\.[^\s<>\"']+")
+_PATH = re.compile(r"(?<![\w/:.])(?:~|\.{1,2})?/(?:[\w.\-]+/)*[\w.\-]+|\b[A-Za-z]:\\(?:[\w.\-]+\\)*[\w.\-]+")
+_TRAIL = ".,;:!?)]}"
+
+def _kept_items(original):
+    found = {"quotation": tt.quotations(original), "code snippet": [], "file path": [], "link": [], "emoji": []}
+    rest = original
+    for kind, rx in (("code snippet", _CODE), ("link", _LINK)):
+        for m in rx.finditer(rest):
+            found[kind].append(m.group(0).rstrip(_TRAIL) if kind == "link" else m.group(0))
+        rest = rx.sub(" ", rest)
+    for m in _PATH.finditer(rest):
+        item = m.group(0).rstrip(_TRAIL)
+        # A path needs a folder and a name, such as ~/notes/plan.md or C:\\data\\run.csv.
+        if item.count("/") + item.count("\\") >= 2 or re.search(r"\.\w+$", item):
+            found["file path"].append(item)
+    i, chars = 0, list(original)
+    while i < len(chars):
+        if tt._is_emoji(chars[i]):
+            j = i + 1
+            # Keep a whole emoji sequence together: joiners, variation selectors, skin tones and the next emoji in a ZWJ sequence.
+            while j < len(chars) and (ord(chars[j]) in (0x200D, 0xFE0F) or 0x1F3FB <= ord(chars[j]) <= 0x1F3FF or (ord(chars[j - 1]) == 0x200D and tt._is_emoji(chars[j]))):
+                j += 1
+            found["emoji"].append("".join(chars[i:j]))
+            i = j
+        else:
+            i += 1
+    return found
+
+def _kept_line(original, rewrite):
+    found = _kept_items(original)
+    kept, changed = [], []
+    for kind, items in found.items():
+        if not items:
+            continue
+        ok = sum(item in rewrite for item in items)
+        if kind == "quotation" and ok < len(items):
+            continue  # the script's own line covers it
+        n = len(items)
+        noun = kind if n == 1 or kind == "emoji" else kind + "s"
+        if ok == n:
+            kept.append(f"{n} {noun}")
+        else:
+            changed.append(f"{n - ok} of {n} {noun}")
+    if not kept and not changed:
+        return None
+    def join(parts):
+        return parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+    line = []
+    if kept:
+        line.append(f"Left as-is: {join(kept)}")
+    if changed:
+        line.append(f"Changed in the rewrite: {join(changed)}. Restore them from the original.")
+    return "\n".join(line)
+
 def compare(original, rewrite):
     text, clean_new = tt.report(original, rewrite)
     clean_orig, _ = tt.clean(original)
+    kept = _kept_line(clean_orig, clean_new)
+    if kept:
+        lines = text.split("\n")
+        quote = next((k for k, l in enumerate(lines) if l.startswith("Quoted text:")), None)
+        if quote is not None and "left as written and not scored" in lines[quote]:
+            del lines[quote]
+            quote = None
+        # After the script's "Quoted text" line when it stays, otherwise after "Hidden characters removed".
+        at = quote + 1 if quote is not None else next((k + 1 for k, l in enumerate(lines) if l.startswith("Hidden characters removed:")), len(lines))
+        lines[at:at] = kept.split("\n")
+        text = "\n".join(lines)
     return json.dumps({
         "report": text,
         "cleaned_rewrite": clean_new,

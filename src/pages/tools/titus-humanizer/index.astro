@@ -31,8 +31,8 @@ const app = {
       <p class="lead">An editing skill that rewrites text so it reads like a careful, plain-spoken person wrote it. It strips hidden characters first and scores the AI-writing patterns before and after.</p>
       <div class="btn-row">
         <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Check your text</a>
-        <a class="link-arrow" href="#video">Watch the tour</a>
-        <a class="link-arrow" href={u("/tools/titus-humanizer/install/")}>Install</a>
+        <a class="btn" href="#video">Watch the tour</a>
+        <a class="btn" href={u("/tools/titus-humanizer/install/")}>Install</a>
       </div>
     </div>
   </section>
@@ -40,7 +40,7 @@ const app = {
   <section class="demo-section">
     <div class="wrap">
       <Demo />
-      <p class="small muted center demo-note">The highlights and scores are the titus-humanizer {skill.version} scoring script's own output for these two texts. The rewrite keeps the 12 steps, the two weeks and who uses the list. The score also measures sentence rhythm and word variety, so plain text rarely scores 0.</p>
+      <p class="small muted center demo-note">The highlights and scores are the titus-humanizer {skill.version} scoring script's own output for these two texts. The rewrite keeps the 12 setup steps, the two weeks and who uses the list. The score also measures sentence rhythm and word variety, so plain text rarely scores 0.</p>
     </div>
   </section>
 
@@ -48,7 +48,7 @@ const app = {
     <div class="wrap">
       <div class="section-head">
         <h2 class="h2">Four ways to use it</h2>
-        <p class="lead">You don't need Claude or ChatGPT. The Checker needs no account at all.</p>
+        <p class="lead">You don't need Claude or ChatGPT to use it. The Checker needs no account at all.</p>
       </div>
       <div class="grid grid-2">
         <a class="card tile tile-tall reveal" href={u("/tools/titus-humanizer/checker/")}>
@@ -97,10 +97,10 @@ const app = {
       </div>
       <div class="grid grid-3 how">
         <div class="card reveal"><span class="how-n">1</span><h3 class="h3">Clean</h3><p class="muted">It removes characters you can't see, such as zero-width spaces and look-alike letters, and leaves emoji, other alphabets and code alone.</p></div>
-        <div class="card reveal" style="--d: 0.06s"><span class="how-n">2</span><h3 class="h3">Rewrite</h3><p class="muted">It applies seven hard rules, fixes five kinds of weak wording and removes the patterns AI stories share. Every fact, number, name and quotation stays as it was.</p></div>
+        <div class="card reveal" style="--d: 0.06s"><span class="how-n">2</span><h3 class="h3">Rewrite</h3><p class="muted">It applies seven hard rules, fixes five kinds of weak wording and removes the patterns AI stories share. Every fact, number and name stays as it was. Code snippets, file paths, links, emojis and quoted text are left as-is.</p></div>
         <div class="card reveal" style="--d: 0.12s"><span class="how-n">3</span><h3 class="h3">Measure</h3><p class="muted">It scores the original and the rewrite from 0 to 1, and takes another pass if the rewrite still scores high.</p></div>
       </div>
-      <p class="small muted center how-note">The score counts the AI-writing patterns titus-humanizer targets. It doesn't measure quality. It isn't a detector, and a low score doesn't prove a person wrote the text. The cleanup removes invisible characters only. AI watermarks and file metadata stay in place.</p>
+      <p class="small muted center how-note">The score counts AI-writing patterns, so a lower score means plainer, better writing. It isn't a detector, and a low score doesn't prove a person wrote the text. The cleanup removes invisible characters only. It does not target AI watermarks, but it helps to reduce them. AI watermarks are invisible to the eye and build up statistically throughout the text, so they are hard to target. A text can look completely normal and still contain AI watermarks, and the only way to find one is with a detector that knows the AI company’s secret key.</p>
     </div>
   </section>
 

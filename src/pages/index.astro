@@ -5,20 +5,24 @@ import { u } from "../lib/url";
 import { links } from "../data/profile";
 import skills from "../data/skills.generated.json";
 const skill = skills["titus-humanizer"];
-const latest = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0];
+const posts = (await getCollection("blog", (p) => !p.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
 const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 ---
 <Base title="Titus Nyarko Nde" current="home" description="Titus Nyarko Nde is a data scientist with a Ph.D. in Computing. He builds machine learning models, measures how far to trust them, and makes tools that help people write clearly with AI.">
   <section class="home-hero">
     <div class="wrap wrap-text home-hero-grid">
-      <img class="home-portrait" src={u("/images/titus.jpg")} alt="Titus Nyarko Nde" width="300" height="300" />
+      <img class="home-portrait portrait-ring" src={u("/images/titus.jpg")} alt="Titus Nyarko Nde" width="300" height="300" />
       <div class="home-hero-text">
         <p class="eyebrow">Data scientist</p>
         <h1 class="display">Titus Nyarko Nde</h1>
         <p class="home-intro">I build machine learning models, work out how far to trust their answers, and make tools that help people write clearly with AI.</p>
         <div class="btn-row">
+          <a class="btn" href={u("/about/")}>About</a>
+          <a class="btn" href={u("/experience/")}>Experience</a>
           <a class="btn" href={u("/about/#contact")}>Contact me</a>
-          <a class="link-arrow" href="#work">See my work</a>
+          <a class="btn" href={u("/tools/")}>See my work</a>
         </div>
       </div>
     </div>
@@ -29,6 +33,34 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
     </dl>
   </section>
 
+  <section class="section-tight" id="explore">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="h2">What you'll find here</h2>
+      </div>
+      <div class="grid grid-3">
+        <a class="card tile home-tile reveal" href={u("/tools/")}>
+          <span class="home-icon" style="background: linear-gradient(135deg,#0071e3,#5e5ce6)" aria-hidden="true">⚙</span>
+          <h3 class="h3">Tools</h3>
+          <p>Skills and plugins I build for AI assistants. Most have a free way to try them in your browser.</p>
+          <span class="link-arrow">See the tools</span>
+        </a>
+        <a class="card tile home-tile reveal" style="--d: 0.08s" href={u("/blog/")}>
+          <span class="home-icon" style="background: linear-gradient(135deg,#ff9f0a,#ff375f)" aria-hidden="true">✎</span>
+          <h3 class="h3">Blog</h3>
+          <p>What I write about AI, data science and building tools.</p>
+          <span class="link-arrow">Read the blog</span>
+        </a>
+        <a class="card tile home-tile reveal" style="--d: 0.16s" href={u("/experience/")}>
+          <span class="home-icon" style="background: linear-gradient(135deg,#34c759,#0a8f3c)" aria-hidden="true">★</span>
+          <h3 class="h3">Experience</h3>
+          <p>My work in AI evaluation, banking and research, with the education and skills behind it.</p>
+          <span class="link-arrow">See my experience</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
   <section class="section section-soft" id="work">
     <div class="wrap">
       <div class="section-head">
@@ -37,7 +69,7 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
         <p class="lead">Check any text for AI-writing patterns in your browser, then rewrite it with the assistant you already use.</p>
         <div class="btn-row center home-actions">
           <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Try the Checker</a>
-          <a class="link-arrow" href={u("/tools/titus-humanizer/")}>Learn more</a>
+          <a class="btn" href={u("/tools/titus-humanizer/")}>Learn more</a>
         </div>
       </div>
       <figure class="shot reveal">
@@ -51,29 +83,26 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
 
   <section class="section">
     <div class="wrap">
-      <div class="grid grid-2">
-        <a class="card tile tile-tall reveal" href={u("/experience/")}>
-          <p class="tile-eyebrow">Experience</p>
-          <h2 class="h-tile">AI evaluation, research and banking</h2>
-          <p>Credit and churn models for lenders, uncertainty in scientific models at Boise State and Berkeley Lab, and grading for large language models.</p>
-          <span class="link-arrow">See my experience</span>
-        </a>
-        {latest ? (
-          <a class="card tile tile-tall reveal" style="--d: 0.06s" href={u(`/blog/${latest.id}/`)}>
-            <p class="tile-eyebrow">From the blog</p>
-            <h2 class="h-tile">{latest.data.title}</h2>
-            <p class="small"><time datetime={latest.data.date.toISOString().slice(0, 10)}>{fmt(latest.data.date)}</time>{latest.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
-            <p>{latest.data.description}</p>
-            <span class="link-arrow">{latest.data.fiction ? "Read the story" : "Read the post"}</span>
-          </a>
-        ) : (
-          <a class="card tile tile-tall reveal" style="--d: 0.06s" href={u("/blog/")}>
-            <p class="tile-eyebrow">Blog</p>
-            <h2 class="h-tile">Writing on AI and data science</h2>
-            <p>The first posts are coming soon.</p>
-            <span class="link-arrow">Go to the blog</span>
-          </a>
-        )}
+      <div class="section-head reveal">
+        <h2 class="h2">From the blog</h2>
+      </div>
+      {posts.length === 0 ? (
+        <div class="card center reveal empty-blog">
+          <p class="lead" style="margin: 0">The first posts are coming soon. They will cover AI evaluation, machine learning and how the tools on this site work.</p>
+        </div>
+      ) : (
+        <div class="grid grid-3">
+          {posts.map((p, i) => (
+            <a class="card tile home-tile reveal" style={`--d: ${i * 0.06}s`} href={u(`/blog/${p.id}/`)}>
+              <p class="small muted" style="margin: 0"><time datetime={p.data.date.toISOString().slice(0, 10)}>{fmt(p.data.date)}</time>{p.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
+              <h3 class="h3">{p.data.title}</h3>
+              <p>{p.data.description}</p>
+            </a>
+          ))}
+        </div>
+      )}
+      <div class="btn-row center reveal" style="margin-top: 28px">
+        <a class="btn" href={u("/blog/")}>All posts</a>
       </div>
     </div>
   </section>
@@ -93,7 +122,12 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
   .home-actions { margin-top: 24px; }
   .shot { margin: 0 auto; max-width: 1000px; padding: 20px; border-radius: var(--radius-lg); background: var(--bg-raised); border: 1px solid var(--line-soft); }
   .shot img { width: 100%; height: auto; border-radius: 14px; }
-  .tile-eyebrow { font-size: 17px; font-weight: 600; }
+  #explore { scroll-margin-top: 64px; padding-top: 8px; }
+  .home-tile { min-height: 260px; gap: 10px; padding: 40px; transition: transform 0.5s var(--ease); }
+  .home-tile:hover { transform: translateY(-4px) scale(1.01); }
+  .home-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 24px; color: #fff; margin-bottom: 8px; }
+  .empty-blog { min-height: 0; padding: 36px 28px; }
+  @media (prefers-reduced-motion: reduce) { .home-tile, .home-tile:hover { transition: none; transform: none; } }
   @media (max-width: 1068px) {
     .home-hero-grid { grid-template-columns: minmax(0, 1fr) 240px; gap: 40px; }
     .home-portrait { width: 240px; height: 240px; }
@@ -104,13 +138,13 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
     .home-portrait { grid-column: auto; width: 168px; height: 168px; }
     .home-hero-text { align-items: center; }
     .home-intro { font-size: 21px; }
-    .home-hero-text .btn-row { flex-direction: column; row-gap: 4px; }
+    .home-hero-text .btn-row { justify-content: center; }
     .home-facts { grid-template-columns: 1fr; gap: 0; margin-top: 40px; text-align: left; }
     .home-facts div { padding: 16px 0; gap: 4px; }
     .home-facts div:last-child { border-bottom: 1px solid var(--line); }
     .home-facts dt { font-size: 24px; }
     .shot { padding: 10px; border-radius: 20px; }
     .shot img { border-radius: 12px; }
-    .tile-eyebrow { font-size: 14px; }
+    .home-tile { min-height: 0; padding: 28px 24px; }
   }
 </style>
