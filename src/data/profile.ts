@@ -2,7 +2,7 @@
 
 export const links = {
   linkedin: "https://www.linkedin.com/in/titus-n-nde/",
-  github: "https://github.com/Dr-Titus100",
+  github: "https://github.com/Dr-Titus100?tab=repositories",
   scholar: "https://scholar.google.com/citations?user=cLPCRhsAAAAJ",
   orcid: "https://orcid.org/0000-0002-0089-0774",
 };
