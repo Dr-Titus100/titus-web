@@ -351,7 +351,7 @@ const skill = skills["titus-humanizer"];
     const m = markAt(e.target);
     if (e.key === "Escape") { hideTip(); return; }
     if (m && /^Arrow(Right|Down|Left|Up)$/.test(e.key)) {
-      // One stop per highlight: a span that wraps or overlaps another is split into several pieces.
+      // The view splits a span that wraps or overlaps another into several pieces, so keep one stop per highlight.
       const seen = new Set<string>();
       const stops = [...viewEl.querySelectorAll<HTMLElement>("mark.hl, mark.hid")].filter((x) => {
         const key = x.dataset.span;
