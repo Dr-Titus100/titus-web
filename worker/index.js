@@ -131,13 +131,16 @@ async function listApproved(url, env) {
   const [tops, replies, totals] = await d1.batch([
     d1.prepare(`${cols} WHERE post = ? AND status = 'approved' AND parent_id IS NULL ORDER BY created_at DESC, id DESC LIMIT ?`)
       .bind(post, POST_SHOWN),
-    d1.prepare(`${cols} WHERE post = ? AND status = 'approved' AND parent_id IS NOT NULL ORDER BY created_at, id LIMIT 5000`).bind(post),
+    // Only replies in the threads shown, newest first so a new reply is never cut off, then put in reading order below.
+    d1.prepare(`${cols} WHERE post = ? AND status = 'approved' AND parent_id IN (
+        SELECT id FROM comments WHERE post = ? AND status = 'approved' AND parent_id IS NULL ORDER BY created_at DESC, id DESC LIMIT ?
+      ) ORDER BY created_at DESC, id DESC LIMIT 5000`).bind(post, post, POST_SHOWN),
     d1.prepare("SELECT COUNT(*) AS everything, SUM(parent_id IS NULL) AS top FROM comments WHERE post = ? AND status = 'approved'").bind(post),
   ]);
   const shown = new Set(tops.results.map((c) => c.id));
   const tidyRow = (c) => ({ ...c, author: c.author === 1 });
   return json({
-    comments: [...tops.results.reverse(), ...replies.results.filter((r) => shown.has(r.parent))].map(tidyRow),
+    comments: [...tops.results.reverse(), ...replies.results.reverse().filter((r) => shown.has(r.parent))].map(tidyRow),
     total: totals.results[0].top || 0,
     count: totals.results[0].everything || 0,
   });
@@ -187,8 +190,12 @@ async function addComment(request, url, env, ctx) {
   }
   const waiting = await d1.prepare("SELECT COUNT(*) AS n FROM comments WHERE status = 'pending'").first("n");
   if (waiting >= PENDING_MAX) return json({ error: "full" }, 503);
-  await d1.prepare("INSERT INTO comments (post, name, body, status, created_at, parent_id) VALUES (?, ?, ?, 'pending', ?, ?)")
-    .bind(post, name, body, new Date().toISOString(), parent ? parent.id : null).run();
+  // The insert checks the thread again, so a reply can't land in a thread deleted a moment ago.
+  const parentId = parent ? parent.id : null;
+  const saved = await d1.prepare(`INSERT INTO comments (post, name, body, status, created_at, parent_id)
+      SELECT ?, ?, ?, 'pending', ?, ? WHERE ? IS NULL OR EXISTS (SELECT 1 FROM comments WHERE id = ? AND parent_id IS NULL)`)
+    .bind(post, name, body, new Date().toISOString(), parentId, parentId, parentId).run();
+  if (!saved.meta || saved.meta.changes === 0) return json({ error: "parent" }, 400);
   // The email goes out after the response, so a slow or failed send never holds up the reader.
   ctx.waitUntil(notify(env, url, page, { post, name, body, waiting: waiting + 1, replyTo: parent && parent.name }));
   return json({ status: "pending" }, 202);
@@ -287,11 +294,14 @@ async function admin(request, url, env) {
     if (!target) return json({ error: "missing" }, 404);
     const root = target.parent_id ?? target.id;
     // Replying to a waiting comment approves it, and its thread's first comment, so the reply has a place to show.
-    await d1.batch([
+    const [, saved] = await d1.batch([
       d1.prepare("UPDATE comments SET status = 'approved' WHERE id IN (?, ?) AND status = 'pending'").bind(target.id, root),
-      d1.prepare("INSERT INTO comments (post, name, body, status, created_at, parent_id, author) VALUES (?, ?, ?, 'approved', ?, ?, 1)")
-        .bind(target.post, AUTHOR_NAME, body, new Date().toISOString(), root),
+      // Only while the thread still exists, so the reply never lands in a thread deleted a moment ago.
+      d1.prepare(`INSERT INTO comments (post, name, body, status, created_at, parent_id, author)
+          SELECT ?, ?, ?, 'approved', ?, ?, 1 WHERE EXISTS (SELECT 1 FROM comments WHERE id = ? AND parent_id IS NULL)`)
+        .bind(target.post, AUTHOR_NAME, body, new Date().toISOString(), root, root),
     ]);
+    if (!saved.meta || saved.meta.changes === 0) return json({ error: "missing" }, 404);
     return json({ ok: true });
   } else {
     return json({ error: "action" }, 400);
