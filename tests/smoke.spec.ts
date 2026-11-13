@@ -274,6 +274,9 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
   await page.fill("#mod-token", "right-token");
   await page.click("#mod-login button[type=submit]");
   await expect(page.locator("#mod-pending .mod-item")).toHaveCount(1);
+  // Forget the token is a pill like Show comments.
+  await expect(page.locator("#mod-forget")).toHaveClass("btn");
+  await expect(page.locator("#mod-forget")).toHaveCSS("border-radius", await page.locator("#mod-login button[type=submit]").evaluate((b) => getComputedStyle(b).borderRadius));
   await expect(page.locator("#mod-pending .mod-meta")).toContainText("replying to Ama");
   await expect(page.locator("#mod-approved .mod-item")).toHaveCount(1);
   await page.locator("#mod-pending .mod-item").getByRole("button", { name: "Approve", exact: true }).click();

@@ -24,7 +24,7 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
         </div>
         <div class="btn-row">
           <button class="btn" type="submit">Show comments</button>
-          <button class="btn-link" type="button" id="mod-forget" hidden>Forget the token</button>
+          <button class="btn" type="button" id="mod-forget" hidden>Forget the token</button>
           <span class="small muted" id="mod-status" role="status" aria-live="polite"></span>
         </div>
         <p class="small muted mod-note">The token is the COMMENTS_ADMIN_TOKEN secret on the Worker. This tab keeps it until you close it.</p>
