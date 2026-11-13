@@ -9,17 +9,17 @@ const skill = skills["titus-humanizer"];
 <Base fullTitle="titus-humanizer Checker" title="Checker" current="humanizer" image="/og/titus-humanizer.png" imageAlt="The titus-humanizer Checker scoring a sample text 0.80, high, with the patterns it found" description="Paste text to see its AI-pattern score, the patterns highlighted in place and the hidden characters removed. Quoted text is left out of the score. It runs the titus-humanizer scoring script in your browser.">
   <ToolNav slot="subnav" current="checker" />
 
-  <section class="hero" style="padding-bottom: 32px">
-    <div class="wrap wrap-narrow">
+  <section class="hero tool-hero">
+    <div class="wrap wrap-text">
       <p class="eyebrow">Checker</p>
-      <h1 class="h1" data-rise>Which phrases sound machine-made?</h1>
+      <h1 class="h1">Which phrases sound machine-made?</h1>
       <p class="lead">Paste any text. The checker scores it from 0 to 1, marks each pattern where it appears and removes hidden characters. Quoted text belongs to the person quoted, so the checker leaves it out of the score. It uses the same scoring script as titus-humanizer {skill.version}, and it runs inside your browser.</p>
     </div>
   </section>
 
-  <section class="section-tight" style="padding-top: 0">
+  <section class="tool-body">
     <div class="wrap">
-      <div class="card checker-card reveal">
+      <div class="card checker-card">
         <div class="checker-top">
           <label for="input">Your text</label>
           <span class="status" id="status" data-state="idle"><span class="dot"></span><span class="status-text" id="status-text">The first check downloads Python, about 12 MB</span></span>
@@ -31,13 +31,13 @@ const skill = skills["titus-humanizer"];
         <textarea id="input" spellcheck="false" placeholder="Paste an email, an essay, a cover letter or a story here."></textarea>
         <div class="checker-actions">
           <div class="btn-row">
-            <button class="btn btn-ghost" id="run" type="button" aria-describedby="status-text">Check text</button>
-            <button class="btn btn-ghost" id="sample" type="button">Try a sample</button>
-            <button class="btn btn-ghost" id="clear" type="button">Clear</button>
+            <button class="btn" id="run" type="button" aria-describedby="status-text">Check text</button>
+            <button class="btn-link" id="sample" type="button">Try a sample</button>
+            <button class="btn-link" id="clear" type="button">Clear</button>
           </div>
           <span class="small muted" id="count">0 words</span>
         </div>
-        <div class="notice" style="margin-top: 18px">
+        <div class="notice checker-notice">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1a3 3 0 0 0-3 3v2H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3Zm-1.5 3a1.5 1.5 0 0 1 3 0v2h-3V4Z"/></svg>
           <span>Your text stays in your browser. This site doesn't store it or send it anywhere. <a href={u("/privacy/")}>Privacy</a></span>
         </div>
@@ -71,7 +71,7 @@ const skill = skills["titus-humanizer"];
               <button role="tab" type="button" id="tab-hidden" aria-controls="view" aria-selected="false" tabindex="-1" data-view="hidden">Hidden characters</button>
               <button role="tab" type="button" id="tab-cleaned" aria-controls="view" aria-selected="false" tabindex="-1" data-view="cleaned">Cleaned text</button>
             </div>
-            <button class="btn btn-small btn-ghost" id="copy-clean" type="button">Copy cleaned text</button>
+            <button class="btn btn-small btn-quiet" id="copy-clean" type="button">Copy cleaned text</button>
           </div>
           <div class="legend" id="legend">
             <span><i class="hl-rule"></i>Hard rule</span>
@@ -85,17 +85,17 @@ const skill = skills["titus-humanizer"];
           <p class="small muted" id="view-note"></p>
         </div>
 
-        <div class="next reveal">
+        <div class="next">
           <h2 class="h2">Want it rewritten?</h2>
           <p class="lead">Use your own Claude, OpenAI or Gemini key on this site, or paste the rules into any chatbot you already use.</p>
-          <div class="btn-row center" style="margin-top: 24px">
-            <a class="btn btn-ghost" href={u("/tools/titus-humanizer/rewrite/")}>Rewrite with your key</a>
-            <a class="btn btn-ghost" href={u("/tools/titus-humanizer/any-chatbot/")}>Use any chatbot</a>
+          <div class="btn-row center next-actions">
+            <a class="btn" href={u("/tools/titus-humanizer/rewrite/")}>Rewrite with your key</a>
+            <a class="link-arrow" href={u("/tools/titus-humanizer/any-chatbot/")}>Use any chatbot</a>
           </div>
         </div>
       </div>
 
-      <p class="small muted center" style="margin-top: 40px; max-width: 680px; margin-left: auto; margin-right: auto">
+      <p class="small muted center tool-footnote">
         The score counts the AI-writing patterns titus-humanizer targets. It doesn't measure quality, and it isn't the output of GPTZero, Turnitin or any other detector, and a low score doesn't prove a person wrote the text.
       </p>
     </div>
@@ -104,6 +104,8 @@ const skill = skills["titus-humanizer"];
 
 <style is:global>
   .checker-card { padding: 28px; }
+  .checker-notice { margin-top: 16px; }
+  .next-actions { margin-top: 24px; }
   .checker-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
   .checker-top label { margin: 0; }
   .checker-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
@@ -285,8 +287,6 @@ const skill = skills["titus-humanizer"];
     setTimeout(() => { live.textContent = text; }, 50);
   }
 
-  const actions = ["run", "sample", "clear"].map((id) => $(id));
-  actions.forEach((b) => b.addEventListener("click", () => actions.forEach((x) => x.classList.toggle("picked", x === b))));
   run.addEventListener("click", check);
   input.addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !run.disabled) check(); });
   $("sample").addEventListener("click", () => { input.value = SAMPLE; input.dispatchEvent(new Event("input")); check(); });
@@ -371,9 +371,5 @@ const skill = skills["titus-humanizer"];
 </script>
 
 <style is:global>
-  /* Check text, Try a sample and Clear start as matching outlines. The last one clicked fills in. */
-  .checker-actions .btn.picked { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
-  /* The selected view tab is filled. Highlighted patterns starts selected. */
   .legend[hidden] { display: none; }
-  .view-head .segmented button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
 </style>

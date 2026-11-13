@@ -10,26 +10,43 @@ const filters = [
   { id: "industry", name: "Industry" },
   { id: "teaching", name: "Teaching" },
 ];
+const RECENT = 5;
+const TOP_TALKS = 6;
+const icons = {
+  linkedin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  scholar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/></svg>',
+  github: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>',
+  orcid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17c.8-2 2-3 3.5-3s2.7 1 3.5 3M15 9h3M15 13h3"/></svg>',
+};
+const profiles = [
+  { href: links.linkedin, label: "LinkedIn", icon: icons.linkedin },
+  { href: links.scholar, label: "Google Scholar", icon: icons.scholar },
+  { href: links.github, label: "GitHub", icon: icons.github },
+  { href: links.orcid, label: "ORCID", icon: icons.orcid },
+];
 const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching: "Teaching" };
 ---
 <Base title="Experience" current="experience" description="Titus Nyarko Nde's work in AI evaluation, machine learning research, banking analytics and research computing, with his education, publications and talks.">
   <section class="hero">
-    <div class="wrap wrap-narrow">
+    <div class="wrap wrap-text">
       <p class="eyebrow">Experience</p>
-      <h1 class="h1" data-rise>Machine learning, research and AI evaluation</h1>
+      <h1 class="h1">Machine learning, research and AI evaluation</h1>
       <p class="lead">I've built credit and churn models for lenders, measured uncertainty in galaxy cluster masses and satellite maps, and graded and written training data for large language models. Now I also write AI skills, starting with titus-humanizer.</p>
       <div class="btn-row">
-        <a class="btn btn-ghost" href={links.linkedin}>LinkedIn</a>
-        <a class="btn btn-ghost" href={links.scholar}>Google Scholar</a>
-        <a class="btn btn-ghost" href={links.github}>GitHub</a>
-        <a class="btn btn-ghost" href={links.orcid}>ORCID</a>
+        <a class="btn" href={u("/about/#contact")}>Contact me</a>
+        <a class="link-arrow" href="#work">See my roles</a>
       </div>
+      <ul class="profile-icons" aria-label="Profiles">
+        {profiles.map((p) => (
+          <li><a href={p.href}><span class="profile-icon" set:html={p.icon} />{p.label}</a></li>
+        ))}
+      </ul>
     </div>
   </section>
 
-  <section class="section-tight" style="padding-top: 0">
+  <section class="stats-section">
     <div class="wrap">
-      <div class="exp-stats reveal">
+      <div class="exp-stats">
         <div><strong>0.986</strong><span>AUC of the churn model I built at KCB Bank Rwanda</span></div>
         <div><strong>100+</strong><span>citations of the micro-credit scoring paper in Risks</span></div>
         <div><strong>250+</strong><span>LLM evaluation tasks graded at Mercor</span></div>
@@ -38,66 +55,73 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
     </div>
   </section>
 
-  <section class="section" id="work">
-    <div class="wrap wrap-narrow">
+  <section class="section section-soft" id="work">
+    <div class="wrap wrap-text">
       <div class="section-head">
         <h2 class="h2">Work</h2>
+        <p class="lead">The {RECENT} most recent roles are open below. Earlier roles are one click away.</p>
       </div>
-      <div class="center" style="margin-bottom: 36px">
+      <div class="center role-filter">
         <div class="segmented" role="group" aria-label="Filter roles">
           {filters.map((f, i) => <button type="button" aria-pressed={i === 0 ? "true" : "false"} data-filter={f.id}>{f.name}</button>)}
         </div>
       </div>
       <ol class="timeline">
-        {roles.map((r) => (
-          <li class="role reveal" data-tag={r.tag}>
+        {roles.map((r, i) => (
+          <li class="role" data-tag={r.tag} data-earlier={i >= RECENT ? "" : undefined} hidden={i >= RECENT}>
             <div class="role-when">
               <span class="role-dates">{r.dates}</span>
               <span class={`role-tag tag-${r.tag}`}>{tagName[r.tag]}</span>
             </div>
             <div class="card role-card">
-              <h3 class="h3">{r.title}</h3>
+              <h3 class="h4">{r.title}</h3>
               <p class="role-org">{r.orgUrl ? <a href={r.orgUrl}>{r.org}</a> : r.org}<span class="muted">, {r.place}</span></p>
-              <ul class="role-points">
-                {r.points.map((p) => <li>{p}</li>)}
-              </ul>
-              {r.tag === "ai" && r.org === "Independent project" && (
-                <div class="btn-row" style="margin-top: 18px">
-                  <a class="btn btn-ghost" href={u("/tools/titus-humanizer/")}>Try titus-humanizer</a>
-                  <a class="btn btn-ghost" href={r.orgUrl}>Source on GitHub</a>
-                </div>
+              <p class="role-lead">{r.points[0]}</p>
+              {r.points.length > 1 && (
+                <details class="role-more">
+                  <summary>Show details</summary>
+                  <ul class="role-points">
+                    {r.points.slice(1).map((p) => <li>{p}</li>)}
+                  </ul>
+                </details>
+              )}
+              {r.org === "Independent project" && (
+                <p class="role-links"><a class="link-arrow" href={u("/tools/titus-humanizer/")}>Try titus-humanizer</a><a class="link-arrow" href={r.orgUrl}>Source on GitHub</a></p>
               )}
             </div>
           </li>
         ))}
       </ol>
+      <div class="center">
+        <button class="btn-link" type="button" id="show-earlier" aria-expanded="false">Show earlier roles ({roles.length - RECENT})</button>
+      </div>
     </div>
   </section>
 
-  <section class="section section-soft" id="education">
-    <div class="wrap wrap-narrow">
+  <section class="section" id="education">
+    <div class="wrap wrap-text">
       <div class="section-head"><h2 class="h2">Education</h2></div>
       <div class="stack">
         {education.map((e, i) => (
           <div class="card reveal" style={`--d: ${i * 0.06}s`}>
-            <div class="row-head"><h3 class="h3">{e.degree}</h3><span class="muted small">{e.date}</span></div>
+            <div class="row-head"><h3 class="h4">{e.degree}</h3><span class="muted small">{e.date}</span></div>
             <p class="role-org">{e.school}</p>
-            {e.notes.map((n) => <p class="muted" style="margin: 6px 0 0">{n}</p>)}
+            {e.notes.map((n) => <p class="muted edu-note">{n}</p>)}
           </div>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="section" id="publications">
-    <div class="wrap wrap-narrow">
+  <section class="section section-soft" id="publications">
+    <div class="wrap wrap-text">
       <div class="section-head">
         <h2 class="h2">Publications</h2>
         <p class="lead">The full list is on <a href={links.scholar}>Google Scholar</a> and <a href={links.orcid}>ORCID</a>.</p>
       </div>
       <ol class="pubs">
         {publications.map((p) => (
-          <li class="reveal">
+          <li>
             <p>{p.cite}</p>
             {p.url && <a class="link-arrow small" href={p.url}>{p.label}</a>}
           </li>
@@ -106,17 +130,25 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
     </div>
   </section>
 
-  <section class="section section-soft" id="talks">
-    <div class="wrap">
+  <section class="section" id="talks">
+    <div class="wrap wrap-text">
       <div class="grid grid-2 two-lists">
         <div>
-          <h2 class="h3" style="margin-bottom: 18px">Talks, posters and workshops</h2>
+          <h2 class="h3 list-title">Talks, posters and workshops</h2>
           <ul class="dated">
-            {talks.map(([d, t]) => <li><span class="muted small">{d}</span><span>{t}</span></li>)}
+            {talks.slice(0, TOP_TALKS).map(([d, t]) => <li><span class="muted small">{d}</span><span>{t}</span></li>)}
           </ul>
+          {talks.length > TOP_TALKS && (
+            <details class="more-list">
+              <summary>See all {talks.length}</summary>
+              <ul class="dated">
+                {talks.slice(TOP_TALKS).map(([d, t]) => <li><span class="muted small">{d}</span><span>{t}</span></li>)}
+              </ul>
+            </details>
+          )}
         </div>
         <div>
-          <h2 class="h3" style="margin-bottom: 18px">Awards and certificates</h2>
+          <h2 class="h3 list-title">Awards and certificates</h2>
           <ul class="dated">
             {awards.map(([d, t]) => <li><span class="muted small">{d}</span><span>{t}</span></li>)}
           </ul>
@@ -125,102 +157,138 @@ const tagName = { ai: "AI", research: "Research", industry: "Industry", teaching
     </div>
   </section>
 
-  <section class="section" id="leadership">
-    <div class="wrap wrap-narrow">
+  <section class="section section-soft" id="leadership">
+    <div class="wrap wrap-text">
       <div class="section-head"><h2 class="h2">Teaching, outreach and leadership</h2></div>
       <div class="stack">
-        {leadership.map(([role, org, text], i) => (
-          <div class="card reveal" style={`--d: ${i * 0.05}s`}>
-            <h3 class="h3" style="font-size: 19px">{org}</h3>
-            <p class="muted" style="margin: 6px 0 0">{role}</p>
-            {text && <p style="margin: 12px 0 0">{text}</p>}
+        {leadership.map(([role, org, text]) => (
+          <div class="card lead-card">
+            <h3 class="h4">{org}</h3>
+            <p class="muted">{role}</p>
+            {text && <p class="lead-text">{text}</p>}
           </div>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="section section-dark" id="skills">
-    <div class="wrap wrap-narrow">
+  <section class="section" id="skills">
+    <div class="wrap wrap-text">
       <div class="section-head"><h2 class="h2">Skills and tools</h2></div>
       <dl class="skills">
-        {skills.map(([k, v]) => <div class="reveal"><dt>{k}</dt><dd>{v}</dd></div>)}
+        {skills.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
       </dl>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section section-soft">
     <div class="wrap center">
-      <h2 class="h2 reveal">More about me</h2>
-      <div class="btn-row center reveal" style="margin-top: 24px">
-        <a class="btn btn-ghost" href={u("/about/")}>About</a>
-        <a class="btn btn-ghost" href={u("/tools/")}>Skills and tools I've built</a>
-        <a class="btn btn-ghost" href={u("/about/#contact")}>Contact me</a>
+      <h2 class="h2">More about me</h2>
+      <div class="btn-row center more-actions">
+        <a class="btn" href={u("/about/#contact")}>Contact me</a>
+        <a class="link-arrow" href={u("/about/")}>About</a>
+        <a class="link-arrow" href={u("/tools/")}>Skills and tools I've built</a>
       </div>
     </div>
   </section>
 </Base>
 
 <style is:global>
-  .exp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  .exp-stats > div { background: var(--bg-soft); border-radius: 22px; padding: 26px 22px; display: flex; flex-direction: column; gap: 8px; }
-  .exp-stats strong { font-size: clamp(32px, 4vw, 44px); letter-spacing: -0.03em; line-height: 1; }
-  .exp-stats span { color: var(--ink-soft); font-size: 15px; line-height: 1.4; }
-  @media (max-width: 860px) { .exp-stats { grid-template-columns: repeat(2, 1fr); } }
+  .profile-icons { list-style: none; margin: 32px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; font-size: 14px; }
+  .profile-icons a { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-mid); padding: 6px 0; }
+  .profile-icon { display: inline-flex; width: 20px; height: 20px; }
+  .profile-icon svg { width: 20px; height: 20px; }
+  .stats-section { padding: 0 0 120px; }
+  .exp-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .exp-stats > div { border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .exp-stats strong { font-size: 40px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.1; }
+  .exp-stats span { color: var(--ink-soft); font-size: 14px; line-height: 1.43; }
+  @media (max-width: 1068px) { .stats-section { padding-bottom: 80px; } .exp-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 734px) { .stats-section { padding-bottom: 64px; } .exp-stats strong { font-size: 32px; } }
 
-  .timeline { list-style: none; margin: 0; padding: 0; position: relative; }
-  .timeline::before { content: ""; position: absolute; left: 172px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--accent), transparent); opacity: 0.35; }
-  .role { display: grid; grid-template-columns: 150px 1fr; gap: 44px; margin-bottom: 28px; position: relative; }
-  .role::before { content: ""; position: absolute; left: 166px; top: 28px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 20%, transparent); }
-  .role[hidden] { display: none; }
+  .role-filter { margin-bottom: 40px; }
+  /* Without JavaScript every role shows, since the button that unfolds them can't run. */
+  .no-js .role[hidden] { display: grid !important; }
+  .no-js #show-earlier { display: none; }
+  .timeline { list-style: none; margin: 0 0 24px; padding: 0; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 172px; top: 8px; bottom: 8px; width: 1px; background: var(--line); }
+  .role { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 44px; margin-bottom: 20px; position: relative; }
+  .role::before { content: ""; position: absolute; left: 168px; top: 30px; width: 9px; height: 9px; border-radius: 50%; background: var(--ink-soft); }
   .role-when { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding-top: 24px; text-align: right; }
   .role-dates { font-size: 14px; font-weight: 600; }
-  .role-tag { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(127,127,127,0.12); }
+  .role-tag { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; }
   .tag-ai { color: var(--tag-ai); background: color-mix(in srgb, var(--tag-ai) 12%, transparent); }
   .tag-research { color: var(--tag-research); background: color-mix(in srgb, var(--tag-research) 12%, transparent); }
   .tag-industry { color: var(--tag-industry); background: color-mix(in srgb, var(--tag-industry) 12%, transparent); }
   .tag-teaching { color: var(--tag-teaching); background: color-mix(in srgb, var(--tag-teaching) 12%, transparent); }
+  .role-card { padding: 32px; }
   .role-card h3 { margin: 0; }
-  .role-org { margin: 6px 0 0; font-weight: 500; }
-  .role-points { margin: 16px 0 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 10px; }
+  .role-org { margin: 4px 0 0; font-weight: 500; }
+  .role-lead { margin: 12px 0 0; line-height: 1.55; }
+  .role-more { margin-top: 8px; }
+  .role-more summary, .more-list summary { cursor: pointer; color: var(--link); list-style: none; padding: 8px 0; display: inline-block; }
+  .role-more summary::-webkit-details-marker, .more-list summary::-webkit-details-marker { display: none; }
+  .role-more summary::after, .more-list summary::after { content: "\00a0\203A"; }
+  .role-more[open] summary { color: var(--ink-soft); }
+  .role-more[open] summary::after { content: ""; }
+  .role-points { margin: 4px 0 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 10px; }
   .role-points li { line-height: 1.55; }
-  .role.enter { animation: roleIn 0.5s var(--ease) both; }
-  @keyframes roleIn { from { opacity: 0; transform: translateY(14px); } }
-  @media (max-width: 720px) {
-    .timeline::before { left: 6px; }
-    .role { grid-template-columns: 1fr; gap: 10px; padding-left: 28px; }
-    .role::before { left: 0; top: 4px; }
+  .role-links { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 12px 0 0; }
+  @media (max-width: 734px) {
+    .timeline::before { left: 4px; }
+    .role { grid-template-columns: minmax(0, 1fr); gap: 8px; padding-left: 24px; }
+    .role::before { left: 0; top: 6px; }
     .role-when { flex-direction: row; align-items: center; padding-top: 0; text-align: left; }
+    .role-card { padding: 24px 20px; }
   }
 
   .stack { display: flex; flex-direction: column; gap: 16px; }
   .row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
   .row-head h3 { margin: 0; }
+  .edu-note { margin: 8px 0 0; }
+  .lead-card { padding: 28px 32px; }
+  .lead-card p { margin: 4px 0 0; }
+  .lead-card .lead-text { margin-top: 12px; }
 
-  .pubs { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 22px; }
-  .pubs p { margin: 0 0 6px; line-height: 1.55; }
+  .pubs { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 24px; }
+  .pubs p { margin: 0 0 8px; line-height: 1.55; }
 
-  .two-lists { align-items: start; }
+  .two-lists { align-items: start; gap: 48px; }
+  .list-title { margin-bottom: 16px; }
   .dated { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-  .dated li { display: grid; grid-template-columns: 82px 1fr; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line-soft); line-height: 1.45; }
+  .dated li { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-top: 1px solid var(--line-soft); line-height: 1.45; }
   .dated li span:first-child { padding-top: 2px; }
+  .more-list { margin-top: 4px; }
 
   .skills { margin: 0; display: flex; flex-direction: column; }
-  .skills > div { display: grid; grid-template-columns: 200px 1fr; gap: 20px; padding: 18px 0; border-top: 1px solid rgba(255,255,255,0.14); }
+  .skills > div { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; padding: 16px 0; border-top: 1px solid var(--line-soft); }
   .skills dt { font-weight: 600; }
-  .skills dd { margin: 0; opacity: 0.8; line-height: 1.55; }
-  @media (max-width: 640px) { .skills > div { grid-template-columns: 1fr; gap: 6px; } }
+  .skills dd { margin: 0; color: var(--ink-mid); line-height: 1.55; }
+  @media (max-width: 734px) { .skills > div { grid-template-columns: 1fr; gap: 4px; } }
+  .more-actions { margin-top: 24px; }
 </style>
 
 <script>
   import { initChoice } from "../scripts/choice";
-  initChoice(document.querySelector<HTMLElement>('[aria-label="Filter roles"]')!, (b) => {
-    const f = b.dataset.filter;
-    document.querySelectorAll<HTMLElement>(".role").forEach((r) => {
-      const show = f === "all" || r.dataset.tag === f;
-      r.hidden = !show;
-      r.classList.remove("enter");
-      if (show) { void r.offsetWidth; r.classList.add("enter"); r.classList.add("in"); }
+  const roles = [...document.querySelectorAll<HTMLElement>(".role")];
+  const more = document.getElementById("show-earlier") as HTMLButtonElement;
+  let filter = "all";
+  let expanded = false;
+  // With All selected, older roles stay folded until "Show earlier roles". A tag filter shows every
+  // matching role, old or new.
+  function render() {
+    roles.forEach((r) => {
+      const match = filter === "all" || r.dataset.tag === filter;
+      const folded = filter === "all" && !expanded && r.dataset.earlier !== undefined;
+      r.hidden = !match || folded;
     });
+    more.hidden = filter !== "all" || expanded;
+  }
+  initChoice(document.querySelector<HTMLElement>('[aria-label="Filter roles"]')!, (b) => { filter = b.dataset.filter || "all"; render(); });
+  more.addEventListener("click", () => {
+    expanded = true;
+    more.setAttribute("aria-expanded", "true");
+    render();
+    roles.find((r) => r.dataset.earlier !== undefined)?.querySelector<HTMLElement>("a, summary")?.focus();
   });
 </script>

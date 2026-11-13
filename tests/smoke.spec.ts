@@ -15,6 +15,7 @@ const pages = [
   "tools/titus-humanizer/install/",
   "privacy/",
   "terms/",
+  "site-map/",
 ];
 
 function collectErrors(page: Page) {

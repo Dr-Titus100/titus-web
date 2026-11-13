@@ -5,6 +5,18 @@ Notable changes to the titus-web site, newest first. The site has no version num
 ## 2026-11-13
 
 - The tour video has English captions, and a "Read the transcript" panel under it shows the narration by scene.
+- New layout across the site, built from the approved mockups. Inter in one type scale (80 px page names, 56 px section titles, 40 px tile titles, 17 px body, smaller on phones), an 8 px spacing grid, and sections that alternate white and light gray. Dark mode uses a black page, #1d1d1f sections and #2c2c2e cards with thin borders.
+- The top navigation is 44 px tall with a TN monogram, and the current page shows in full-strength text. On phones it hides while you scroll down a titus-humanizer page and comes back when you scroll up.
+- The titus-humanizer bar is 52 px tall with a "Try it free" button that opens the Checker. On phones its pages fold into a menu behind a chevron.
+- Each section has one filled button. Other actions are text links that end in ›.
+- The footer is a site map with four columns (titus-humanizer, Work and writing, About Titus, Elsewhere) that fold into headings on phones, and a bottom row with the copyright, Privacy, Terms and a new Site map page.
+- Nothing starts hidden or animates forever. Sections slide a few pixels into place as you scroll and stay visible if scripts don't run. The gradient headline text and the scaling video are gone.
+- The home page puts my photo beside my name, adds three facts (Ph.D., citations, titus-humanizer version) and shows a large picture of the Checker scoring a sample email.
+- The Experience page shows the five most recent roles with one line each and a "Show details" control. Older roles and the full list of talks open on request.
+- The tour video shows a sharp poster frame and a large play button, loads nothing until you press play, and lists its length and captions under it.
+- The titus-humanizer overview uses line icons for the four ways to use it. Install labels each copy block (Repository link, Plugin commands, Manual install, Terminal).
+- The Checker, Rewrite, Any chatbot and Install pages lost their inline styles and use shared classes instead.
+- Links on the light blue notices and the green "Rewrite" label in the overview demo are a shade darker, so they pass WCAG AA contrast.
 
 ## 2026-11-12
 

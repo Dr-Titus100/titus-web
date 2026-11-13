@@ -2,6 +2,7 @@
 import interLatin from "../fonts/inter-latin-wght-normal.woff2?url";
 import "../styles/global.css";
 import { u } from "../lib/url";
+import { links as profileLinks } from "../data/profile";
 
 interface Props {
   title: string;
@@ -38,6 +39,30 @@ const links = [
   { href: "/about/", label: "About", key: "about" },
 ];
 const year = new Date().getFullYear();
+const footerCols = [
+  { title: "titus-humanizer", links: [
+    { href: u("/tools/titus-humanizer/"), label: "Overview" },
+    { href: u("/tools/titus-humanizer/checker/"), label: "Checker" },
+    { href: u("/tools/titus-humanizer/rewrite/"), label: "Rewrite" },
+    { href: u("/tools/titus-humanizer/any-chatbot/"), label: "Any chatbot" },
+    { href: u("/tools/titus-humanizer/install/"), label: "Install" },
+  ] },
+  { title: "Work and writing", links: [
+    { href: u("/tools/"), label: "Tools" },
+    { href: u("/blog/"), label: "Blog" },
+    { href: u("/experience/"), label: "Experience" },
+  ] },
+  { title: "About Titus", links: [
+    { href: u("/about/"), label: "About" },
+    { href: u("/about/#contact"), label: "Contact" },
+  ] },
+  { title: "Elsewhere", links: [
+    { href: profileLinks.github, label: "GitHub" },
+    { href: profileLinks.linkedin, label: "LinkedIn" },
+    { href: profileLinks.scholar, label: "Google Scholar" },
+    { href: profileLinks.orcid, label: "ORCID" },
+  ] },
+];
 ---
 <!doctype html>
 <html lang="en" class="no-js">
@@ -75,15 +100,15 @@ const year = new Date().getFullYear();
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="nav" id="nav">
-      <div class="wrap nav-inner">
-        <a class="brand" href={u("/")}><span class="brand-dot" aria-hidden="true"></span>Titus Nyarko Nde</a>
-        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links"><span></span><span></span></button>
+      <nav class="wrap nav-inner" aria-label="Site">
+        <a class="brand" href={u("/")} aria-label="Titus Nyarko Nde, home" aria-current={current === "home" ? "page" : undefined}>TN</a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links"><span></span><span></span></button>
         <ul class="nav-links" id="nav-links">
           {links.map((l) => (
             <li><a href={u(l.href)} aria-current={current === l.key ? "page" : undefined}>{l.label}</a></li>
           ))}
         </ul>
-      </div>
+      </nav>
     </header>
     <slot name="subnav" />
     <main id="main" tabindex="-1">
@@ -91,43 +116,20 @@ const year = new Date().getFullYear();
     </main>
     <footer class="footer">
       <div class="wrap">
-        <nav class="footer-cols" aria-label="Site map">
-          <div>
-            <h2 class="footer-h">titus-humanizer</h2>
-            <ul>
-              <li><a href={u("/tools/titus-humanizer/")}>Overview</a></li>
-              <li><a href={u("/tools/titus-humanizer/checker/")}>Checker</a></li>
-              <li><a href={u("/tools/titus-humanizer/rewrite/")}>Rewrite with your key</a></li>
-              <li><a href={u("/tools/titus-humanizer/any-chatbot/")}>Use any chatbot</a></li>
-              <li><a href={u("/tools/titus-humanizer/install/")}>Install</a></li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="footer-h">Tools</h2>
-            <ul>
-              <li><a href={u("/tools/")}>All tools</a></li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="footer-h">Writing</h2>
-            <ul>
-              <li><a href={u("/blog/")}>Blog</a></li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="footer-h">Titus</h2>
-            <ul>
-              <li><a href={u("/about/")}>About</a></li>
-              <li><a href={u("/about/#contact")}>Contact</a></li>
-              <li><a href={u("/experience/")}>Experience</a></li>
-              <li><a href="https://github.com/Dr-Titus100">GitHub</a></li>
-            </ul>
-          </div>
-        </nav>
         <p class="footer-note">The Checker runs in your browser. Rewrites go only to the AI provider you choose, and contact messages go through Web3Forms. The <a href={u("/privacy/")}>Privacy page</a> has the details.</p>
+        <nav class="footer-cols" id="site-map" aria-label="Site map">
+          {footerCols.map((col) => (
+            <details class="footer-col" open>
+              <summary>{col.title}</summary>
+              <ul>
+                {col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+              </ul>
+            </details>
+          ))}
+        </nav>
         <div class="footer-bottom">
-          <span>Copyright © {year} Titus Nyarko Nde.</span>
-          <span class="footer-legal"><a href={u("/privacy/")}>Privacy</a><a href={u("/terms/")}>Terms</a></span>
+          <span>Copyright © {year} Titus Nyarko Nde. titus-humanizer is MIT licensed.</span>
+          <span class="footer-legal"><a href={u("/privacy/")}>Privacy</a><a href={u("/terms/")}>Terms</a><a href={u("/site-map/")}>Site map</a></span>
         </div>
       </div>
     </footer>

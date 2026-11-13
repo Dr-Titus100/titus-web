@@ -52,33 +52,33 @@ const guides = [
 <Base fullTitle="titus-humanizer for any chatbot" title="Use any chatbot" current="humanizer" image="/og/titus-humanizer.png" imageAlt="The titus-humanizer Checker scoring a sample text 0.80, high, with the patterns it found" description="Copy-ready titus-humanizer instructions and short guides for Gemini, Copilot, Perplexity and other assistants.">
   <ToolNav slot="subnav" current="any-chatbot" />
 
-  <section class="hero">
-    <div class="wrap wrap-narrow">
+  <section class="hero tool-hero">
+    <div class="wrap wrap-text">
       <p class="eyebrow">Any chatbot</p>
-      <h1 class="h1" data-rise>The rules work in the chatbot you already use.</h1>
+      <h1 class="h1">The rules work in the chatbot you already use.</h1>
       <p class="lead">Copy the titus-humanizer rulebook, paste it into Gemini, Copilot or any other assistant, and ask it to humanize your text. It's free, and you don't need an account here.</p>
     </div>
   </section>
 
-  <section class="section-tight" style="padding-top: 0">
+  <section class="tool-body">
     <div class="wrap">
       <div class="grid grid-2">
         <div class="card copy-card reveal">
           <p class="eyebrow">Recommended</p>
           <h2 class="h3">Full rulebook</h2>
           <p class="muted">The complete rulebook, about {fullWords.toLocaleString("en-US")} words. It gives the best results in assistants that accept long messages, such as Gemini and Perplexity. It tells the assistant to keep every quotation, block quote and line of dialogue exactly as written and to rewrite only the text around them.</p>
-          <div class="btn-row" style="margin-top: auto">
-            <button class="btn btn-ghost" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
-            <a class="btn btn-ghost" href={full} download="SKILL.md">Download</a>
+          <div class="btn-row copy-actions">
+            <button class="btn" data-copy-url={full} data-copy-label="Full rulebook copied">Copy full rulebook</button>
+            <a class="link-arrow" href={full} download="SKILL.md">Download</a>
           </div>
         </div>
-        <div class="card copy-card reveal" style="--d: 0.08s">
+        <div class="card copy-card reveal" style="--d: 0.06s">
           <p class="eyebrow">For short limits</p>
           <h2 class="h3">Short version</h2>
           <p class="muted">A summary of the rules, about {shortWords.toLocaleString("en-US")} words, which amounts to about {shortChars.toLocaleString("en-US")} characters. Use it when an assistant says your message is too long, as Copilot often does. It carries the same rule for quoted text, so quotes come back unchanged.</p>
-          <div class="btn-row" style="margin-top: auto">
-            <button class="btn btn-ghost" data-copy-url={short} data-copy-label="Short version copied">Copy short version</button>
-            <a class="btn btn-ghost" href={short} download="titus-humanizer-short.md">Download</a>
+          <div class="btn-row copy-actions">
+            <button class="btn-link" data-copy-url={short} data-copy-label="Short version copied">Copy short version</button>
+            <a class="link-arrow" href={short} download="titus-humanizer-short.md">Download</a>
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@ const guides = [
         <h2 class="h2">Step by step</h2>
         <p class="lead">Pick your assistant.</p>
       </div>
-      <div class="center" style="margin-bottom: 28px">
+      <div class="center guide-tabs">
         <div class="segmented" role="tablist" aria-label="Assistant">
           {guides.map((g, i) => (
             <button role="tab" type="button" id={`tab-g-${g.id}`} aria-selected={i === 0 ? "true" : "false"} aria-controls={`g-${g.id}`} tabindex={i === 0 ? 0 : -1} data-guide={g.id}>{g.name}</button>
@@ -100,7 +100,7 @@ const guides = [
       </div>
       {guides.map((g, i) => (
         <div class="card guide" id={`g-${g.id}`} role="tabpanel" aria-labelledby={`tab-g-${g.id}`} tabindex="0" hidden={i !== 0}>
-          <h3 class="h3" style="margin-bottom: 22px">{g.name}</h3>
+          <h3 class="h3 guide-h">{g.name}</h3>
           <ol class="steps">
             {g.steps.map((s) => <li>{s}</li>)}
           </ol>
@@ -119,7 +119,7 @@ const guides = [
       <div class="card reveal">
         <label for="pb-text">Your text</label>
         <textarea id="pb-text" placeholder="Paste the draft you want rewritten."></textarea>
-        <div class="field" style="margin-top: 16px">
+        <div class="field pb-field">
           <label for="pb-mode">Ask for</label>
           <select id="pb-mode">
             <option value="Humanize this:">A rewrite</option>
@@ -128,19 +128,19 @@ const guides = [
           </select>
         </div>
         <div class="btn-row">
-          <button class="btn btn-ghost" id="pb-copy" data-full={full}>Copy prompt</button>
+          <button class="btn" id="pb-copy" data-full={full}>Copy prompt</button>
           <span class="small muted">Then paste it into your chatbot and send it.</span>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section-tight section-soft">
+  <section class="section section-soft">
     <div class="wrap wrap-narrow center">
-      <h2 class="h3">A score for the chatbot's rewrite</h2>
+      <h2 class="h-tile">A score for the chatbot's rewrite</h2>
       <p class="muted">Most chatbots can't run the scoring script. Paste the rewrite into the checker to see its score and any patterns left.</p>
-      <div class="btn-row center" style="margin-top: 20px">
-        <a class="btn btn-ghost" href={u("/tools/titus-humanizer/checker/")}>Open the checker</a>
+      <div class="btn-row center score-actions">
+        <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Open the Checker</a>
       </div>
     </div>
   </section>
@@ -148,6 +148,11 @@ const guides = [
 
 <style is:global>
   .copy-card { display: flex; flex-direction: column; gap: 12px; min-height: 280px; }
+  .copy-card .copy-actions { margin-top: auto; }
+  .guide-tabs { margin-bottom: 32px; }
+  .guide-h { margin-bottom: 24px; }
+  .pb-field { margin-top: 16px; }
+  .score-actions { margin-top: 24px; }
   .copy-card p { margin: 0; }
   .guide { animation: resultsIn 0.6s var(--ease); }
   #pb-text { min-height: 200px; }

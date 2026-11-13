@@ -3,32 +3,42 @@ import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url";
 import { tools } from "../../data/tools";
 ---
-<Base title="Tools" current="tools" description="Skills and plugins by Titus Nyarko Nde.">
+<Base title="Tools" current="tools" description="Skills and plugins by Titus Nyarko Nde, each with a free way to try it on this site.">
   <section class="hero">
-    <div class="wrap wrap-narrow">
-      <h1 class="h1" data-rise>Tools</h1>
+    <div class="wrap wrap-text">
+      <h1 class="h1">Tools</h1>
       <p class="lead">Skills and plugins for Claude, ChatGPT and other assistants. Each one has a free way to try it on this site.</p>
     </div>
   </section>
-  <section class="section-tight" style="padding-top: 0">
+  <section class="tools-list">
     <div class="wrap">
-      <div class="grid grid-3">
-        {tools.map((t) => (
-          <a class="card tile reveal" href={u(t.href)}>
-            <span class="tile-icon" style={`background:${t.gradient}`}>T</span>
-            <p class="small muted" style="margin:0">{t.kind}<br />Version {t.version.replace(/^v/, "")}</p>
-            <h2 class="h3">{t.name}</h2>
-            <p>{t.blurb}</p>
-            <span class="link-arrow">Explore</span>
-          </a>
-        ))}
-        <div class="card tile soon reveal" style="--d: 0.08s">
-          <span class="tile-icon" style="background: var(--line)">+</span>
-          <h2 class="h3">More soon</h2>
-          <p>New skills and plugins will show up here as they ship.</p>
-        </div>
-      </div>
+      {tools.map((t) => (
+        <article class="card tool-feature reveal">
+          <div class="tool-text">
+            <p class="small muted tool-kind">{t.kind}<br />Version {t.version.replace(/^v/, "")}</p>
+            <h2 class="h-tile">{t.name}</h2>
+            <p class="muted">{t.blurb}</p>
+            <div class="btn-row">
+              <a class="btn" href={u(t.links[0].href)}>Try the {t.links[0].label}</a>
+              <a class="link-arrow" href={u(t.href)}>Learn more</a>
+            </div>
+          </div>
+          <picture class="tool-shot">
+            <source srcset={u("/images/checker-light.webp")} type="image/webp" />
+            <img src={u("/images/checker-light.jpg")} alt="The titus-humanizer Checker scoring a sample email 0.80, high, with each AI-writing pattern highlighted" width="1152" height="770" loading="lazy" decoding="async" />
+          </picture>
+        </article>
+      ))}
     </div>
   </section>
 </Base>
-<style>.soon { box-shadow: none; border: 1px dashed var(--line); background: transparent; }</style>
+<style>
+  .tools-list { padding: 0 0 120px; }
+  .tool-feature { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: center; padding: 56px; }
+  .tool-text { display: flex; flex-direction: column; gap: 12px; }
+  .tool-text p, .tool-text h2 { margin: 0; }
+  .tool-text .btn-row { margin-top: 12px; }
+  .tool-shot img { width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line-soft); }
+  @media (max-width: 1068px) { .tools-list { padding-bottom: 80px; } .tool-feature { grid-template-columns: 1fr; padding: 40px; } }
+  @media (max-width: 734px) { .tools-list { padding-bottom: 64px; } .tool-feature { padding: 28px 20px; gap: 28px; } }
+</style>

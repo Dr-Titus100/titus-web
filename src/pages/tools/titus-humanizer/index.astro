@@ -25,63 +25,63 @@ const app = {
   <ToolNav slot="subnav" current="overview" />
 
   <section class="hero">
-    <div class="wrap">
+    <div class="wrap wrap-text">
       <p class="eyebrow">titus-humanizer {skill.version}</p>
-      <h1 class="display" data-rise>Plain rewrites that keep every fact</h1>
+      <h1 class="display">Plain rewrites that keep every fact</h1>
       <p class="lead">An editing skill that rewrites text so it reads like a careful, plain-spoken person wrote it. It strips hidden characters first and scores the AI-writing patterns before and after.</p>
       <div class="btn-row">
-        <a class="btn btn-ghost" href="#video">Watch video</a>
-        <a class="btn btn-ghost" href={u("/tools/titus-humanizer/checker/")}>Try it free</a>
-        <a class="btn btn-ghost" href={u("/tools/titus-humanizer/install/")}>Install</a>
+        <a class="btn" href={u("/tools/titus-humanizer/checker/")}>Check your text</a>
+        <a class="link-arrow" href="#video">Watch the tour</a>
+        <a class="link-arrow" href={u("/tools/titus-humanizer/install/")}>Install</a>
       </div>
     </div>
   </section>
 
-  <section class="section-tight" style="padding-top: 0">
+  <section class="demo-section">
     <div class="wrap">
       <Demo />
-      <p class="small muted center" style="margin-top: 16px">The highlights and scores are the titus-humanizer {skill.version} scoring script's own output for these two texts. The rewrite keeps the 12 steps, the two weeks and who uses the list. The score also measures sentence rhythm and word variety, so plain text rarely scores 0.</p>
+      <p class="small muted center demo-note">The highlights and scores are the titus-humanizer {skill.version} scoring script's own output for these two texts. The rewrite keeps the 12 steps, the two weeks and who uses the list. The score also measures sentence rhythm and word variety, so plain text rarely scores 0.</p>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section section-soft">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head">
         <h2 class="h2">Four ways to use it</h2>
-        <p class="lead">You don't need Claude or ChatGPT to use it.</p>
+        <p class="lead">You don't need Claude or ChatGPT. The Checker needs no account at all.</p>
       </div>
       <div class="grid grid-2">
-        <a class="card tile reveal" href={u("/tools/titus-humanizer/checker/")}>
-          <span class="tile-icon" style="background: linear-gradient(135deg,#34c759,#0a8f3c)">✓</span>
+        <a class="card tile tile-tall reveal" href={u("/tools/titus-humanizer/checker/")}>
+          <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M16 16l5 5M8 11l2 2 4-4" /></svg>
           <h3 class="h3">Check any text</h3>
           <p>Get the 0 to 1 score, every pattern marked in place and the hidden characters removed. Quoted text stays out of the score. It runs in your browser and costs nothing.</p>
-          <span class="link-arrow">Open the checker</span>
+          <span class="link-arrow">Open the Checker</span>
         </a>
-        <a class="card tile reveal" style="--d: 0.08s" href={u("/tools/titus-humanizer/rewrite/")}>
-          <span class="tile-icon" style="background: linear-gradient(135deg,#0071e3,#5e5ce6)">✎</span>
+        <a class="card tile tile-tall reveal" style="--d: 0.06s" href={u("/tools/titus-humanizer/rewrite/")}>
+          <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M13 7l4 4" /></svg>
           <h3 class="h3">Rewrite with your key</h3>
           <p>Use a Gemini, Claude or OpenAI key. Google's free tier costs nothing, but Google may use free-tier text to improve its products.</p>
           <span class="link-arrow">Rewrite a draft</span>
         </a>
-        <a class="card tile reveal" href={u("/tools/titus-humanizer/any-chatbot/")}>
-          <span class="tile-icon" style="background: linear-gradient(135deg,#ff9f0a,#ff375f)">⧉</span>
+        <a class="card tile tile-tall reveal" href={u("/tools/titus-humanizer/any-chatbot/")}>
+          <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" /></svg>
           <h3 class="h3">Use any chatbot</h3>
           <p>Copy the rulebook into Gemini, Copilot, Perplexity or whatever you already use.</p>
           <span class="link-arrow">Get the rules</span>
         </a>
-        <a class="card tile reveal" style="--d: 0.08s" href={u("/tools/titus-humanizer/install/")}>
-          <span class="tile-icon" style="background: linear-gradient(135deg,#1d1d1f,#636366)">↓</span>
+        <a class="card tile tile-tall reveal" style="--d: 0.06s" href={u("/tools/titus-humanizer/install/")}>
+          <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
           <h3 class="h3">Install it</h3>
           <p>Give Claude, ChatGPT, Claude Code or Codex the repository link and it installs the skill for you. It then loads whenever you ask for a rewrite.</p>
-          <span class="link-arrow">Install</span>
+          <span class="link-arrow">See the install steps</span>
         </a>
       </div>
     </div>
   </section>
 
-  <section class="section section-dark" id="video">
+  <section class="section" id="video">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head">
         <p class="eyebrow">The tour</p>
         <h2 class="h2">Every feature in under three minutes</h2>
       </div>
@@ -91,30 +91,30 @@ const app = {
 
   <section class="section section-soft">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head">
         <h2 class="h2">How it works</h2>
-        <p class="lead">The skill works in three steps. It cleans the text, rewrites what it finds and then measures the result.</p>
+        <p class="lead">It cleans the text, rewrites what it finds and then measures the result.</p>
       </div>
       <div class="grid grid-3 how">
         <div class="card reveal"><span class="how-n">1</span><h3 class="h3">Clean</h3><p class="muted">It removes characters you can't see, such as zero-width spaces and look-alike letters, and leaves emoji, other alphabets and code alone.</p></div>
-        <div class="card reveal" style="--d: 0.08s"><span class="how-n">2</span><h3 class="h3">Rewrite</h3><p class="muted">It applies seven hard rules, fixes five kinds of weak wording and removes the patterns AI stories share. Every fact, number, name and quotation stays as it was.</p></div>
-        <div class="card reveal" style="--d: 0.16s"><span class="how-n">3</span><h3 class="h3">Measure</h3><p class="muted">It scores the original and the rewrite from 0 to 1, and takes another pass if the rewrite still scores high.</p></div>
+        <div class="card reveal" style="--d: 0.06s"><span class="how-n">2</span><h3 class="h3">Rewrite</h3><p class="muted">It applies seven hard rules, fixes five kinds of weak wording and removes the patterns AI stories share. Every fact, number, name and quotation stays as it was.</p></div>
+        <div class="card reveal" style="--d: 0.12s"><span class="how-n">3</span><h3 class="h3">Measure</h3><p class="muted">It scores the original and the rewrite from 0 to 1, and takes another pass if the rewrite still scores high.</p></div>
       </div>
+      <p class="small muted center how-note">The score counts the AI-writing patterns titus-humanizer targets. It doesn't measure quality. It isn't a detector, and a low score doesn't prove a person wrote the text. The cleanup removes invisible characters only. AI watermarks and file metadata stay in place.</p>
     </div>
   </section>
 
   <section class="section">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head">
         <h2 class="h2">It works on almost anything you write</h2>
-        <p class="lead">Emails, reports, slide decks, resumes, papers, cover letters, personal statements, blog posts and fiction.</p>
+        <p class="lead">Emails, reports, slide decks, résumés, papers, cover letters, personal statements, blog posts and fiction.</p>
       </div>
       <div class="grid grid-3">
         <div class="card reveal"><h3 class="h3">Seven hard rules</h3><p class="muted">No em dashes or semicolons, no "it's not X, it's Y", no passive voice that hides who acted, no slogans and no chatbot phrases.</p></div>
-        <div class="card reveal" style="--d: 0.08s"><h3 class="h3">Five kinds of weak wording</h3><p class="muted">Awkward, flowery, vague, unnecessary and illogical. Each comes with a test, such as "would you say this out loud to a colleague?"</p></div>
-        <div class="card reveal" style="--d: 0.16s"><h3 class="h3">Story patterns</h3><p class="muted">AI stories state their moral, stack body sensations for fear and make the weather match the mood. The skill cuts these and keeps your real details.</p></div>
+        <div class="card reveal" style="--d: 0.06s"><h3 class="h3">Five kinds of weak wording</h3><p class="muted">Awkward, flowery, vague, unnecessary and illogical. Each comes with a test, such as "would you say this out loud to a colleague?"</p></div>
+        <div class="card reveal" style="--d: 0.12s"><h3 class="h3">Story patterns</h3><p class="muted">AI stories state their moral, stack body sensations for fear and make the weather match the mood. The skill cuts these and keeps your real details.</p></div>
       </div>
-      <p class="small muted center" style="margin-top: 32px; max-width: 700px; margin-left: auto; margin-right: auto">The score counts the AI-writing patterns titus-humanizer targets. It doesn't measure quality. It isn't a detector, and a low score doesn't prove a person wrote the text. The cleanup removes invisible characters only. AI watermarks and file metadata stay in place.</p>
     </div>
   </section>
 
@@ -127,7 +127,12 @@ const app = {
   </section>
 </Base>
 <style>
-  .how .card { display: flex; flex-direction: column; gap: 10px; }
-  .how p { margin: 0; }
-  .how-n { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; background: var(--ink); color: var(--bg); margin-bottom: 6px; }
+  .demo-section { padding: 0 0 120px; }
+  .demo-note { max-width: 760px; margin: 16px auto 0; }
+  .how .card { display: flex; flex-direction: column; gap: 12px; }
+  .how .card h3, .how p { margin: 0; }
+  .how-n { font-size: 40px; line-height: 1; font-weight: 600; color: var(--ink-soft); }
+  .how-note { max-width: 760px; margin: 40px auto 0; }
+  @media (max-width: 1068px) { .demo-section { padding-bottom: 80px; } }
+  @media (max-width: 734px) { .demo-section { padding-bottom: 64px; } }
 </style>

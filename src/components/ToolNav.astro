@@ -11,22 +11,18 @@ const items = [
 ];
 ---
 <nav class="subnav" aria-label="titus-humanizer">
-  <div class="wrap subnav-inner">
+  <div class="wrap wrap-text subnav-inner">
     <a class="subnav-title" href={u("/tools/titus-humanizer/")}>titus-humanizer</a>
-    <div class="subnav-links">
-      {items.map((i) => (
-        <a href={u(i.href)} aria-current={current === i.key ? "page" : undefined}>{i.label}</a>
-      ))}
+    <div class="subnav-right">
+      <button class="subnav-toggle" type="button" aria-expanded="false" aria-controls="subnav-links" aria-label="Open the titus-humanizer menu">
+        <svg width="14" height="8" viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <ul class="subnav-links" id="subnav-links">
+        {items.map((i) => (
+          <li><a href={u(i.href)} aria-current={current === i.key ? "page" : undefined}>{i.label}</a></li>
+        ))}
+      </ul>
+      {current !== "checker" && <a class="subnav-cta" href={u("/tools/titus-humanizer/checker/")}>Try it free</a>}
     </div>
   </div>
 </nav>
-
-<script>
-  // On narrow screens the links scroll sideways, so bring the current one into view.
-  const cur = document.querySelector<HTMLElement>(".subnav-links a[aria-current='page']");
-  const row = cur?.parentElement;
-  if (cur && row && row.scrollWidth > row.clientWidth) {
-    const r = row.getBoundingClientRect(), c = cur.getBoundingClientRect();
-    row.scrollLeft += c.left - r.left - (r.width - c.width) / 2;
-  }
-</script>

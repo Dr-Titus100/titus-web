@@ -22,17 +22,21 @@ for (const block of vtt.split(/\r?\n\r?\n/)) {
   last.text = (last.text + " " + words).trim();
 }
 ---
-<div class="video-stage reveal">
-  <div class="video-frame" data-scroll-scale>
-    <video controls playsinline preload="metadata" poster={u("/media/titus-humanizer-promo-poster.jpg")} aria-label="titus-humanizer tour video">
+<div class="video-stage">
+  <div class="video-frame" data-video>
+    <video controls playsinline preload="none" poster={u("/media/titus-humanizer-promo-poster.jpg")} aria-label="titus-humanizer tour video">
       <source src={u("/media/titus-humanizer-promo-720p.mp4")} type="video/mp4" media="(max-width: 900px)" />
       <source src={u("/media/titus-humanizer-promo.mp4")} type="video/mp4" />
       {vtt && <track kind="captions" srclang="en" label="English" src={u("/media/titus-humanizer-promo.en.vtt")} default />}
       Your browser can't play this video. <a href={u("/media/titus-humanizer-promo.mp4")}>Download it</a> instead.
     </video>
+    <button class="video-play" type="button" hidden aria-label="Play the tour, 2 minutes 49 seconds">
+      <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
+    </button>
   </div>
+  <p class="small muted center video-meta">2 minutes 49 seconds{transcript.length > 0 && ", with captions"}</p>
   {transcript.length > 0 && (
-    <details class="transcript">
+    <details class="transcript" id="transcript">
       <summary>Read the transcript</summary>
       <div class="transcript-body">
         {transcript.filter((t) => t.text).map((t) => (<>{t.title && <h3 class="transcript-h">{t.title}</h3>}<p>{t.text}</p></>))}
@@ -42,13 +46,34 @@ for (const block of vtt.split(/\r?\n\r?\n/)) {
 </div>
 
 <style>
-  .transcript { max-width: 760px; margin: 20px auto 0; font-size: 15px; }
+  .video-stage { max-width: 1000px; margin: 0 auto; }
+  .video-play { position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; margin: -44px 0 0 -44px; border-radius: 50%; border: 0; background: rgba(29, 29, 31, 0.88); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s var(--ease), background 0.2s; }
+  .video-play svg { margin-left: 4px; }
+  .video-play:hover { background: #1d1d1f; transform: scale(1.04); }
+  .video-meta { margin: 16px 0 0; }
+  .transcript { max-width: 760px; margin: 8px auto 0; font-size: 15px; }
   .transcript summary { cursor: pointer; color: var(--link); text-align: center; list-style: none; padding: 8px 0; }
   .transcript summary::-webkit-details-marker { display: none; }
-  .transcript summary::after { content: " ›"; }
-  .transcript[open] summary::after { content: " ⌄"; }
+  .transcript summary::after { content: "\00a0\203A"; }
+  .transcript[open] summary::after { content: "\00a0\2304"; }
   .transcript-body { text-align: left; color: inherit; line-height: 1.6; }
   .transcript-body p { margin: 0 0 14px; }
   .transcript-h { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
-  :global(.section-dark) .transcript summary { color: var(--link-on-dark); }
 </style>
+
+<script>
+  // Until someone presses play, the poster shows with one large play button and no control bar.
+  // Without JavaScript the browser's own controls stay, so the video still plays.
+  document.querySelectorAll<HTMLElement>("[data-video]").forEach((frame) => {
+    const video = frame.querySelector("video")!;
+    const play = frame.querySelector<HTMLButtonElement>(".video-play")!;
+    video.controls = false;
+    play.hidden = false;
+    play.addEventListener("click", () => {
+      play.hidden = true;
+      video.controls = true;
+      video.play().catch(() => {});
+      video.focus();
+    });
+  });
+</script>

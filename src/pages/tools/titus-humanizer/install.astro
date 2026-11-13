@@ -18,38 +18,38 @@ const platforms = [
   <ToolNav slot="subnav" current="install" />
 
   <section class="hero">
-    <div class="wrap wrap-narrow">
+    <div class="wrap wrap-text">
       <p class="eyebrow">Install</p>
-      <h1 class="h1" data-rise>A one-minute install for your assistant</h1>
+      <h1 class="h1">A one-minute install for your assistant</h1>
       <p class="lead">The quickest route is to give your assistant the repository link and let it do the work. To install by hand, one zip file works in claude.ai, the Claude desktop app and ChatGPT, and Claude Code and Codex install it from GitHub.</p>
       <div class="btn-row">
-        <a class="btn btn-ghost" href={skill.zipUrl}>Download titus-humanizer.zip</a>
-        <a class="btn btn-ghost" href={skill.releaseUrl}>{skill.version} release notes</a>
+        <a class="btn" href={skill.zipUrl}>Download titus-humanizer.zip</a>
+        <a class="link-arrow" href={skill.releaseUrl}>{skill.version} release notes</a>
       </div>
     </div>
   </section>
 
-  <section class="section" id="easy">
+  <section class="section section-soft" id="easy">
     <div class="wrap wrap-narrow">
-      <div class="card easy reveal">
+      <div class="card easy">
         <p class="eyebrow">The simplest way</p>
         <h2 class="h3">Your assistant can install it</h2>
         <p class="muted">Copy the repository link below into Claude, Claude Code, ChatGPT or Codex and ask it to help you install the skill. It handles the installation for you, or walks you through any step it can't do itself.</p>
         <div class="copy-block">
+          <div class="copy-head"><span>Repository link</span><button class="btn btn-small btn-quiet" data-copy-from="#repo-link">Copy</button></div>
           <pre><code id="repo-link">{skill.repoUrl}.git</code></pre>
-          <button class="btn btn-small btn-quiet" data-copy-from="#repo-link">Copy</button>
         </div>
-        <p class="small muted" style="margin: 0">To install it yourself, follow the steps below. A video tour of every feature is further down.</p>
+        <p class="small muted">To install it yourself, follow the steps below. A video tour of every feature is further down.</p>
       </div>
     </div>
   </section>
 
-  <section class="section" id="steps" style="padding-top: 0">
+  <section class="section" id="steps">
     <div class="wrap wrap-narrow">
       <div class="section-head">
         <h2 class="h2">Install steps for each assistant</h2>
       </div>
-      <div class="center" style="margin-bottom: 28px">
+      <div class="center platform-tabs">
         <div class="segmented" role="tablist" aria-label="Platform">
           {platforms.map((p, i) => (
             <button role="tab" type="button" id={`tab-p-${p.id}`} aria-selected={i === 0 ? "true" : "false"} aria-controls={`p-${p.id}`} tabindex={i === 0 ? 0 : -1} data-platform={p.id}>{p.name}</button>
@@ -59,7 +59,7 @@ const platforms = [
 
       <div class="card platform" id="p-claude" role="tabpanel" aria-labelledby="tab-p-claude" tabindex="0">
         <h3 class="h3">claude.ai and the Claude desktop app</h3>
-        <ol class="steps" style="margin-top: 22px">
+        <ol class="steps">
           <li>Download <a href={skill.zipUrl}>titus-humanizer.zip</a>. Keep it zipped.</li>
           <li>In Settings, open Capabilities and turn on "Create and edit files". Older layouts call it "Code execution and file creation". Skills need it.</li>
           <li>Open <a href="https://claude.ai/customize/skills">Customize, then Skills</a>. Choose the + button, then Create skill, then Upload a skill, and select the zip.</li>
@@ -70,13 +70,13 @@ const platforms = [
 
       <div class="card platform" id="p-chatgpt" role="tabpanel" aria-labelledby="tab-p-chatgpt" tabindex="0" hidden>
         <h3 class="h3">ChatGPT</h3>
-        <ol class="steps" style="margin-top: 22px">
+        <ol class="steps">
           <li>Download <a href={skill.zipUrl}>titus-humanizer.zip</a>. Keep it zipped.</li>
           <li>In the ChatGPT app, go to Skills and select Create.</li>
           <li>Select "Upload from your computer" and choose the zip.</li>
         </ol>
         <p class="small muted">OpenAI lists skills for Business, Enterprise, Healthcare and Edu workspaces, and an admin may need to turn them on. OpenAI's guide is <a href="https://help.openai.com/en/articles/20001066-skills-in-chatgpt">Skills in ChatGPT</a>.</p>
-        <h4 style="margin: 28px 0 8px">No skills on your plan? Build a Custom GPT.</h4>
+        <h4 class="h4 gpt-h">No skills on your plan? Build a Custom GPT.</h4>
         <ol class="steps">
           <li>Paste the <a href={u("/skills/titus-humanizer/gpt-instructions.md")}>short instructions</a> into the Instructions field.</li>
           <li>Upload <a href={u("/skills/titus-humanizer/SKILL.md")} download>the full rulebook</a> and <a href={u("/skills/titus-humanizer/titus_tools.py")} download>the scoring script</a> as Knowledge files.</li>
@@ -86,53 +86,59 @@ const platforms = [
 
       <div class="card platform" id="p-claude-code" role="tabpanel" aria-labelledby="tab-p-claude-code" tabindex="0" hidden>
         <h3 class="h3">Claude Code</h3>
-        <p class="muted" style="margin-top: 12px">Add the repository as a plugin marketplace and install the plugin:</p>
+        <p class="muted platform-intro">Add the repository as a plugin marketplace and install the plugin:</p>
         <div class="copy-block">
+          <div class="copy-head"><span>Plugin commands</span><button class="btn btn-small btn-quiet" data-copy-from="#cc1">Copy</button></div>
           <pre><code id="cc1">/plugin marketplace add Dr-Titus100/titus-humanizer
 /plugin install titus-humanizer@titus-humanizer</code></pre>
-          <button class="btn btn-small btn-quiet" data-copy-from="#cc1">Copy</button>
         </div>
         <p class="muted">Or copy the skill folder in by hand:</p>
         <div class="copy-block">
+          <div class="copy-head"><span>Manual install</span><button class="btn btn-small btn-quiet" data-copy-from="#cc2">Copy</button></div>
           <pre><code id="cc2">git clone https://github.com/Dr-Titus100/titus-humanizer.git
 mkdir -p ~/.claude/skills
 cp -r titus-humanizer/skills/titus-humanizer ~/.claude/skills/</code></pre>
-          <button class="btn btn-small btn-quiet" data-copy-from="#cc2">Copy</button>
         </div>
       </div>
 
       <div class="card platform" id="p-codex" role="tabpanel" aria-labelledby="tab-p-codex" tabindex="0" hidden>
         <h3 class="h3">Codex</h3>
-        <p class="muted" style="margin-top: 12px">Codex loads skills from <code>~/.agents/skills</code> in your home folder, or from <code>.agents/skills</code> inside a project:</p>
+        <p class="muted platform-intro">Codex loads skills from <code>~/.agents/skills</code> in your home folder, or from <code>.agents/skills</code> inside a project:</p>
         <div class="copy-block">
+          <div class="copy-head"><span>Terminal</span><button class="btn btn-small btn-quiet" data-copy-from="#cx1">Copy</button></div>
           <pre><code id="cx1">git clone https://github.com/Dr-Titus100/titus-humanizer.git
 mkdir -p ~/.agents/skills
 cp -r titus-humanizer/skills/titus-humanizer ~/.agents/skills/</code></pre>
-          <button class="btn btn-small btn-quiet" data-copy-from="#cx1">Copy</button>
         </div>
         <p class="small muted">OpenAI's guide is <a href="https://developers.openai.com/codex/build-skills">Build skills</a>.</p>
       </div>
 
-      <p class="center muted" style="margin-top: 36px">Using Gemini, Copilot or something else? <a class="link-arrow" href={u("/tools/titus-humanizer/any-chatbot/")}>Use the rules in any chatbot</a></p>
+      <p class="center muted other-chatbots">Using Gemini, Copilot or something else? <a class="link-arrow" href={u("/tools/titus-humanizer/any-chatbot/")}>Use the rules in any chatbot</a></p>
     </div>
   </section>
 
-  <section class="section-tight section-dark">
+  <section class="section section-soft" id="video">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Watch</p>
-        <h2 class="h2">The tour</h2>
+        <p class="eyebrow">The tour</p>
+        <h2 class="h2">Every feature in under three minutes</h2>
       </div>
       <PromoVideo />
     </div>
   </section>
 
-  <Examples />
+  <Examples soft={false} />
 </Base>
 
 <style is:global>
   .easy { display: flex; flex-direction: column; gap: 12px; }
   .easy p, .easy h2 { margin: 0; }
+  .easy .copy-block { margin: 4px 0; }
+  .platform-tabs { margin-bottom: 32px; }
+  .platform .steps { margin-top: 24px; }
+  .platform-intro { margin: 12px 0 0; }
+  .gpt-h { margin: 32px 0 12px; }
+  .other-chatbots { margin-top: 40px; }
   .platform { animation: resultsIn 0.6s var(--ease); }
 </style>
 
