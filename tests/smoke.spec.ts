@@ -30,7 +30,23 @@ function collectErrors(page: Page) {
 // with SITE_HOST=cloudflare ask it for comments, so every test gets an empty answer here.
 test.beforeEach(async ({ page }) => {
   await page.route(/\/api\/comments\?/, (route) => route.fulfill({ contentType: "application/json", body: '{"comments":[]}' }));
+  // A stand-in for Cloudflare Turnstile, so the comment form's spam check passes at once without the network.
+  await page.route(/challenges\.cloudflare\.com\/turnstile\/v0\/api\.js/, (route) => route.fulfill({ contentType: "text/javascript", body: `
+    (() => {
+      let done = () => {};
+      window.turnstile = {
+        render(_el, opts) { done = () => opts.callback("test-token"); done(); return "w1"; },
+        reset() { done(); },
+      };
+      const onload = new URL(document.currentScript.src).searchParams.get("onload");
+      if (onload) window[onload]();
+    })();` }));
 });
+
+// The comment form loads the spam check when someone clicks into it. Wait until it has a token.
+async function passCheck(page: Page) {
+  await page.waitForFunction(() => "turnstile" in window);
+}
 
 for (const path of pages) {
   test(`/${path} loads with one h1 and no errors`, async ({ page }) => {
@@ -132,6 +148,7 @@ test("blog comments list approved comments and replies, and post both", async ({
   await expect(page.locator("#cm-form-status")).toHaveText("Please add your name and a comment.");
   await page.fill("#cm-name", "Kofi");
   await page.fill("#cm-body", "Great story.");
+  await passCheck(page);
   await page.click("#cm-send");
   await expect(page.locator("#cm-form-status")).toContainText("Your comment will show up here after I read it");
   await expect(page.locator("#cm-body")).toHaveValue("");
@@ -148,8 +165,8 @@ test("blog comments list approved comments and replies, and post both", async ({
   await expect(page.locator("#cm-replying")).toBeHidden();
   await expect(page.locator("#cm-send")).toHaveText("Post comment");
   expect(posted).toEqual([
-    { post: "the-exercise-book", name: "Kofi", body: "Great story.", trap: false, token: "" },
-    { post: "the-exercise-book", name: "Esi", body: "Same here.", trap: false, token: "", parent: 2 },
+    { post: "the-exercise-book", name: "Kofi", body: "Great story.", trap: false, token: "test-token" },
+    { post: "the-exercise-book", name: "Esi", body: "Same here.", trap: false, token: "test-token", parent: 2 },
   ]);
   expect(errors).toEqual([]);
 });
@@ -174,6 +191,7 @@ test("a comment that passes the spam check shows at once", async ({ page }) => {
   await expect(page.locator("#cm-list > .cm-item")).toHaveCount(1);
   await page.fill("#cm-name", "Kofi");
   await page.fill("#cm-body", "Great story.");
+  await passCheck(page);
   await page.click("#cm-send");
   await expect(page.locator("#cm-form-status")).toHaveText("Thanks. Your comment is up.");
   await expect(page.locator("#cm-list > .cm-item")).toHaveCount(2);
@@ -188,6 +206,40 @@ test("a comment that passes the spam check shows at once", async ({ page }) => {
   await expect(page.locator("#comment-1 .cm-replies #comment-11")).toContainText("Same here.");
   await expect(page.locator("#cm-list > .cm-item")).toHaveCount(2);
   await expect(page.locator("#cm-count")).toHaveText(" (3)");
+  expect(errors).toEqual([]);
+});
+
+// If the first load is slow and a reader posts before it finishes, the new comment must stay in the list.
+test("a comment posted before the list loads stays in the list", async ({ page }) => {
+  const errors = collectErrors(page);
+  let posted!: () => void;
+  const postDone = new Promise<void>((resolve) => { posted = resolve; });
+  await page.route(/\/api\/comments(\?.*)?$/, async (route) => {
+    const req = route.request();
+    if (req.method() === "POST") {
+      const sent = req.postDataJSON();
+      await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ status: "approved",
+        comment: { id: 10, name: sent.name, body: sent.body, created: "2026-11-13T12:00:00.000Z", parent: null, author: false } }) });
+      posted();
+      return;
+    }
+    await postDone;
+    await new Promise((r) => setTimeout(r, 100));
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ total: 1, count: 1, comments: [
+      { id: 1, name: "Ama", body: "Loved it.", created: "2026-11-12T10:00:00.000Z", parent: null, author: false },
+    ] }) });
+  });
+  await page.goto("blog/the-exercise-book/");
+  test.skip((await page.locator("#comments").count()) === 0, "built without SITE_HOST=cloudflare, so there's no comments section");
+  await page.fill("#cm-name", "Kofi");
+  await page.fill("#cm-body", "Great story.");
+  await passCheck(page);
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toHaveText("Thanks. Your comment is up.");
+  await expect(page.locator("#comment-1")).toBeVisible();
+  await expect(page.locator("#cm-list > .cm-item")).toHaveCount(2);
+  await expect(page.locator("#comment-10 > .cm-body")).toHaveText("Great story.");
+  await expect(page.locator("#cm-count")).toHaveText(" (2)");
   expect(errors).toEqual([]);
 });
 

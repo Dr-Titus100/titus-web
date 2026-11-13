@@ -130,6 +130,8 @@ const { post } = Astro.props;
     let shown: Comment[] = [];
     let shownTotal = 0;
     let shownAll = 0;
+    // Comments posted from this page. If the first load finishes after a post, they stay in the list.
+    const mine: Comment[] = [];
     const show = (comments: Comment[], total: number, all: number) => {
       shown = comments;
       shownTotal = total;
@@ -153,9 +155,13 @@ const { post } = Astro.props;
     fetch(`${api}?post=${encodeURIComponent(post)}`, { headers: { Accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((out) => {
-        const comments: Comment[] = Array.isArray(out.comments) ? out.comments : [];
-        const tops = comments.filter((c) => !c.parent).length;
-        show(comments, typeof out.total === "number" ? out.total : tops, typeof out.count === "number" ? out.count : comments.length);
+        const loaded: Comment[] = Array.isArray(out.comments) ? out.comments : [];
+        const extra = mine.filter((m) => !loaded.some((c) => c.id === m.id));
+        const comments = [...loaded, ...extra];
+        const tops = loaded.filter((c) => !c.parent).length;
+        const total = typeof out.total === "number" ? out.total : tops;
+        const count = typeof out.count === "number" ? out.count : loaded.length;
+        show(comments, total + extra.filter((c) => !c.parent).length, count + extra.length);
       })
       .catch(() => { status.textContent = "Comments couldn't load right now. Try reloading the page in a minute."; });
 
@@ -210,6 +216,7 @@ const { post } = Astro.props;
         // A comment that passed the spam check is live, so it joins the list at once.
         const added: Comment | undefined = out.status === "approved" && out.comment ? out.comment : undefined;
         if (added) {
+          mine.push(added);
           show([...shown, added], shownTotal + (added.parent ? 0 : 1), Math.max(shownAll, shown.length) + 1);
           say(wasReply ? "Thanks. Your reply is up." : "Thanks. Your comment is up.", "ok");
           document.getElementById(`comment-${added.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });

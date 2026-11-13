@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- The Turnstile spam check is on for blog comments. Comments and replies that pass it show at once. A comment posted before the list finishes loading now stays in the list.
 - With the Turnstile spam check on, comments and replies show on the post as soon as they pass it, and the new comment appears in the list right away. I can still delete any of them from the moderation page, and I still get an email for each one. Without the check, they wait for my approval as before.
 - Comments and replies can be up to 3,000 characters, up from 2,000. The limit is the same for readers and for my replies from the moderation page.
 - Readers can reply to any blog comment, and replies wait for my approval like comments do. I reply from the moderation page, where my replies show at once with an "Author" label. The Worker adds the new database columns by itself.
