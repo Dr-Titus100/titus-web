@@ -2,8 +2,9 @@
 
 ## Branches
 - Push every change to the `dev` branch. Don't create a new branch for each change.
-- When `dev` is ready, open a pull request from `dev` into `main`. Titus merges it. Merging to `main` deploys the site.
 - Before you start, bring `dev` up to date with `main`.
+- `main` takes changes only through a pull request, so open one from `dev` into `main`. When its required checks pass (`build`, `check-skills` and `smoke`), merge it yourself with a merge commit. This needs no approval from the repository owner. Merging to `main` deploys the site.
+- `main` is protected. GitHub blocks force pushes and deletion, and a pull request merges only after its checks pass. If `main` has moved, merge `main` into `dev`, push `dev` and wait for the checks again. Never force-push.
 
 ## Rules for the site
 - Never put the email address from Titus's résumé anywhere on the site. The contact form sends to it in the background. The only email the site may show is the public Gmail address in `src/data/profile.ts`.
