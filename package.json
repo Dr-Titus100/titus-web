@@ -27,7 +27,7 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.4.8",
-    "pyodide": "^0.29.5"
+    "pyodide": "^314.0.7"
   },
   "private": true,
   "type": "module",
