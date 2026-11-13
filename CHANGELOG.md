@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- Readers can reply to any blog comment, and replies wait for my approval like comments do. I reply from the moderation page, where my replies show at once with an "Author" label. The Worker adds the new database columns by itself.
 - I get an email about each new comment, with the comment, a link to the post and a link to the moderation page. The Worker sends it through Cloudflare's Email Service to the address in the `NOTIFY_TO` secret, which lives only in Cloudflare. The Privacy page says so.
 - Readers can comment under blog posts. They type a name and a comment, with no account and no email. A small Cloudflare Worker (`worker/index.js`) stores comments in a Cloudflare D1 database, and each one stays hidden until I approve it on the new moderation page at `/admin/comments/`. The Privacy page has a new Comments section. The README explains the one-time setup on Cloudflare.
 

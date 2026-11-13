@@ -1,6 +1,7 @@
 ---
 // Reader comments under a blog post. The Worker in worker/index.js stores them in a Cloudflare D1
-// database, and each one waits there until Titus approves it on /admin/comments/.
+// database, and each one waits there until Titus approves it on /admin/comments/. Readers can reply
+// to any comment. Replies are one level deep, and Titus's own replies carry an "Author" label.
 import { u } from "../lib/url";
 import { commentsTurnstileKey } from "../data/profile";
 interface Props { post: string }
@@ -12,7 +13,8 @@ const { post } = Astro.props;
   <ol class="cm-list" id="cm-list"></ol>
 
   <form class="card cm-form" id="comment-form" data-sitekey={commentsTurnstileKey} novalidate>
-    <h3 class="cm-form-title">Leave a comment</h3>
+    <h3 class="cm-form-title" id="cm-form-title">Leave a comment</h3>
+    <p class="small cm-replying" id="cm-replying" hidden>Replying to <strong id="cm-replying-name"></strong>. <button type="button" class="cm-link" id="cm-cancel-reply">Cancel reply</button></p>
     <div class="field">
       <label for="cm-name">Your name</label>
       <input type="text" id="cm-name" name="name" autocomplete="name" required maxlength="60" />
@@ -40,6 +42,13 @@ const { post } = Astro.props;
   .cm-item:last-child { border-bottom: 0; padding-bottom: 0; }
   .cm-meta { margin: 0 0 6px; font-size: 15px; color: var(--ink-soft); }
   .cm-meta strong { color: var(--ink); font-weight: 600; margin-right: 8px; }
+  .cm-badge { display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 980px; font-size: 12px; font-weight: 600; color: var(--link); box-shadow: inset 0 0 0 1px var(--link); vertical-align: 1px; }
+  .cm-link { background: none; border: 0; padding: 0; font: inherit; font-size: 15px; color: var(--link); cursor: pointer; }
+  .cm-link:hover { text-decoration: underline; }
+  .cm-reply-btn { margin-top: 8px; }
+  .cm-replies { list-style: none; margin: 16px 0 0; padding: 0 0 0 20px; border-left: 2px solid var(--line-soft); display: flex; flex-direction: column; gap: 16px; }
+  .cm-replies:empty { display: none; }
+  .cm-replying { margin: 0; color: var(--ink-soft); }
   .cm-body { margin: 0; font-size: 17px; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
   .cm-form { display: flex; flex-direction: column; gap: 16px; }
   .cm-form .field { margin: 0; }
@@ -53,7 +62,7 @@ const { post } = Astro.props;
 </style>
 
 <script>
-  type Comment = { id: number; name: string; body: string; created: string };
+  type Comment = { id: number; name: string; body: string; created: string; parent: number | null; author: boolean };
   const box = document.getElementById("comments");
   if (box) {
     const api = box.dataset.api!;
@@ -64,40 +73,81 @@ const { post } = Astro.props;
     const form = document.getElementById("comment-form") as HTMLFormElement;
     const send = document.getElementById("cm-send") as HTMLButtonElement;
     const formStatus = document.getElementById("cm-form-status")!;
+    const formTitle = document.getElementById("cm-form-title")!;
+    const replying = document.getElementById("cm-replying")!;
+    const replyingName = document.getElementById("cm-replying-name")!;
+    const bodyField = document.getElementById("cm-body") as HTMLTextAreaElement;
     const say = (text: string, kind = "") => { formStatus.textContent = text; formStatus.className = `small muted ${kind}`; };
     const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
+    // The one form writes both comments and replies. Reply buttons switch it to a reply.
+    let replyTo: number | null = null;
+    const setReply = (c: Comment | null) => {
+      replyTo = c ? c.id : null;
+      replyingName.textContent = c ? c.name : "";
+      replying.hidden = !c;
+      formTitle.textContent = c ? "Write a reply" : "Leave a comment";
+      send.textContent = c ? "Post reply" : "Post comment";
+    };
+    document.getElementById("cm-cancel-reply")!.addEventListener("click", () => { setReply(null); bodyField.focus(); });
+
     // Comment text goes in with textContent, so nothing a reader types runs as HTML.
-    const show = (comments: Comment[], total = comments.length) => {
-      list.replaceChildren(...comments.map((c) => {
-        const li = document.createElement("li");
-        li.className = "cm-item";
-        const meta = document.createElement("p");
-        meta.className = "cm-meta";
-        const who = document.createElement("strong");
-        who.textContent = c.name;
-        const when = document.createElement("time");
-        when.dateTime = c.created;
-        when.textContent = day(c.created);
-        meta.append(who, when);
-        const body = document.createElement("p");
-        body.className = "cm-body";
-        body.textContent = c.body;
-        li.append(meta, body);
+    const item = (c: Comment) => {
+      const li = document.createElement("li");
+      li.className = "cm-item";
+      li.id = `comment-${c.id}`;
+      const meta = document.createElement("p");
+      meta.className = "cm-meta";
+      const who = document.createElement("strong");
+      who.textContent = c.name;
+      meta.append(who);
+      if (c.author) {
+        const badge = document.createElement("span");
+        badge.className = "cm-badge";
+        badge.textContent = "Author";
+        meta.append(badge);
+      }
+      const when = document.createElement("time");
+      when.dateTime = c.created;
+      when.textContent = day(c.created);
+      meta.append(when);
+      const body = document.createElement("p");
+      body.className = "cm-body";
+      body.textContent = c.body;
+      const reply = Object.assign(document.createElement("button"), { type: "button", className: "cm-link cm-reply-btn", textContent: "Reply" });
+      reply.setAttribute("aria-label", `Reply to ${c.name}`);
+      reply.addEventListener("click", () => {
+        setReply(c);
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+        bodyField.focus({ preventScroll: true });
+      });
+      li.append(meta, body, reply);
+      return li;
+    };
+
+    const show = (comments: Comment[], total: number, all: number) => {
+      const tops = comments.filter((c) => !c.parent);
+      list.replaceChildren(...tops.map((c) => {
+        const li = item(c);
+        const replies = document.createElement("ol");
+        replies.className = "cm-replies";
+        replies.append(...comments.filter((r) => r.parent === c.id).map(item));
+        li.append(replies);
         return li;
       }));
-      count.textContent = comments.length ? ` (${Math.max(total, comments.length)})` : "";
+      count.textContent = comments.length ? ` (${Math.max(all, comments.length)})` : "";
       // A very long thread shows only its newest comments, and says so.
-      const partial = total > comments.length;
-      status.textContent = !comments.length ? "No comments yet." : partial ? `These are the newest ${comments.length} comments.` : "";
+      const partial = total > tops.length;
+      status.textContent = !comments.length ? "No comments yet." : partial ? `These are the newest ${tops.length} comments.` : "";
       status.hidden = comments.length > 0 && !partial;
     };
 
     fetch(`${api}?post=${encodeURIComponent(post)}`, { headers: { Accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((out) => {
-        const comments = Array.isArray(out.comments) ? out.comments : [];
-        show(comments, typeof out.total === "number" ? out.total : comments.length);
+        const comments: Comment[] = Array.isArray(out.comments) ? out.comments : [];
+        const tops = comments.filter((c) => !c.parent).length;
+        show(comments, typeof out.total === "number" ? out.total : tops, typeof out.count === "number" ? out.count : comments.length);
       })
       .catch(() => { status.textContent = "Comments couldn't load right now. Try reloading the page in a minute."; });
 
@@ -131,7 +181,7 @@ const { post } = Astro.props;
       const name = String(data.get("name") || "").trim();
       const body = String(data.get("body") || "").trim();
       if (!name || !body) { say("Please add your name and a comment.", "err"); return; }
-      if (sitekey && !token) { say("Please finish the check above the Post comment button.", "err"); return; }
+      if (sitekey && !token) { say(`Please finish the check above the ${send.textContent} button.`, "err"); return; }
       if (!navigator.onLine) { say("You're offline. Your comment is still here. Connect and try again.", "err"); return; }
       send.disabled = true;
       say("Posting...");
@@ -142,12 +192,14 @@ const { post } = Astro.props;
           method: "POST",
           signal: controller.signal,
           headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ post, name, body, trap: data.get("trap") !== null, token }),
+          body: JSON.stringify({ post, name, body, trap: data.get("trap") !== null, token, ...(replyTo ? { parent: replyTo } : {}) }),
         });
         const out = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(out.error || "server");
+        const wasReply = replyTo !== null;
         form.reset();
-        say("Thanks. Your comment will show up here after I read it.", "ok");
+        setReply(null);
+        say(wasReply ? "Thanks. Your reply will show up here after I read it." : "Thanks. Your comment will show up here after I read it.", "ok");
       } catch (err: any) {
         const why: Record<string, string> = {
           busy: "Too many comments came from here in a short time.",
@@ -155,6 +207,7 @@ const { post } = Astro.props;
           full: "Comments are paused for a while.",
           name: "The name is too long.",
           body: "The comment is too long.",
+          parent: "The comment you're replying to isn't available anymore.",
         };
         const reason = controller.signal.aborted ? "The site didn't answer in time." : why[err?.message] || "The comment couldn't be saved.";
         say(`${reason} Your comment is still here. Try again in a minute.`, "err");
