@@ -3,7 +3,7 @@
 ## Branches
 - Push every change to the `dev` branch. Don't create a new branch for each change.
 - Before you start, bring `dev` up to date with `main`.
-- `main` takes changes only through a pull request, so open one from `dev` into `main`. When its required checks pass (`build`, `check-skills` and `smoke`), merge it yourself with a merge commit. This needs no approval from the repository owner. Merging to `main` deploys the site.
+- `main` takes changes only through a pull request, so open one from `dev` into `main`. When its required checks pass (`build`, `check-skills` and `smoke`), the repository owner has to approve and merge it with a merge commit. Merging to `main` deploys the site.
 - `main` is protected. GitHub blocks force pushes and deletion, and a pull request merges only after its checks pass. If `main` has moved, merge `main` into `dev`, push `dev` and wait for the checks again. Never force-push.
 
 ## Rules for the site
