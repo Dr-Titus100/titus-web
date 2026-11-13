@@ -88,9 +88,10 @@ const year = new Date().getFullYear();
             </ul>
           </div>
         </nav>
+        <p class="footer-note">The Checker runs in your browser. Rewrites go only to the AI provider you choose, and contact messages go through Web3Forms. The <a href={u("/privacy/")}>Privacy page</a> has the details.</p>
         <div class="footer-bottom">
           <span>Copyright © {year} Titus Nyarko Nde.</span>
-          <span>Text you check on this site stays in your browser.</span>
+          <span class="footer-legal"><a href={u("/privacy/")}>Privacy</a><a href={u("/terms/")}>Terms</a></span>
         </div>
       </div>
     </footer>

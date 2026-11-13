@@ -1,0 +1,58 @@
+---
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url";
+import { providers } from "../data/providers";
+const updated = "November 12, 2026";
+---
+<Base title="Privacy" current="" description="What this website does with your text, your API keys and your messages, and what it stores in your browser.">
+  <article class="section legal">
+    <div class="wrap wrap-narrow">
+      <p class="eyebrow">Last updated {updated}</p>
+      <h1 class="h1">Privacy</h1>
+      <p class="lead">This site has no accounts, no analytics and no cookies. This page explains what each part of the site sends, where it goes and what stays in your browser.</p>
+
+      <h2>Who runs this site</h2>
+      <p>Titus Nyarko Nde runs this site. For any privacy question, write to me through the <a href={u("/about/#contact")}>contact form</a>.</p>
+
+      <h2>Hosting</h2>
+      <p>GitHub Pages serves the site. Like any web host, GitHub receives your IP address and browser details when you load a page, and it may keep them in its logs for security. See the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>. I don't get these logs, and the site adds no analytics or tracking of its own.</p>
+
+      <h2>The Checker</h2>
+      <p>The Checker runs the titus-humanizer scoring script inside your browser. Your browser downloads the Python runtime and the script from this site once, about 12 MB, and keeps them in its cache. The text you check stays in your browser. It isn't sent to this site or anywhere else, and the site doesn't save it.</p>
+
+      <h2>Rewrite with your key</h2>
+      <p>When you choose Rewrite, your browser sends your API key, your text and the titus-humanizer rulebook straight to the AI provider you picked. This site has no server of its own, so none of it passes through the site. What the provider does with it is set by the provider's own terms:</p>
+      <ul>
+        {Object.values(providers).map((p) => (
+          <li><strong>{p.name}</strong> (<code>{p.host}</code>). {p.dataNote} <a href={p.policyUrl}>{p.policyName}</a>.</li>
+        ))}
+      </ul>
+      <p>Your key stays in the page's memory and is cleared when you reload or close the page. On a site with its own web address, you can choose Remember to save the key in your browser's local storage for 30 days. While the site runs on <code>github.io</code>, that option is turned off, because other sites on <code>github.io</code> could read a saved key. Forget my key removes every saved key at once.</p>
+
+      <h2>The contact form</h2>
+      <p>When you send a message, your name, email address and message go to <a href="https://web3forms.com/">Web3Forms</a>, which emails them to me. Web3Forms says it may keep server logs, which can include your details, for up to two months, on servers in the United States. See the <a href="https://docs.web3forms.com/getting-started/faq">Web3Forms FAQ</a> for its data handling.</p>
+      <p>To block spam, the form uses hCaptcha through Web3Forms. hCaptcha receives information about your browser and how you use the page so it can tell people from bots. See the <a href="https://www.hcaptcha.com/privacy">hCaptcha privacy policy</a>. The hCaptcha script loads only after you click into the form.</p>
+      <p>I use your message and email address only to reply to you. Your message stays in my email inbox. Ask me through the form or by email and I'll delete it.</p>
+
+      <h2>What this site stores in your browser</h2>
+      <ul>
+        <li><code>th.provider</code> and <code>th.model.*</code> in local storage: the provider and model you last picked on the Rewrite page.</li>
+        <li><code>th.key.*</code> in local storage: your API key, only if you turned on Remember. It expires after 30 days.</li>
+        <li>Your browser's normal cache of the pages, the Python runtime and the video.</li>
+      </ul>
+      <p>To clear them, choose Forget my key on the Rewrite page, or clear this site's data in your browser's settings.</p>
+
+      <h2>Children</h2>
+      <p>The site isn't aimed at children under 13, and I don't knowingly collect information from them.</p>
+
+      <h2>Changes</h2>
+      <p>If this page changes, the date at the top changes too. The full history is in the site's <a href="https://github.com/Dr-Titus100/titus-web/commits/main/src/pages/privacy.astro">GitHub repository</a>.</p>
+    </div>
+  </article>
+</Base>
+<style is:global>
+  .legal h1 { margin-bottom: 0; }
+  .legal h2 { font-family: var(--font-display); font-size: 24px; letter-spacing: -0.015em; margin: 44px 0 10px; }
+  .legal p, .legal li { line-height: 1.65; }
+  .legal ul { padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+</style>

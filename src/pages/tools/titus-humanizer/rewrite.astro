@@ -2,11 +2,13 @@
 import Base from "../../../layouts/Base.astro";
 import ToolNav from "../../../components/ToolNav.astro";
 import ScoreRing from "../../../components/ScoreRing.astro";
+import NewTabLink from "../../../components/NewTabLink.astro";
 import { u } from "../../../lib/url";
 import skills from "../../../data/skills.generated.json";
+import { providers, lastVerified } from "../../../data/providers";
 const skill = skills["titus-humanizer"];
 ---
-<Base title="Rewrite with your key" current="humanizer" description="Rewrite text with titus-humanizer using your own Claude, OpenAI or Gemini API key. Your key and your text go only to the provider you pick.">
+<Base title="Rewrite with your key" current="humanizer" description="Rewrite text with titus-humanizer using your own Claude, OpenAI or Gemini API key. Your browser sends your key and text to the provider you pick.">
   <ToolNav slot="subnav" current="rewrite" />
 
   <section class="hero" style="padding-bottom: 32px">
@@ -31,19 +33,34 @@ const skill = skills["titus-humanizer"];
             </div>
           </div>
           <p class="small muted" id="prov-help"></p>
-          <div class="field">
-            <label for="key">API key</label>
-            <input type="password" id="key" autocomplete="off" spellcheck="false" placeholder="Paste your key" />
+          <div id="framed" class="notice" hidden>
+            <span>This page is shown inside another site, so the key field is hidden. <a href="" id="framed-link" target="_top">Open the Rewrite page on its own</a> to use it.</span>
           </div>
-          <div class="field">
-            <label for="model">Model</label>
-            <input type="text" id="model" list="models" spellcheck="false" />
-            <datalist id="models"></datalist>
+          <div id="key-area">
+            <div class="field">
+              <label for="key">API key</label>
+              <div class="key-row">
+                <input type="password" id="key" autocomplete="off" spellcheck="false" placeholder="Paste your key" aria-describedby="key-where" />
+                <button type="button" class="btn btn-small btn-quiet" id="show-key" aria-pressed="false" aria-controls="key">Show key</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="model">Model</label>
+              <input type="text" id="model" list="models" spellcheck="false" maxlength="80" aria-describedby="model-note" />
+              <datalist id="models"></datalist>
+              <p class="small muted" id="model-note" style="margin: 6px 0 0">Suggested models checked on {new Date(lastVerified + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}. You can type another model your account has.</p>
+            </div>
+            <div id="remember-row" hidden>
+              <label class="check"><input type="checkbox" id="remember" /> Remember my key in this browser for 30 days. Leave this off on a shared computer.</label>
+            </div>
+            <p class="small muted" id="key-where" style="margin: 10px 0 0"></p>
+            <div class="btn-row" style="margin-top: 10px">
+              <button type="button" class="btn-link small" id="forget">Forget my key</button>
+            </div>
           </div>
-          <label class="check"><input type="checkbox" id="remember" /> Remember my key on this device. Leave this off on a shared computer.</label>
           <div class="notice" style="margin-top: 18px">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1a3 3 0 0 0-3 3v2H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3Zm-1.5 3a1.5 1.5 0 0 1 3 0v2h-3V4Z"/></svg>
-            <span>Your key and text go straight from your browser to the provider you pick. This site has no server, so it never sees or stores either one.</span>
+            <span>Your browser sends your key and your text straight to <strong id="prov-name">the provider</strong>. This website has no server of its own, so the text and the key don't pass through it. <span id="prov-data"></span> <a id="prov-policy" href=""></a>. Each request may be billed to your provider account. See the <a href={u("/privacy/")}>Privacy page</a>.</span>
           </div>
           <p class="small" style="margin-top: 16px"><a class="link-arrow" href="#get-a-key">How to get a key</a></p>
         </div>
@@ -64,7 +81,8 @@ const skill = skills["titus-humanizer"];
           </div>
           <div class="btn-row">
             <button class="btn btn-ghost" id="go">Rewrite</button>
-            <span class="small muted" id="go-status"></span>
+            <button class="btn btn-ghost" id="stop" type="button" hidden>Stop</button>
+            <span class="small muted" id="go-status" role="status" aria-live="polite"></span>
           </div>
         </div>
       </div>
@@ -103,17 +121,17 @@ const skill = skills["titus-humanizer"];
           <p class="eyebrow">Free to start</p>
           <h3 class="h3">Google Gemini</h3>
           <ol class="steps small" style="margin-top: 20px">
-            <li>Go to <a href="https://aistudio.google.com/apikey">aistudio.google.com</a> and sign in with a Google account.</li>
+            <li>Go to <NewTabLink href="https://aistudio.google.com/apikey">aistudio.google.com</NewTabLink> and sign in with a Google account.</li>
             <li>Choose Create API key.</li>
             <li>Copy the key and paste it on this page.</li>
           </ol>
-          <p class="small muted">Google's free tier needs no card, so this is the easiest route.</p>
+          <p class="small muted">Google's free tier needs no card, so this is the easiest route. On the free tier, Google may use what you send to improve its products, so use a paid key for private text.</p>
         </div>
         <div class="card reveal" style="--d: 0.08s">
           <p class="eyebrow">Prepaid credits</p>
           <h3 class="h3">Anthropic Claude</h3>
           <ol class="steps small" style="margin-top: 20px">
-            <li>Sign up at <a href="https://console.anthropic.com">console.anthropic.com</a>.</li>
+            <li>Sign up at <NewTabLink href="https://console.anthropic.com">console.anthropic.com</NewTabLink>.</li>
             <li>Add a card and buy credits under Billing.</li>
             <li>Open API Keys, choose Create Key and copy it.</li>
           </ol>
@@ -123,9 +141,9 @@ const skill = skills["titus-humanizer"];
           <p class="eyebrow">Prepaid credits</p>
           <h3 class="h3">OpenAI</h3>
           <ol class="steps small" style="margin-top: 20px">
-            <li>Sign up at <a href="https://platform.openai.com">platform.openai.com</a>.</li>
+            <li>Sign up at <NewTabLink href="https://platform.openai.com">platform.openai.com</NewTabLink>.</li>
             <li>Add credits under Billing.</li>
-            <li>Create a key at <a href="https://platform.openai.com/api-keys">API keys</a> and copy it.</li>
+            <li>Create a key at <NewTabLink href="https://platform.openai.com/api-keys">API keys</NewTabLink> and copy it.</li>
           </ol>
           <p class="small muted">A rewrite usually costs a few cents.</p>
         </div>
@@ -151,11 +169,13 @@ const skill = skills["titus-humanizer"];
   .compare-rings { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; }
   .compare-rings .arrow { color: var(--ink-faint); }
   .report { margin-top: 22px; white-space: pre-wrap; }
+  .key-row { display: flex; gap: 8px; align-items: center; }
+  .key-row input { flex: 1; min-width: 0; }
+  .btn-link { background: none; border: 0; padding: 0; font: inherit; color: var(--link); cursor: pointer; }
+  .btn-link:hover { text-decoration: underline; }
 </style>
 
-<script define:vars={{ skillUrl: u("/skills/titus-humanizer/SKILL.md"), version: skill.version }}>
-  window.__TITUS = { skillUrl, version };
-</script>
+<div id="rw-config" hidden data-skill-url={u("/skills/titus-humanizer/SKILL.md")} data-providers={JSON.stringify(providers)}></div>
 
 <script>
   import { compare } from "../../../scripts/titus";
@@ -163,51 +183,116 @@ const skill = skills["titus-humanizer"];
   import { copyText, toast } from "../../../scripts/site";
 
   type P = "gemini" | "anthropic" | "openai";
-  const cfg = (window as any).__TITUS as { skillUrl: string; version: string };
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const cfgEl = $("rw-config");
+  const skillUrl = cfgEl.dataset.skillUrl!;
+  const PROVIDERS = JSON.parse(cfgEl.dataset.providers!) as Record<P, { name: string; models: string[]; keyHint: string; policyName: string; policyUrl: string; dataNote: string }>;
 
-  const PROVIDERS: Record<P, { models: string[]; help: string }> = {
-    gemini: { models: ["gemini-2.5-flash", "gemini-2.5-pro"], help: "Free tier available. Keys start with AIza." },
-    anthropic: { models: ["claude-sonnet-5-5", "claude-opus-5-5", "claude-haiku-5-5"], help: "Keys start with sk-ant-." },
-    openai: { models: ["gpt-5", "gpt-5-mini"], help: "Keys start with sk-. You can type any model your account has." },
-  };
-  const store = {
-    get(k: string) { try { return localStorage.getItem(k) ?? sessionStorage.getItem(k); } catch { return null; } },
-    set(k: string, v: string, persist: boolean) {
-      try { (persist ? localStorage : sessionStorage).setItem(k, v); (persist ? sessionStorage : localStorage).removeItem(k); } catch {}
+  // Keys live in this variable while the page is open. They are saved only when the visitor turns on
+  // Remember, and only on a site with an origin of its own. Every github.io project site shares one
+  // origin, so on github.io any other project site could read a saved key, and Remember stays hidden.
+  const sharedOrigin = /\.github\.io$/i.test(location.hostname);
+  const KEEP_DAYS = 30;
+  const keys: Partial<Record<P, string>> = {};
+  const saved = {
+    read(p: P): string {
+      try {
+        const raw = localStorage.getItem(`th.key.${p}`);
+        if (!raw) return "";
+        const { k, t } = JSON.parse(raw);
+        if (typeof k !== "string" || Date.now() - t > KEEP_DAYS * 864e5) { localStorage.removeItem(`th.key.${p}`); return ""; }
+        return k;
+      } catch { return ""; }
     },
-    del(k: string) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch {} },
+    write(p: P, k: string) { try { localStorage.setItem(`th.key.${p}`, JSON.stringify({ k, t: Date.now() })); } catch {} },
+    clear(p?: P) {
+      try {
+        for (const s of [localStorage, sessionStorage]) {
+          for (const name of Object.keys(s)) if (name.startsWith("th.key.") && (!p || name === `th.key.${p}`)) s.removeItem(name);
+        }
+      } catch {}
+    },
   };
+  // Earlier versions of this page kept keys in browser storage. Remove them where saving isn't safe.
+  if (sharedOrigin) saved.clear();
+  try { for (const name of Object.keys(sessionStorage)) if (name.startsWith("th.key.")) sessionStorage.removeItem(name); } catch {}
 
-  let provider: P = (store.get("th.provider") as P) || "gemini";
+  let provider: P = (() => { try { const v = localStorage.getItem("th.provider") as P; return v in PROVIDERS ? v : "gemini"; } catch { return "gemini" as P; } })();
   const keyEl = $<HTMLInputElement>("key");
   const modelEl = $<HTMLInputElement>("model");
   const remember = $<HTMLInputElement>("remember");
+  $("remember-row").hidden = sharedOrigin;
+
+  // A page shown inside another site's frame could be overlaid to trick someone into typing a key.
+  if (window.top !== window.self) {
+    $("key-area").hidden = true;
+    $("framed").hidden = false;
+    ($("framed-link") as HTMLAnchorElement).href = location.href;
+  }
+
+  function describeStorage() {
+    $("key-where").textContent = remember.checked && !sharedOrigin
+      ? `Your ${PROVIDERS[provider].name} key is saved in this browser's local storage for ${KEEP_DAYS} days, or until you choose Forget my key.`
+      : "Your key stays in this page's memory only. Reloading or closing the page clears it.";
+  }
 
   function selectProvider(p: P) {
     provider = p;
+    const cfg = PROVIDERS[p];
     document.querySelectorAll<HTMLButtonElement>("#providers button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.p === p)));
-    $("prov-help").textContent = PROVIDERS[p].help;
-    $("models").innerHTML = PROVIDERS[p].models.map((m) => `<option value="${m}"></option>`).join("");
-    modelEl.value = store.get(`th.model.${p}`) || PROVIDERS[p].models[0];
-    keyEl.value = store.get(`th.key.${p}`) || "";
-    remember.checked = (() => { try { return !!localStorage.getItem(`th.key.${p}`); } catch { return false; } })();
+    $("prov-help").textContent = cfg.keyHint;
+    $("models").replaceChildren(...cfg.models.map((m) => Object.assign(document.createElement("option"), { value: m })));
+    let model = "";
+    try { model = localStorage.getItem(`th.model.${p}`) || ""; } catch {}
+    modelEl.value = model || cfg.models[0];
+    const stored = sharedOrigin ? "" : saved.read(p);
+    keyEl.value = keys[p] || stored;
+    remember.checked = !!stored;
+    $("prov-name").textContent = cfg.name;
+    $("prov-data").textContent = cfg.dataNote;
+    const policy = $<HTMLAnchorElement>("prov-policy");
+    policy.href = cfg.policyUrl;
+    policy.textContent = `Read ${cfg.policyName}`;
+    describeStorage();
     try { localStorage.setItem("th.provider", p); } catch {}
   }
   document.querySelectorAll<HTMLButtonElement>("#providers button").forEach((b) => b.addEventListener("click", () => selectProvider(b.dataset.p as P)));
   selectProvider(provider);
 
   const saveKey = () => {
-    if (keyEl.value) store.set(`th.key.${provider}`, keyEl.value.trim(), remember.checked);
-    else store.del(`th.key.${provider}`);
+    const k = keyEl.value.trim();
+    keys[provider] = k;
+    if (k && remember.checked && !sharedOrigin) saved.write(provider, k);
+    else saved.clear(provider);
+    describeStorage();
   };
-  keyEl.addEventListener("change", saveKey);
+  keyEl.addEventListener("input", saveKey);
   remember.addEventListener("change", saveKey);
   modelEl.addEventListener("change", () => { try { localStorage.setItem(`th.model.${provider}`, modelEl.value.trim()); } catch {} });
+  $("forget").addEventListener("click", () => {
+    for (const p of Object.keys(PROVIDERS) as P[]) delete keys[p];
+    saved.clear();
+    keyEl.value = "";
+    remember.checked = false;
+    describeStorage();
+    toast("Your keys are forgotten");
+  });
+  const showKey = $<HTMLButtonElement>("show-key");
+  showKey.addEventListener("click", () => {
+    const show = keyEl.type === "password";
+    keyEl.type = show ? "text" : "password";
+    showKey.setAttribute("aria-pressed", String(show));
+    showKey.textContent = show ? "Hide key" : "Show key";
+  });
 
   let skillText = "";
-  async function getSkill() {
-    if (!skillText) skillText = await (await fetch(cfg.skillUrl)).text();
+  // The same signal as the model call, so Stop and the timeout also cancel a stalled rulebook download.
+  async function getSkill(signal: AbortSignal) {
+    if (!skillText) {
+      const res = await fetch(skillUrl, { signal });
+      if (!res.ok) throw new Error("rulebook");
+      skillText = await res.text();
+    }
     return skillText;
   }
 
@@ -220,37 +305,48 @@ const skill = skills["titus-humanizer"];
     deep: (t) => `Do a deeper rewrite of this story. Return only the rewritten text.\n\n${t}`,
   };
 
-  async function callModel(system: string, user: string): Promise<string> {
+  // An error that is safe to show: it names the problem and the next step, and never includes the key.
+  class ProviderError extends Error {}
+  function explain(status: number, detail: string, key: string) {
+    const clean = (detail || "").split(key).join("[your key]").slice(0, 300);
+    const name = PROVIDERS[provider].name;
+    if (status === 401 || status === 403) return `${name} didn't accept the key. Check that you pasted the whole key and that it belongs to ${name}.`;
+    if (status === 404) return `${name} doesn't know the model "${modelEl.value.trim()}". It may have been retired. Pick a suggested model from the list and try again.`;
+    if (status === 429) return `${name} says you've hit a rate limit or run out of credit. Wait a minute, or check your plan and billing with ${name}.`;
+    if (status >= 500) return `${name} is having trouble right now (error ${status}). Try again in a few minutes.`;
+    return `${name} couldn't complete the request (error ${status})${clean ? `: ${clean}` : "."} Check the model name and try again.`;
+  }
+  async function send(url: string, init: RequestInit, key: string) {
+    const res = await fetch(url, init);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new ProviderError(explain(res.status, data?.error?.message || "", key));
+    return data;
+  }
+
+  async function callModel(system: string, user: string, signal: AbortSignal): Promise<string> {
     const key = keyEl.value.trim();
     const model = modelEl.value.trim();
-    let res: Response;
     if (provider === "anthropic") {
-      res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
+      const data = await send("https://api.anthropic.com/v1/messages", {
+        method: "POST", signal,
         headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
         body: JSON.stringify({ model, max_tokens: 8000, system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }], messages: [{ role: "user", content: user }] }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || res.statusText);
+      }, key);
       return data.content.filter((c: any) => c.type === "text").map((c: any) => c.text).join("");
     }
     if (provider === "openai") {
-      res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
+      const data = await send("https://api.openai.com/v1/chat/completions", {
+        method: "POST", signal,
         headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
         body: JSON.stringify({ model, messages: [{ role: "system", content: system }, { role: "user", content: user }] }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || res.statusText);
+      }, key);
       return data.choices?.[0]?.message?.content || "";
     }
-    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-      method: "POST",
+    const data = await send(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST", signal,
       headers: { "content-type": "application/json", "x-goog-api-key": key },
       body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: "user", parts: [{ text: user }] }] }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error?.message || res.statusText);
+    }, key);
     return (data.candidates?.[0]?.content?.parts || []).map((p: any) => p.text || "").join("");
   }
 
@@ -274,14 +370,22 @@ const skill = skills["titus-humanizer"];
   }
 
   const go = $<HTMLButtonElement>("go");
+  const stop = $<HTMLButtonElement>("stop");
+  const TIMEOUT_MS = 120_000;
+  let controller: AbortController | null = null;
   let outText = "";
+  stop.addEventListener("click", () => controller?.abort("stopped"));
   go.addEventListener("click", async () => {
     const text = $<HTMLTextAreaElement>("text").value;
     const mode = $<HTMLSelectElement>("mode").value;
     if (!keyEl.value.trim()) { toast("Paste your API key first"); keyEl.focus(); return; }
     if (!text.trim()) { toast("Paste some text first"); return; }
+    if (!navigator.onLine) { $("go-status").textContent = "You're offline. Connect to the internet and try again. Your text is still here."; return; }
     saveKey();
     go.disabled = true;
+    stop.hidden = false;
+    controller = new AbortController();
+    const timer = window.setTimeout(() => controller?.abort("timeout"), TIMEOUT_MS);
     $("go-status").textContent = "Working. This can take up to a minute.";
     const out = $("out");
     out.hidden = false;
@@ -291,8 +395,8 @@ const skill = skills["titus-humanizer"];
     $("compare").hidden = true;
     out.scrollIntoView({ behavior: "smooth", block: "start" });
     try {
-      const system = (await getSkill()) + SITE_NOTE;
-      const reply = (await callModel(system, PROMPTS[mode](text))).trim();
+      const system = (await getSkill(controller.signal)) + SITE_NOTE;
+      const reply = (await callModel(system, PROMPTS[mode](text), controller.signal)).trim();
       let body = reply, notes = "";
       if (mode === "notes" && reply.includes(MARK)) [body, notes] = reply.split(MARK).map((s) => s.trim());
       outText = body;
@@ -309,9 +413,19 @@ const skill = skills["titus-humanizer"];
       }
       $("go-status").textContent = "";
     } catch (e: any) {
-      $("out-text").textContent = `The provider returned an error: ${e.message || e}. Check the key and the model name, then try again.`;
+      const reason = controller?.signal.reason;
+      $("out-text").textContent =
+        reason === "stopped" ? "Stopped. Your text is still in the box, so you can try again."
+        : reason === "timeout" ? "The provider didn't answer within two minutes, so the page stopped waiting. Try again, or try a shorter text."
+        : e instanceof ProviderError ? e.message
+        : e?.message === "rulebook" ? "The page couldn't load the titus-humanizer rulebook. Reload the page and try again."
+        : !navigator.onLine ? "You went offline. Connect to the internet and try again."
+        : "The request didn't reach the provider. Check your connection and try again. Some browser extensions block these requests.";
       $("go-status").textContent = "";
     } finally {
+      window.clearTimeout(timer);
+      controller = null;
+      stop.hidden = true;
       go.disabled = false;
     }
   });
