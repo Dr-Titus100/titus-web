@@ -260,6 +260,7 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
       actions.push(body);
       if (body.action === "approve") rows.find((r) => r.id === body.id)!.status = "approved";
       if (body.action === "reply") rows.unshift({ id: 3, post: "the-exercise-book", name: "Titus Nyarko Nde", body: body.body, status: "approved", created: "2026-11-13T10:00:00.000Z", parent: 1, parentName: "Ama", author: true });
+      if (body.action === "comment") rows.unshift({ id: 4, post: body.post, name: "Titus Nyarko Nde", body: body.body, status: "approved", created: "2026-11-13T11:00:00.000Z", parent: null, parentName: null, author: true });
       return route.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
     }
     return route.fulfill({ contentType: "application/json", body: JSON.stringify({ comments: rows }) });
@@ -288,7 +289,22 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
   const mine = page.locator("#mod-approved .mod-item", { hasText: "Thank you, Ama." });
   await expect(mine.locator(".mod-badge")).toHaveText("Author");
   await expect(mine.getByRole("button", { name: "Reply", exact: true })).toHaveCount(0);
-  expect(actions).toEqual([{ action: "approve", id: 2 }, { action: "reply", id: 1, body: "Thank you, Ama." }]);
+  // Start a comment of your own. It shows at once with the Author label.
+  await expect(page.locator("#mod-new-body")).toHaveAttribute("maxlength", "3000");
+  await page.getByRole("button", { name: "Post comment" }).click();
+  await expect(page.locator("#mod-new-body")).toBeFocused();
+  await page.selectOption("#mod-new-post", "the-exercise-book");
+  await page.fill("#mod-new-body", "Thanks for reading, everyone.");
+  await page.getByRole("button", { name: "Post comment" }).click();
+  await expect(page.locator("#mod-status")).toHaveText("Comment posted.");
+  await expect(page.locator("#mod-new-body")).toHaveValue("");
+  const own = page.locator("#mod-approved .mod-item", { hasText: "Thanks for reading, everyone." });
+  await expect(own.locator(".mod-badge")).toHaveText("Author");
+  expect(actions).toEqual([
+    { action: "approve", id: 2 },
+    { action: "reply", id: 1, body: "Thank you, Ama." },
+    { action: "comment", post: "the-exercise-book", body: "Thanks for reading, everyone." },
+  ]);
   // The browser logs the 401 answer to the wrong token. Nothing else should show up.
   expect(errors.filter((e) => !e.includes("401"))).toEqual([]);
 });

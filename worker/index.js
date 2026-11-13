@@ -5,7 +5,8 @@
 //   POST /api/comments               a new comment or reply. It shows at once when the spam check is on,
 //                                    and otherwise waits until Titus approves it
 //   GET  /api/comments/admin         every comment, for the moderation page (needs the admin token)
-//   POST /api/comments/admin         approve, delete or reply to one comment (needs the admin token)
+//   POST /api/comments/admin         approve, delete or reply to one comment, or post Titus's own comment
+//                                    on a post (needs the admin token)
 //
 // Replies are one level deep. A reply to a reply joins the same thread, under the first comment.
 // Titus's own replies, posted from the moderation page, carry author = 1 and show an "Author" label.
@@ -289,7 +290,20 @@ async function admin(request, url, env) {
 
   let input;
   try { input = await request.json(); } catch { return json({ error: "invalid" }, 400); }
-  const id = Number(input && input.id);
+  if (!input || typeof input !== "object") return json({ error: "invalid" }, 400);
+  // Titus's own comment on a post. It shows at once with the Author label.
+  if (input.action === "comment") {
+    const post = String(input.post || "");
+    if (!SLUG.test(post)) return json({ error: "post" }, 400);
+    const body = tidy(input.body, true);
+    if (!body || body.length > BODY_MAX) return json({ error: "body" }, 400);
+    const page = await env.ASSETS.fetch(new Request(new URL(`/blog/${post}/`, url.origin), { method: "GET" }));
+    if (page.status !== 200) return json({ error: "post" }, 400);
+    await d1.prepare("INSERT INTO comments (post, name, body, status, created_at, author) VALUES (?, ?, ?, 'approved', ?, 1)")
+      .bind(post, AUTHOR_NAME, body, new Date().toISOString()).run();
+    return json({ ok: true });
+  }
+  const id = Number(input.id);
   if (!Number.isInteger(id) || id < 1) return json({ error: "id" }, 400);
   let result;
   if (input.action === "approve") {
