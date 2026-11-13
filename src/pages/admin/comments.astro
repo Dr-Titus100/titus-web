@@ -5,6 +5,9 @@
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url";
 import { commentsTurnstileKey } from "../../data/profile";
+import { getCollection } from "astro:content";
+// The posts you can start a comment on, newest first.
+const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 <Base title="Comment moderation" description="Approve or delete comments on the blog." noindex>
   <section class="section">
@@ -12,7 +15,7 @@ import { commentsTurnstileKey } from "../../data/profile";
       <h1 class="h1">Comment moderation</h1>
       <p class="lead">{commentsTurnstileKey
         ? "New comments and replies show on their post as soon as they pass the spam check, and they're listed here under Approved. Older ones from before the check may still wait for you."
-        : "New comments and replies wait here until you approve them. Approved ones show under their post."} You can reply to any comment, and deleting a comment deletes its replies too.</p>
+        : "New comments and replies wait here until you approve them. Approved ones show under their post."} You can reply to any comment or start your own, and deleting a comment deletes its replies too.</p>
 
       <form class="card mod-login" id="mod-login" data-api={u("/api/comments/admin")} data-blog={u("/blog/")} novalidate>
         <div class="field">
@@ -28,6 +31,23 @@ import { commentsTurnstileKey } from "../../data/profile";
       </form>
 
       <div id="mod-lists" hidden>
+        <form class="card mod-new" id="mod-new" novalidate>
+          <h2 class="mod-new-title">New comment</h2>
+          <div class="field">
+            <label for="mod-new-post">Post</label>
+            <select id="mod-new-post">
+              {posts.map((p) => <option value={p.id}>{p.data.title}</option>)}
+            </select>
+          </div>
+          <div class="field">
+            <label for="mod-new-body">Your comment</label>
+            <textarea id="mod-new-body" maxlength="3000"></textarea>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-small" type="submit" id="mod-new-send">Post comment</button>
+          </div>
+          <p class="small muted mod-note">It shows on the post at once, with your name and the Author label.</p>
+        </form>
         <h2 class="mod-heading">Waiting for approval <span id="mod-pending-count"></span></h2>
         <ol class="mod-list" id="mod-pending"></ol>
         <p class="small muted" id="mod-pending-empty" hidden>Nothing is waiting.</p>
@@ -53,6 +73,10 @@ import { commentsTurnstileKey } from "../../data/profile";
   .mod-badge { display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 980px; font-size: 12px; font-weight: 600; color: var(--link); box-shadow: inset 0 0 0 1px var(--link); }
   .mod-reply { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
   .mod-reply textarea { min-height: 120px; }
+  .mod-new { margin-top: 40px; display: flex; flex-direction: column; gap: 16px; }
+  .mod-new .field { margin: 0; }
+  .mod-new textarea { min-height: 140px; }
+  .mod-new-title { font-size: 21px; margin: 0; }
 </style>
 
 <script>
@@ -79,6 +103,8 @@ import { commentsTurnstileKey } from "../../data/profile";
     busy: "Too many tries in a short time. Wait a minute.",
     unavailable: "The Worker can't reach the comments database.",
     missing: "That comment is already gone. The list is now up to date.",
+    post: "That post isn't on the site anymore.",
+    body: "The comment is too long.",
   };
 
   async function call(method: "GET" | "POST", body?: object) {
@@ -209,6 +235,27 @@ import { commentsTurnstileKey } from "../../data/profile";
     await load();
     status.textContent = keep;
   }
+
+  // Your own comment on a post, with the Author label. A failed post keeps its text in the box.
+  const newForm = document.getElementById("mod-new") as HTMLFormElement;
+  const newPost = document.getElementById("mod-new-post") as HTMLSelectElement;
+  const newBody = document.getElementById("mod-new-body") as HTMLTextAreaElement;
+  const newSend = document.getElementById("mod-new-send") as HTMLButtonElement;
+  newForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!newBody.value.trim()) { newBody.focus(); return; }
+    newSend.disabled = true;
+    try {
+      await call("POST", { action: "comment", post: newPost.value, body: newBody.value });
+      newBody.value = "";
+      await load();
+      status.textContent = "Comment posted.";
+    } catch (err) {
+      fail(err);
+    } finally {
+      newSend.disabled = false;
+    }
+  });
 
   login.addEventListener("submit", (e) => {
     e.preventDefault();
