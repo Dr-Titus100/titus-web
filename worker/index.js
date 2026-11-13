@@ -12,6 +12,9 @@
 //   ADMIN_LIMIT              rate limiter for the moderation API, keyed the same way.
 //   COMMENTS_ADMIN_TOKEN     secret, at least 32 characters. The moderation page sends it. Without it, moderation is off.
 //   TURNSTILE_SECRET         optional secret. When set, every new comment must pass a Turnstile check.
+//   NOTIFY_EMAIL             Cloudflare Email Service binding, for the email Titus gets about each new comment.
+//   NOTIFY_TO                secret, the address that gets those emails. It lives only in Cloudflare, never in
+//                            this repo or on the site. Without it, no emails go out.
 //
 // The database keeps only the post, the name, the comment, its status and the time.
 
@@ -24,15 +27,17 @@ const APPROVED_SHOWN = 500;
 // A post shows at most this many comments, the newest ones.
 const POST_SHOWN = 500;
 const SLUG = /^[a-z0-9][a-z0-9-]{0,99}$/;
+// The sender of the new-comment emails. titusnyarkonde.com must be set up for sending in Email Service.
+const NOTIFY_FROM = { email: "comments@titusnyarkonde.com", name: "titusnyarkonde.com comments" };
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     try {
       if (url.pathname === "/api/comments") {
         if (request.method === "GET") return await listApproved(url, env);
-        if (request.method === "POST") return await addComment(request, url, env);
+        if (request.method === "POST") return await addComment(request, url, env, ctx);
         return json({ error: "method" }, 405, { Allow: "GET, POST" });
       }
       if (url.pathname === "/api/comments/admin") {
@@ -112,7 +117,7 @@ async function listApproved(url, env) {
   return json({ comments: latest.results.reverse(), total: total.results[0].n });
 }
 
-async function addComment(request, url, env) {
+async function addComment(request, url, env, ctx) {
   // Only pages on this site may post. Browsers always send Origin on a cross-site POST.
   const origin = request.headers.get("Origin");
   if (origin && origin !== url.origin) return json({ error: "origin" }, 403);
@@ -148,7 +153,38 @@ async function addComment(request, url, env) {
   if (waiting >= PENDING_MAX) return json({ error: "full" }, 503);
   await d1.prepare("INSERT INTO comments (post, name, body, status, created_at) VALUES (?, ?, ?, 'pending', ?)")
     .bind(post, name, body, new Date().toISOString()).run();
+  // The email goes out after the reply, so a slow or failed send never holds up the reader.
+  ctx.waitUntil(notify(env, url, page, { post, name, body, waiting: waiting + 1 }));
   return json({ status: "pending" }, 202);
+}
+
+// Emails Titus about a new comment, with the text and a link to the moderation page. Errors only
+// go to the Worker's logs: the comment is already saved, and it shows on the moderation page anyway.
+async function notify(env, url, page, c) {
+  if (!env.NOTIFY_EMAIL || !env.NOTIFY_TO) return;
+  try {
+    const title = ((await page.text()).match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1]?.replace(/<[^>]+>/g, "")
+      .replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").trim() || c.post;
+    const site = `https://${NOTIFY_FROM.email.split("@")[1]}`;
+    const text = [
+      `${c.name} commented on "${title}":`,
+      "",
+      c.body,
+      "",
+      `Approve or delete it: ${site}/admin/comments/`,
+      `The post: ${site}/blog/${c.post}/`,
+      "",
+      c.waiting === 1 ? "This is the only comment waiting for you." : `${c.waiting} comments are waiting for you.`,
+    ].join("\n");
+    await env.NOTIFY_EMAIL.send({
+      to: env.NOTIFY_TO,
+      from: NOTIFY_FROM,
+      subject: `New comment from ${c.name} on "${title}"`.slice(0, 200),
+      text,
+    });
+  } catch (err) {
+    console.error("new-comment email failed", err && (err.code || err.message) ? `${err.code || ""} ${err.message || ""}` : err);
+  }
 }
 
 async function turnstile(secret, token, remoteip) {

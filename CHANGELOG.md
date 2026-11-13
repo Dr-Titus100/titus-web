@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-13
 
+- I get an email about each new comment, with the comment, a link to the post and a link to the moderation page. The Worker sends it through Cloudflare's Email Service to the address in the `NOTIFY_TO` secret, which lives only in Cloudflare. The Privacy page says so.
 - Readers can comment under blog posts. They type a name and a comment, with no account and no email. A small Cloudflare Worker (`worker/index.js`) stores comments in a Cloudflare D1 database, and each one stays hidden until I approve it on the new moderation page at `/admin/comments/`. The Privacy page has a new Comments section. The README explains the one-time setup on Cloudflare.
 
 - The site uses titus-humanizer v1.2.0. Its script now writes the "Left as-is" line itself, so I removed the site's own copy from `public/js/titus_glue.py`. The reports read the same as before. The Checker and the score also count words with a curly apostrophe, such as "don’t", as one word.
