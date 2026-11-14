@@ -1,10 +1,13 @@
 ---
 import Base from "../../layouts/Base.astro";
 import ComingSoon from "../../components/ComingSoon.astro";
+import PostTags from "../../components/PostTags.astro";
 import { getCollection } from "astro:content";
 import { u } from "../../lib/url";
+import { allTags, postTags, tagSlug } from "../../lib/tags";
 const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+const filters = [{ id: "all", name: "All" }, ...allTags(posts).map((t) => ({ id: tagSlug(t), name: t }))];
 ---
 <Base title="Blog" current="blog" description="Writing by Titus Nyarko Nde.">
   {posts.length === 0 ? (
@@ -19,17 +22,54 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
       </section>
       <section class="tool-body">
         <div class="wrap wrap-text">
-          {posts.map((p) => (
-            <a class="card tile post-row" href={u(`/blog/${p.id}/`)}>
-              <p class="small muted"><time datetime={p.data.date.toISOString().slice(0, 10)}>{fmt(p.data.date)}</time>{p.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
-              <h2 class="h-tile">{p.data.title}</h2>
-              <p>{p.data.description}</p>
-              <span class="link-arrow">{p.data.fiction ? "Read the story" : "Read the post"}</span>
-            </a>
-          ))}
+          {filters.length > 2 && (
+            <div class="center post-filter">
+              <div class="segmented" role="tablist" aria-label="Filter posts by tag">
+                {filters.map((f, i) => <button role="tab" type="button" id={`filter-${f.id}`} aria-controls="posts" aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1} data-filter={f.id}>{f.name}</button>)}
+              </div>
+            </div>
+          )}
+          <div id="posts" role={filters.length > 2 ? "tabpanel" : undefined} aria-labelledby={filters.length > 2 ? "filter-all" : undefined}>
+            {posts.map((p) => (
+              <a class="card tile post-row" href={u(`/blog/${p.id}/`)} data-tags={postTags(p).map(tagSlug).join(" ")}>
+                <p class="small muted post-meta"><time datetime={p.data.date.toISOString().slice(0, 10)}>{fmt(p.data.date)}</time><PostTags post={p} /></p>
+                <h2 class="h-tile">{p.data.title}</h2>
+                <p>{p.data.description}</p>
+                <span class="link-arrow">{p.data.fiction ? "Read the story" : "Read the post"}</span>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
     </>
   )}
 </Base>
-<style>.post-row { margin-bottom: 20px; }</style>
+<style>
+  .post-row { margin-bottom: 20px; }
+  .post-filter { margin-bottom: 32px; }
+  /* Without JavaScript the filter can't run, so it stays hidden and every post shows. */
+  :global(.no-js) .post-filter { display: none; }
+</style>
+
+<script>
+  import { initTabs } from "../../scripts/tabs";
+  // Filters the list by tag. The chosen tag goes in the address (/blog/?tag=research), so a filtered
+  // list can be shared, and a tag on a post page opens the list already filtered.
+  const list = document.querySelector<HTMLElement>('[aria-label="Filter posts by tag"]');
+  if (list) {
+    const rows = [...document.querySelectorAll<HTMLElement>(".post-row")];
+    const panel = document.getElementById("posts")!;
+    const tabs = initTabs(list, (b) => {
+      const tag = b.dataset.filter || "all";
+      rows.forEach((r) => { r.hidden = tag !== "all" && !(r.dataset.tags || "").split(" ").includes(tag); });
+      panel.setAttribute("aria-labelledby", b.id);
+      const url = new URL(location.href);
+      if (tag === "all") url.searchParams.delete("tag");
+      else url.searchParams.set("tag", tag);
+      history.replaceState(null, "", url);
+    });
+    const wanted = new URLSearchParams(location.search).get("tag");
+    const start = tabs.tabs.find((t) => t.dataset.filter === wanted);
+    if (start) tabs.select(start);
+  }
+</script>

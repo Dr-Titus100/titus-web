@@ -2,6 +2,7 @@
 title: "titus-humanizer: plain rewrites that keep every fact"
 description: "What the free titus-humanizer skill changes, what it leaves alone, how it scores text and four ways to use it."
 date: 2026-11-13T20:00:00Z
+tags: ["Release", "AI writing"]
 ---
 
 titus-humanizer is now available, free and open source under the MIT license. It's an editing skill for Claude and ChatGPT that rewrites text so it reads like a careful, plain-spoken person wrote it. It keeps every fact, number and name from the original, strips hidden characters before it starts, and scores the text from 0 to 1 for AI-writing patterns before and after the rewrite, so you can see what changed.

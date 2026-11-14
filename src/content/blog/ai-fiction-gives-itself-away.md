@@ -2,6 +2,7 @@
 title: "AI fiction gives itself away through its stories"
 description: "A study of 61,608 stories found that the choices a story makes, such as how it ends and who drives the plot, separate AI fiction from human fiction even after an AI model polishes the prose."
 date: 2026-11-13T21:00:00Z
+tags: ["Research", "AI writing"]
 ---
 
 Most advice about spotting AI writing focuses on words: "delve", "tapestry", em dashes, "It's not X, it's Y". A new study asks a harder question. If you ignore the wording completely and look only at the choices a story makes (who drives the plot, how time moves, how it ends), can you still tell a human story from an AI one?

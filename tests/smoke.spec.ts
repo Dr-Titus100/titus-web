@@ -117,6 +117,30 @@ test("Rewrite switches provider and remembers the choice", async ({ page }) => {
 
 // The comments section is built only for Cloudflare (SITE_HOST=cloudflare), where the Worker answers
 // /api/comments. Here the API is faked. To run this test, build with SITE_HOST=cloudflare first.
+test("the blog list filters posts by tag and keeps the tag in the address", async ({ page }) => {
+  await page.goto("blog/");
+  const rows = page.locator(".post-row");
+  const total = await rows.count();
+  await page.getByRole("tab", { name: "Research", exact: true }).click();
+  await expect(page).toHaveURL(/\?tag=research$/);
+  await expect(rows.filter({ visible: true })).toHaveCount(1);
+  await expect(rows.filter({ visible: true })).toContainText("AI fiction gives itself away");
+  await page.getByRole("tab", { name: "All", exact: true }).click();
+  await expect(page).not.toHaveURL(/tag=/);
+  await expect(rows.filter({ visible: true })).toHaveCount(total);
+  // A tag on a post opens the list already filtered.
+  await page.goto("blog/titus-humanizer-release/");
+  await page.locator(".eyebrow a.post-tag", { hasText: "Release" }).click();
+  await expect(page.getByRole("tab", { name: "Release", exact: true })).toHaveAttribute("aria-selected", "true");
+  await expect(rows.filter({ visible: true })).toHaveCount(1);
+});
+
+test("each home page blog card ends with a Read the post link", async ({ page }) => {
+  await page.goto("");
+  const cards = page.locator(".home-tile[href*='/blog/'] .link-arrow", { hasText: "Read the post" });
+  await expect(cards).toHaveCount(3);
+});
+
 test("blog comments list approved comments and replies, and post both", async ({ page }) => {
   const errors = collectErrors(page);
   const posted: any[] = [];

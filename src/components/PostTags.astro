@@ -1,0 +1,15 @@
+---
+// The tag labels on a post. With `link`, each label opens the blog list filtered to that tag.
+import { postTags, tagClass, tagSlug } from "../lib/tags";
+import { u } from "../lib/url";
+interface Props { post: { data: { tags: string[]; fiction: boolean } }; link?: boolean }
+const { post, link = false } = Astro.props;
+const tags = postTags(post);
+---
+{tags.length > 0 && (
+  <span class="post-tags">
+    {tags.map((t) => link
+      ? <a class={tagClass(t)} href={u(`/blog/?tag=${tagSlug(t)}`)}>{t}</a>
+      : <span class={tagClass(t)}>{t}</span>)}
+  </span>
+)}

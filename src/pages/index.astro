@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import { u } from "../lib/url";
+import PostTags from "../components/PostTags.astro";
 import { links } from "../data/profile";
 import skills from "../data/skills.generated.json";
 const skill = skills["titus-humanizer"];
@@ -94,9 +95,10 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
         <div class="grid grid-3">
           {posts.map((p, i) => (
             <a class="card tile home-tile reveal" style={`--d: ${i * 0.06}s`} href={u(`/blog/${p.id}/`)}>
-              <p class="small muted" style="margin: 0"><time datetime={p.data.date.toISOString().slice(0, 10)}>{fmt(p.data.date)}</time>{p.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
+              <p class="small muted post-meta" style="margin: 0"><time datetime={p.data.date.toISOString().slice(0, 10)}>{fmt(p.data.date)}</time><PostTags post={p} /></p>
               <h3 class="h3">{p.data.title}</h3>
               <p>{p.data.description}</p>
+              <span class="link-arrow">Read the post</span>
             </a>
           ))}
         </div>

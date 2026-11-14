@@ -453,5 +453,16 @@ main:focus { outline: none; }
 /* Keep in-page targets clear of the sticky nav and subnav */
 #video, #contact, #transcript { scroll-margin-top: 104px; }
 
-/* Label for blog posts that are stories, so readers know they are made up. */
-.fiction-tag { display: inline-block; margin-left: 10px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--tag-fiction); background: var(--tag-fiction-bg); vertical-align: middle; }
+/* Tags on blog posts (src/lib/tags.ts). "Fiction" marks stories, so readers know they are made up.
+   The text mixes in some ink color, so it stays readable on the gray cards in light and dark mode. */
+.post-tags { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-left: 10px; vertical-align: middle; }
+.post-tag { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--ink-soft); background: var(--bg-soft); }
+a.post-tag:hover { text-decoration: underline; }
+/* The date line on post cards. When the tags don't fit beside the date, they move under it. */
+.post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.post-meta .post-tags { margin-left: 0; }
+.post-tag.fiction-tag { color: var(--tag-fiction); background: var(--tag-fiction-bg); }
+.post-tag.tag-ai { color: color-mix(in srgb, var(--tag-ai) 75%, var(--ink)); background: color-mix(in srgb, var(--tag-ai) 10%, transparent); }
+.post-tag.tag-research { color: color-mix(in srgb, var(--tag-research) 75%, var(--ink)); background: color-mix(in srgb, var(--tag-research) 10%, transparent); }
+.post-tag.tag-industry { color: color-mix(in srgb, var(--tag-industry) 75%, var(--ink)); background: color-mix(in srgb, var(--tag-industry) 10%, transparent); }
+.post-tag.tag-teaching { color: color-mix(in srgb, var(--tag-teaching) 75%, var(--ink)); background: color-mix(in srgb, var(--tag-teaching) 10%, transparent); }
