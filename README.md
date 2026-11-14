@@ -14,7 +14,7 @@ The website for Titus Nyarko Nde: skills, plugins, experience and blog posts. It
   - **Install.** Steps for Claude, ChatGPT, Claude Code and Codex, the zip download, the promo video and the examples.
 - **Experience** (`/experience/`). Work history with filters for AI, research, industry and teaching, plus education, publications, talks, awards, leadership and skills.
 - **About** (`/about/`). Titus's story, newest chapter first, his photo and the contact form.
-- **Blog** (`/blog/`). Posts from `src/content/blog/`. Stories carry a "Fiction" label so readers know they are reading fiction. On Cloudflare, each post ends with reader comments, which show up after Titus approves them on `/admin/comments/`. See [Blog comments](#blog-comments).
+- **Blog** (`/blog/`). Posts from `src/content/blog/`. Each post shows its tags, such as "Research" and "AI writing", and the list has a filter for them. A tag on a post opens the list filtered to it (`/blog/?tag=research`). Stories carry a "Fiction" tag so readers know they are reading fiction. On Cloudflare, each post ends with reader comments, which show up after Titus approves them on `/admin/comments/`. See [Blog comments](#blog-comments).
 - **Privacy** (`/privacy/`) and **Terms** (`/terms/`). What each part of the site sends and stores, and the terms for the tools. Update the date at the top of each page when you change it.
 
 ## How the skill files get here
@@ -120,7 +120,7 @@ If you replace the video, update the captions file in the same commit.
 
 ## Adding posts, pages and tools
 
-- **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`, and the home page lists the three newest posts. For a story, also set `fiction: true`, and the post shows a "Fiction" label everywhere it appears.
+- **A blog post.** Copy `src/content/blog/_template.md` to a new file without the underscore, such as `my-first-post.md`, fill it in and set `draft: false`. It appears at `/blog/my-first-post/`, and the home page lists the three newest posts. List its topics in `tags`, such as `tags: ["Research", "AI writing"]`, and reuse tags that exist when they fit. Tag names and colors are in `src/lib/tags.ts`. For a story, also set `fiction: true`, and the post shows a "Fiction" tag everywhere it appears.
 - **About and Experience.** The facts on both pages, such as roles, education, publications, talks, awards and skills, live in `src/data/profile.ts`. Change the data there, and edit `src/pages/about.astro` or `src/pages/experience.astro` only to change the layout or the story text.
 - **A new skill or plugin.**
   1. Add an entry to `src/data/tools.ts`. Its card then shows up on the Tools page.

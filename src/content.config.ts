@@ -11,6 +11,8 @@ const blog = defineCollection({
     draft: z.boolean().default(false),
     // Set to true for stories. The post then shows a "Fiction" label wherever it appears.
     fiction: z.boolean().default(false),
+    // Topic tags, such as ["Research", "AI writing"]. The blog list can be filtered by them. See src/lib/tags.ts.
+    tags: z.array(z.string()).default([]),
   }),
 });
 

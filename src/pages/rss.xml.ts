@@ -2,6 +2,7 @@ import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { u } from "../lib/url";
+import { postTags } from "../lib/tags";
 
 // The blog's RSS feed, newest post first. Drafts are left out.
 export const GET: APIRoute = async ({ site }) => {
@@ -15,7 +16,7 @@ export const GET: APIRoute = async ({ site }) => {
       description: p.data.description,
       pubDate: p.data.date,
       link: u(`/blog/${p.id}/`),
-      categories: p.data.fiction ? ["Fiction"] : [],
+      categories: postTags(p),
     })),
     customData: "<language>en-us</language>",
   });

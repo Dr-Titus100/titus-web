@@ -1,6 +1,8 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Comments from "../../components/Comments.astro";
+import PostTags from "../../components/PostTags.astro";
+import { postTags } from "../../lib/tags";
 import { getCollection, render } from "astro:content";
 import { u } from "../../lib/url";
 import fs from "node:fs";
@@ -32,6 +34,7 @@ const posting = {
   mainEntityOfPage: new URL(u(`/blog/${post.id}/`), Astro.site).href,
   image: new URL(u(image), Astro.site).href,
   ...(post.data.fiction ? { genre: "Fiction" } : {}),
+  ...(postTags(post).length ? { keywords: postTags(post).join(", ") } : {}),
   author: { "@type": "Person", name: "Titus Nyarko Nde", url: new URL(u("/about/"), Astro.site).href },
 };
 const date = post.data.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
@@ -39,7 +42,7 @@ const date = post.data.date.toLocaleDateString("en-US", { year: "numeric", month
 <Base title={post.data.title} current="blog" description={post.data.description} image={image} imageAlt={`${post.data.title}, by Titus Nyarko Nde`} type="article" jsonLd={posting}>
   <article class="section">
     <div class="wrap wrap-narrow">
-      <p class="eyebrow"><a href={u("/blog/")}>Blog</a>{post.data.fiction && <span class="fiction-tag">Fiction</span>}</p>
+      <p class="eyebrow"><a href={u("/blog/")}>Blog</a><PostTags post={post} link /></p>
       <h1 class="h1">{post.data.title}</h1>
       <p class="lead">{post.data.description}</p>
       <p class="byline small muted">By Titus Nyarko Nde<br /><time datetime={post.data.date.toISOString().slice(0, 10)}>{date}</time> · {minutes}-minute read</p>
