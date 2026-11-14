@@ -8,6 +8,8 @@ const pages = [
   "tools/",
   "blog/",
   "blog/the-exercise-book/",
+  "blog/titus-humanizer-release/",
+  "blog/ai-fiction-gives-itself-away/",
   "tools/titus-humanizer/",
   "tools/titus-humanizer/checker/",
   "tools/titus-humanizer/rewrite/",
