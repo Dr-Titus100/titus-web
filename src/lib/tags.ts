@@ -12,7 +12,7 @@ export const tagSlug = (tag: string) => tag.toLowerCase().replace(/[^a-z0-9]+/g,
 
 // The colors match the role tags on the Experience page.
 const colors: Record<string, string> = {
-  "ai-writing": "ai",
+  ai: "ai",
   research: "research",
   release: "teaching",
   "data-science": "industry",
