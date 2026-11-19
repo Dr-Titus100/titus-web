@@ -1,7 +1,12 @@
 // The Cloudflare Worker for titusnyarkonde.com. Static files in dist/ are served as before. This
-// script answers only /api/* (see run_worker_first in wrangler.jsonc), which is the blog comments API.
+// script answers only /api/* (see run_worker_first in wrangler.jsonc), which is the comments API for
+// blog posts and the reviews of games.
 //
-//   GET  /api/comments?post=<slug>   approved comments and replies on one post
+// A "post" is a blog post's slug, such as my-first-post, or a game, such as games/sankofa-snake. A
+// game's reviews live on its Play page. A review is a comment with a rating from 1 to 10, and it may
+// name the player's favorite level. Replies to reviews carry no rating, like replies on blog posts.
+//
+//   GET  /api/comments?post=<slug>   approved comments and replies on one post, and for a game the rating summary
 //   POST /api/comments               a new comment or reply. It shows at once when the spam check is on,
 //                                    and otherwise waits until Titus approves it
 //   GET  /api/comments/admin         every comment, for the moderation page (needs the admin token)
@@ -23,7 +28,7 @@
 //                            this repo or on the site. Without it, no emails go out.
 //
 // The database keeps only the post, the name, the comment, its status, the time, the comment it
-// replies to and whether Titus wrote it.
+// replies to, whether Titus wrote it, and for a game review the rating and favorite level.
 
 const NAME_MAX = 60;
 // The longest comment or reply, for readers and Titus alike. The text boxes use the same limit.
@@ -36,6 +41,16 @@ const APPROVED_SHOWN = 500;
 // A post shows at most this many comments, the newest ones.
 const POST_SHOWN = 500;
 const SLUG = /^[a-z0-9][a-z0-9-]{0,99}$/;
+// A game's reviews, keyed by the game's folder under /games/.
+const GAME = /^games\/[a-z0-9][a-z0-9-]{0,59}$/;
+// The levels and modes a player can name as a favorite in a review, by game.
+const FAVORITES = {
+  "games/sankofa-snake": ["farm", "park", "market", "city", "road", "lab", "maze", "ocean", "village", "daily", "free", "practice"],
+};
+const validPost = (post) => SLUG.test(post) || GAME.test(post);
+const isGame = (post) => GAME.test(post);
+// The page a post's comments show on.
+const pagePath = (post) => (isGame(post) ? `/${post}/play/` : `/blog/${post}/`);
 // The name on Titus's replies from the moderation page.
 const AUTHOR_NAME = "Titus Nyarko Nde";
 // The sender of the new-comment emails. titusnyarkonde.com must be set up for sending in Email Service.
@@ -99,6 +114,8 @@ async function db(env) {
     const add = [];
     if (!have.has("parent_id")) add.push("ALTER TABLE comments ADD COLUMN parent_id INTEGER");
     if (!have.has("author")) add.push("ALTER TABLE comments ADD COLUMN author INTEGER NOT NULL DEFAULT 0");
+    if (!have.has("rating")) add.push("ALTER TABLE comments ADD COLUMN rating INTEGER");
+    if (!have.has("favorite")) add.push("ALTER TABLE comments ADD COLUMN favorite TEXT");
     for (const sql of add) {
       try { await d1.prepare(sql).run(); } catch (err) { if (!/duplicate column/i.test(String(err && err.message))) throw err; }
     }
@@ -127,13 +144,13 @@ function tidy(value, multiline) {
 
 async function listApproved(url, env) {
   const post = url.searchParams.get("post") || "";
-  if (!SLUG.test(post)) return json({ error: "post" }, 400);
+  if (!validPost(post)) return json({ error: "post" }, 400);
   const d1 = await db(env);
   if (!d1) return json({ error: "unavailable" }, 503);
   // The newest POST_SHOWN comments, put back in reading order, with their replies, plus the totals.
   // So a newly approved comment always shows, even on a post with a very long thread.
-  const cols = "SELECT id, name, body, created_at AS created, parent_id AS parent, author FROM comments";
-  const [tops, replies, totals] = await d1.batch([
+  const cols = "SELECT id, name, body, created_at AS created, parent_id AS parent, author, rating, favorite FROM comments";
+  const [tops, replies, totals, scores] = await d1.batch([
     d1.prepare(`${cols} WHERE post = ? AND status = 'approved' AND parent_id IS NULL ORDER BY created_at DESC, id DESC LIMIT ?`)
       .bind(post, POST_SHOWN),
     // Only replies in the threads shown, newest first so a new reply is never cut off, then put in reading order below.
@@ -141,14 +158,28 @@ async function listApproved(url, env) {
         SELECT id FROM comments WHERE post = ? AND status = 'approved' AND parent_id IS NULL ORDER BY created_at DESC, id DESC LIMIT ?
       ) ORDER BY created_at DESC, id DESC LIMIT 5000`).bind(post, post, POST_SHOWN),
     d1.prepare("SELECT COUNT(*) AS everything, SUM(parent_id IS NULL) AS top FROM comments WHERE post = ? AND status = 'approved'").bind(post),
+    // How many approved reviews gave each rating, over every review and not only the ones shown.
+    d1.prepare(`SELECT rating, COUNT(*) AS n FROM comments WHERE post = ? AND status = 'approved' AND parent_id IS NULL
+      AND rating IS NOT NULL GROUP BY rating`).bind(post),
   ]);
   const shown = new Set(tops.results.map((c) => c.id));
-  const tidyRow = (c) => ({ ...c, author: c.author === 1 });
-  return json({
+  const tidyRow = ({ rating, favorite, ...c }) => ({ ...c, author: c.author === 1, ...(rating ? { rating } : {}), ...(favorite ? { favorite } : {}) });
+  const out = {
     comments: [...tops.results.reverse(), ...replies.results.reverse().filter((r) => shown.has(r.parent))].map(tidyRow),
     total: totals.results[0].top || 0,
     count: totals.results[0].everything || 0,
-  });
+  };
+  if (isGame(post)) out.ratings = ratingSummary(scores.results);
+  return json(out);
+}
+
+// The number of ratings, their average to one decimal place, and how many gave each score from 1 to 10.
+function ratingSummary(rows) {
+  const counts = Array(10).fill(0);
+  for (const r of rows) if (r.rating >= 1 && r.rating <= 10) counts[r.rating - 1] = r.n;
+  const count = counts.reduce((a, b) => a + b, 0);
+  const sum = counts.reduce((a, n, i) => a + n * (i + 1), 0);
+  return { count, average: count ? Math.round((sum / count) * 10) / 10 : null, counts };
 }
 
 async function addComment(request, url, env, ctx) {
@@ -170,14 +201,21 @@ async function addComment(request, url, env, ctx) {
   const post = String(input.post || "");
   const name = tidy(input.name, false);
   const body = tidy(input.body, true);
-  if (!SLUG.test(post)) return json({ error: "post" }, 400);
+  if (!validPost(post)) return json({ error: "post" }, 400);
   if (!name || name.length > NAME_MAX) return json({ error: "name" }, 400);
-  if (!body || body.length > BODY_MAX) return json({ error: "body" }, 400);
   const replyTo = input.parent == null ? null : Number(input.parent);
   if (replyTo !== null && (!Number.isInteger(replyTo) || replyTo < 1)) return json({ error: "parent" }, 400);
+  // A game review needs a rating from 1 to 10, and its words are optional. Every other comment and
+  // every reply needs words and has no rating.
+  const review = isGame(post) && replyTo === null;
+  const rating = review ? Number(input.rating) : null;
+  if (review && !(Number.isInteger(rating) && rating >= 1 && rating <= 10)) return json({ error: "rating" }, 400);
+  if ((!review && !body) || body.length > BODY_MAX) return json({ error: "body" }, 400);
+  const favorite = review && input.favorite ? String(input.favorite) : null;
+  if (favorite !== null && !(FAVORITES[post] || []).includes(favorite)) return json({ error: "favorite" }, 400);
 
   // The post must be a real page on the site.
-  const page = await env.ASSETS.fetch(new Request(new URL(`/blog/${post}/`, url.origin), { method: "GET" }));
+  const page = await env.ASSETS.fetch(new Request(new URL(pagePath(post), url.origin), { method: "GET" }));
   if (page.status !== 200) return json({ error: "post" }, 400);
 
   if (live) {
@@ -201,15 +239,18 @@ async function addComment(request, url, env, ctx) {
   const parentId = parent ? parent.id : null;
   const status = live ? "approved" : "pending";
   const created = new Date().toISOString();
-  const saved = await d1.prepare(`INSERT INTO comments (post, name, body, status, created_at, parent_id)
-      SELECT ?, ?, ?, ?, ?, ? WHERE ? IS NULL OR EXISTS (SELECT 1 FROM comments WHERE id = ? AND parent_id IS NULL)`)
-    .bind(post, name, body, status, created, parentId, parentId, parentId).run();
+  const saved = await d1.prepare(`INSERT INTO comments (post, name, body, status, created_at, parent_id, rating, favorite)
+      SELECT ?, ?, ?, ?, ?, ?, ?, ? WHERE ? IS NULL OR EXISTS (SELECT 1 FROM comments WHERE id = ? AND parent_id IS NULL)`)
+    .bind(post, name, body, status, created, parentId, rating, favorite, parentId, parentId).run();
   if (!saved.meta || saved.meta.changes === 0) return json({ error: "parent" }, 400);
   // The email goes out after the response, so a slow or failed send never holds up the reader.
-  ctx.waitUntil(notify(env, url, page, { post, name, body, live, waiting: live ? waiting : waiting + 1, replyTo: parent && parent.name }));
+  ctx.waitUntil(notify(env, url, page, { post, name, body, rating, live, waiting: live ? waiting : waiting + 1, replyTo: parent && parent.name }));
   if (!live) return json({ status: "pending" }, 202);
   // The page adds the new comment to the list straight away, without loading them all again.
-  return json({ status: "approved", comment: { id: saved.meta.last_row_id, name, body, created, parent: parentId, author: false } }, 201);
+  const comment = { id: saved.meta.last_row_id, name, body, created, parent: parentId, author: false };
+  if (rating) comment.rating = rating;
+  if (favorite) comment.favorite = favorite;
+  return json({ status: "approved", comment }, 201);
 }
 
 // Emails Titus about a new comment, with the text, a link to the post and a link to the moderation page. Errors only
@@ -220,12 +261,13 @@ async function notify(env, url, page, c) {
     const title = ((await page.text()).match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1]?.replace(/<[^>]+>/g, "")
       .replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").trim() || c.post;
     const site = `https://${NOTIFY_FROM.email.split("@")[1]}`;
+    const where = `${site}${pagePath(c.post)}`;
+    const what = c.rating ? `${c.name} rated "${title}" ${c.rating} out of 10` : c.replyTo ? `${c.name} replied to ${c.replyTo} on "${title}"` : `${c.name} commented on "${title}"`;
     const text = [
-      c.replyTo ? `${c.name} replied to ${c.replyTo} on "${title}":` : `${c.name} commented on "${title}":`,
+      c.body ? `${what}:` : `${what}.`,
+      ...(c.body ? ["", c.body] : []),
       "",
-      c.body,
-      "",
-      c.live ? `It's on the post now: ${site}/blog/${c.post}/` : `The post: ${site}/blog/${c.post}/`,
+      c.live ? `It's on the page now: ${where}` : `The page: ${where}`,
       c.live ? `To delete it: ${site}/admin/comments/` : `Approve or delete it: ${site}/admin/comments/`,
       // Older comments from before the spam check may still be waiting.
       ...(c.waiting ? ["", c.waiting === 1 ? "One comment is waiting for your approval." : `${c.waiting} comments are waiting for your approval.`] : []),
@@ -233,7 +275,7 @@ async function notify(env, url, page, c) {
     await env.NOTIFY_EMAIL.send({
       to: env.NOTIFY_TO,
       from: NOTIFY_FROM,
-      subject: `${c.replyTo ? "New reply" : "New comment"} from ${c.name} on "${title}"`.slice(0, 200),
+      subject: `${c.rating ? `New ${c.rating}/10 review` : c.replyTo ? "New reply" : "New comment"} from ${c.name} on "${title}"`.slice(0, 200),
       text,
     });
   } catch (err) {
@@ -278,7 +320,7 @@ async function admin(request, url, env) {
     // Every waiting comment (PENDING_MAX keeps that list short), then the newest approved ones.
     // The two lists come separately, so a long approved history never hides a waiting comment.
     const cols = `SELECT c.id, c.post, c.name, c.body, c.status, c.created_at AS created, c.parent_id AS parent,
-      c.author, p.name AS parentName FROM comments c LEFT JOIN comments p ON p.id = c.parent_id`;
+      c.author, c.rating, c.favorite, p.name AS parentName FROM comments c LEFT JOIN comments p ON p.id = c.parent_id`;
     const [pending, approved, total] = await d1.batch([
       d1.prepare(`${cols} WHERE c.status = 'pending' ORDER BY c.created_at DESC, c.id DESC LIMIT ?`).bind(PENDING_MAX * 2),
       d1.prepare(`${cols} WHERE c.status = 'approved' ORDER BY c.created_at DESC, c.id DESC LIMIT ?`).bind(APPROVED_SHOWN),
@@ -294,10 +336,11 @@ async function admin(request, url, env) {
   // Titus's own comment on a post. It shows at once with the Author label.
   if (input.action === "comment") {
     const post = String(input.post || "");
-    if (!SLUG.test(post)) return json({ error: "post" }, 400);
+    if (!validPost(post)) return json({ error: "post" }, 400);
     const body = tidy(input.body, true);
     if (!body || body.length > BODY_MAX) return json({ error: "body" }, 400);
-    const page = await env.ASSETS.fetch(new Request(new URL(`/blog/${post}/`, url.origin), { method: "GET" }));
+    // On a game, Titus's own comment is a note from the author with no rating, so it never changes the average.
+    const page = await env.ASSETS.fetch(new Request(new URL(pagePath(post), url.origin), { method: "GET" }));
     if (page.status !== 200) return json({ error: "post" }, 400);
     await d1.prepare("INSERT INTO comments (post, name, body, status, created_at, author) VALUES (?, ?, ?, 'approved', ?, 1)")
       .bind(post, AUTHOR_NAME, body, new Date().toISOString()).run();

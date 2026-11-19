@@ -1,20 +1,37 @@
 ---
+// The tabs under the top menu for a tool or game with several pages, such as the Humanizer.
 import { u } from "../lib/url";
-interface Props { current: string }
-const { current } = Astro.props;
-const items = [
-  { key: "overview", href: "/tools/titus-humanizer/", label: "Overview" },
-  { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Checker" },
-  { key: "rewrite", href: "/tools/titus-humanizer/rewrite/", label: "Rewrite" },
-  { key: "any-chatbot", href: "/tools/titus-humanizer/any-chatbot/", label: "Any chatbot" },
-  { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
-];
+interface Props { current: string; tool?: keyof typeof tools }
+const tools = {
+  humanizer: {
+    title: "Humanizer",
+    home: "/tools/titus-humanizer/",
+    items: [
+      { key: "overview", href: "/tools/titus-humanizer/", label: "Overview" },
+      { key: "checker", href: "/tools/titus-humanizer/checker/", label: "Checker" },
+      { key: "rewrite", href: "/tools/titus-humanizer/rewrite/", label: "Rewrite" },
+      { key: "any-chatbot", href: "/tools/titus-humanizer/any-chatbot/", label: "Any chatbot" },
+      { key: "install", href: "/tools/titus-humanizer/install/", label: "Install" },
+    ],
+  },
+  "sankofa-snake": {
+    title: "Sankofa Snake",
+    home: "/games/sankofa-snake/",
+    items: [
+      { key: "about", href: "/games/sankofa-snake/", label: "About the game" },
+      { key: "play", href: "/games/sankofa-snake/play/", label: "Play game" },
+      { key: "how-to-play", href: "/games/sankofa-snake/how-to-play/", label: "How to play" },
+    ],
+  },
+};
+const { current, tool = "humanizer" } = Astro.props;
+const { title, home, items } = tools[tool];
 ---
-<nav class="subnav" aria-label="Humanizer">
+<nav class="subnav" aria-label={title} data-home={home}>
   <div class="wrap wrap-text subnav-inner">
-    <a class="subnav-title" href={u("/tools/titus-humanizer/")}>Humanizer</a>
+    <a class="subnav-title" href={u(home)}>{title}</a>
     <div class="subnav-right">
-      <button class="subnav-toggle" type="button" aria-expanded="false" aria-controls="subnav-links" aria-label="Open the Humanizer menu">
+      <button class="subnav-toggle" type="button" aria-expanded="false" aria-controls="subnav-links" aria-label={`Open the ${title} menu`}>
         <svg width="14" height="8" viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </button>
       <ul class="subnav-links" id="subnav-links">
@@ -26,13 +43,13 @@ const items = [
   </div>
 </nav>
 <script is:inline>
-  // On desktop, start the tabs directly under Humanizer in the top bar, so Overview sits below it.
+  // On desktop, start the tabs directly under the tool's item in the top bar, so the first tab sits below it.
   // When there isn't room for that, or on phones, the tabs stay at the right as the CSS places them.
   (() => {
     const bar = document.currentScript.previousElementSibling;
     const right = bar.querySelector(".subnav-right");
     const align = () => {
-      const top = document.querySelector('.nav-links a[href$="/tools/titus-humanizer/"]');
+      const top = document.querySelector(`.nav-links a[href$="${bar.dataset.home}"]`);
       right.classList.remove("aligned");
       if (!top || matchMedia("(max-width: 734px)").matches) return;
       const inner = bar.querySelector(".subnav-inner").getBoundingClientRect();

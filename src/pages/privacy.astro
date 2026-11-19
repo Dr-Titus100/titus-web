@@ -47,8 +47,8 @@ const onCloudflare = process.env.SITE_HOST === "cloudflare";
 
       {onCloudflare && (
         <>
-          <h2 id="comments">Comments on blog posts</h2>
-          <p>When you post a comment, your browser sends your name and comment to this site's Worker on Cloudflare. The Worker saves them in a Cloudflare D1 database with the post, the time and, for a reply, the comment you replied to. The form doesn't ask for your email, and the database doesn't keep your IP address. The Worker uses your IP address only in the moment, to limit how many comments one place can send in a minute. Cloudflare's own logs may record it, as they do for every page you load. The Worker also sends me your name and comment in an email through Cloudflare, so I can read new comments quickly.</p>
+          <h2 id="comments">Comments on blog posts and game reviews</h2>
+          <p>When you post a comment, your browser sends your name and comment to this site's Worker on Cloudflare. The Worker saves them in a Cloudflare D1 database with the post, the time and, for a reply, the comment you replied to. A review of a game works the same way, and the Worker also saves your rating from 1 to 10 and the favorite level you picked, if any. The form doesn't ask for your email, and the database doesn't keep your IP address. The Worker uses your IP address only in the moment, to limit how many comments one place can send in a minute. Cloudflare's own logs may record it, as they do for every page you load. The Worker also sends me your name and comment in an email through Cloudflare, so I can read new comments quickly.</p>
           {commentsTurnstileKey && (
             <p>To block spam, the form uses Cloudflare Turnstile, which checks your browser to tell people from bots. See the <a href="https://www.cloudflare.com/turnstile-privacy-policy/">Turnstile privacy addendum</a>. The Turnstile script loads only after you click into the form.</p>
           )}
@@ -57,7 +57,7 @@ const onCloudflare = process.env.SITE_HOST === "cloudflare";
       )}
 
       <h2 id="sankofa-snake">Sankofa Snake</h2>
-      <p>The <a href={u("/games/sankofa-snake/")}>Sankofa Snake</a> game runs entirely in your browser. It keeps your best score, your stars and the levels you've cleared in your browser's local storage, so the next level stays open when you come back. The game sends nothing to this site or anywhere else, has no ads and collects no personal information.</p>
+      <p>The <a href={u("/games/sankofa-snake/")}>Sankofa Snake</a> game runs entirely in your browser. It keeps your best score, your stars and the levels you've cleared in your browser's local storage, so the next level stays open when you come back. The game sends nothing to this site or anywhere else, has no ads and collects no personal information. If you post a review on the game's Play game tab, the review is handled like a blog comment, as described above.</p>
 
       <h2>What this site stores in your browser</h2>
       <ul>

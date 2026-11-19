@@ -1,0 +1,47 @@
+---
+import Base from "../../../layouts/Base.astro";
+import ToolNav from "../../../components/ToolNav.astro";
+import Comments from "../../../components/Comments.astro";
+import { u } from "../../../lib/url";
+import { favorites, version } from "../../../data/sankofa-snake";
+// Reviews need the Worker and database that only the Cloudflare host has (SITE_HOST=cloudflare).
+const reviews = process.env.SITE_HOST === "cloudflare";
+---
+<Base title="Play Sankofa Snake" current="sankofa-snake" description="Play Sankofa Snake, a free snake game in kente colors, in your browser. Then rate it from 1 to 10 and read what other players think.">
+  <ToolNav slot="subnav" tool="sankofa-snake" current="play" />
+  <link rel="stylesheet" href={u("/games/sankofa-snake/sankofa-snake.css")} />
+
+  <section class="hero game-hero">
+    <div class="wrap wrap-text">
+      <p class="eyebrow">Sankofa Snake {version}</p>
+      <h1 class="h1">Play Sankofa Snake</h1>
+    </div>
+  </section>
+
+  <section class="game-section">
+    <div class="wrap">
+      <div data-sankofa-snake="play"></div>
+      <noscript><p class="center muted">The game needs JavaScript to run.</p></noscript>
+    </div>
+  </section>
+
+  {reviews && (
+    <section class="section section-soft game-reviews">
+      <div class="wrap wrap-narrow">
+        <Comments post="games/sankofa-snake" review={{ favorites }} />
+      </div>
+    </section>
+  )}
+
+  <script is:inline type="module" src={u("/games/sankofa-snake/sankofa-snake.js")}></script>
+</Base>
+<style>
+  .game-hero { padding-bottom: 32px; }
+  .game-section { padding: 0 0 80px; }
+  .game-reviews :global(.comments) { margin-top: 0; padding-top: 0; border-top: 0; }
+  @media (max-width: 734px) {
+    .game-hero { padding-bottom: 20px; }
+    .game-section { padding-bottom: 56px; }
+    .game-section .wrap { padding-left: 8px; padding-right: 8px; }
+  }
+</style>

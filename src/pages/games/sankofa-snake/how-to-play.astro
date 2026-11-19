@@ -1,0 +1,36 @@
+---
+import Base from "../../../layouts/Base.astro";
+import ToolNav from "../../../components/ToolNav.astro";
+import { u } from "../../../lib/url";
+---
+<Base title="How to play Sankofa Snake" current="sankofa-snake" description="How to play Sankofa Snake: the controls, the nine levels, power-ups, currents, stars, the daily challenge, free play, practice and the sound and vibration switches.">
+  <ToolNav slot="subnav" tool="sankofa-snake" current="how-to-play" />
+  <link rel="stylesheet" href={u("/games/sankofa-snake/sankofa-snake.css")} />
+
+  <section class="hero game-hero">
+    <div class="wrap wrap-text">
+      <h1 class="h1">How to play</h1>
+      <p class="lead">The controls and rules for every level and way to play. The switches at the bottom turn the game's sound and vibration off or on.</p>
+    </div>
+  </section>
+
+  <section class="game-section">
+    <div class="wrap">
+      <div data-sankofa-snake="help"></div>
+      <noscript><p class="center muted">This page needs JavaScript to show the rules.</p></noscript>
+      <div class="btn-row center game-next">
+        <a class="btn" href={u("/games/sankofa-snake/play/")}>Play the game</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline type="module" src={u("/games/sankofa-snake/sankofa-snake.js")}></script>
+</Base>
+<style>
+  .game-hero { padding-bottom: 32px; }
+  .game-section { padding: 0 0 80px; }
+  .game-next { justify-content: center; margin-top: 32px; }
+  @media (max-width: 734px) {
+    .game-section .wrap { padding-left: 8px; padding-right: 8px; }
+  }
+</style>

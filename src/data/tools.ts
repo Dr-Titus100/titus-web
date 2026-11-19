@@ -35,7 +35,10 @@ export const tools = [
     href: "/games/sankofa-snake/",
     version: games["sankofa-snake"].version,
     gradient: "linear-gradient(135deg,#f2b705,#1e8a3e,#c8102e)",
-    links: [{ label: "Game", href: "/games/sankofa-snake/" }],
+    links: [
+      { label: "Play game", href: "/games/sankofa-snake/play/" },
+      { label: "How to play", href: "/games/sankofa-snake/how-to-play/" },
+    ],
     cta: "Play the game",
     more: { label: "See the code", href: games["sankofa-snake"].repoUrl },
     image: {

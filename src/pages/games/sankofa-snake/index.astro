@@ -1,9 +1,8 @@
 ---
 import Base from "../../../layouts/Base.astro";
+import ToolNav from "../../../components/ToolNav.astro";
 import { u } from "../../../lib/url";
-import games from "../../../data/games.generated.json";
-const game = games["sankofa-snake"];
-const version = game.version.replace(/^v/, "");
+import { game, version } from "../../../data/sankofa-snake";
 const app = {
   "@type": "VideoGame",
   name: "Sankofa Snake",
@@ -19,20 +18,18 @@ const app = {
 };
 ---
 <Base title="Sankofa Snake" current="sankofa-snake" jsonLd={app} description="Sankofa Snake is a free snake game in kente colors. You steer a snake of woven kente blocks to collect cowrie shells, and each level adds a new world and one new rule.">
-  <link rel="stylesheet" href={u("/games/sankofa-snake/sankofa-snake.css")} />
+  <ToolNav slot="subnav" tool="sankofa-snake" current="about" />
 
   <section class="hero game-hero">
     <div class="wrap wrap-text">
       <p class="eyebrow">Sankofa Snake {version}</p>
       <h1 class="h1">Sankofa Snake</h1>
       <p class="lead">A free snake game in kente colors, with the Sankofa bird as its logo. It runs in your browser on a computer or a phone.</p>
-    </div>
-  </section>
-
-  <section class="game-section">
-    <div class="wrap">
-      <div data-sankofa-snake></div>
-      <noscript><p class="center muted">The game needs JavaScript to run.</p></noscript>
+      <div class="btn-row">
+        <a class="btn" href={u("/games/sankofa-snake/play/")}>Play the game</a>
+        <a class="btn" href={u("/games/sankofa-snake/how-to-play/")}>How to play</a>
+        <a class="btn" href={u("/games/sankofa-snake/play/#reviews")}>Reviews and ratings</a>
+      </div>
     </div>
   </section>
 
@@ -41,23 +38,15 @@ const app = {
       <h2 class="h2">About the game</h2>
       <p>All nine levels are ready to play. The Farm is where you learn the controls. In the Park the snake speeds up after every 5 cowries, and in the Market you steer around stalls. In the City the edge of the board is a wall, and on the Road you cross between trotros and taxis. The Lab brings power-ups, and the Maze has narrow corridors with little room to turn. In the Ocean, currents push the snake sideways, and the Weaving village puts every challenge together at top speed. Eat 20 cowries to clear a level and open the next one.</p>
       <p>There are three other ways to play. The daily challenge mixes a world and its rules from the date, so everyone gets the same one that day, and clearing it on days in a row builds a streak. Free play is the classic game in any world you have opened, with wrap-around edges or walls. Practice runs every level at a slower speed, and a crash only stops the snake, which suits a class demo.</p>
-      <p>Each cowrie plays a short wooden note modeled on the gyil, a xylophone from the Upper West of Ghana, and phones that support it give a short buzz. You can turn the sound off with the M key or on the How to play screen. For teachers, the <a href={`${game.repoUrl}/tree/main/docs/teaching`}>teaching guides</a> use the game's code to teach programming, with exercises and answers.</p>
+      <p>Each cowrie plays a short wooden note modeled on the gyil, a xylophone from the Upper West of Ghana, and phones that support it give a short buzz. You can turn the sound off with the M key or on the <a href={u("/games/sankofa-snake/how-to-play/")}>How to play</a> tab. For teachers, the <a href={`${game.repoUrl}/tree/main/docs/teaching`}>teaching guides</a> use the game's code to teach programming, with exercises and answers.</p>
       <p>The logo is the Sankofa bird, an Adinkra symbol from Ghana. The bird turns its head back to pick up an egg from its back, and the Akan word means "go back and get it." The game draws the kente patterns and the bird in code, so it needs no image files.</p>
-      <p>Your scores and stars stay in your browser. The game sends nothing to any server and has no ads.</p>
+      <p>Your scores and stars stay in your browser. The game itself sends nothing to any server and has no ads. A review you post on the <a href={u("/games/sankofa-snake/play/#reviews")}>Play game</a> tab is saved on this site, as the <a href={u("/privacy/#comments")}>Privacy page</a> explains.</p>
       <p>The game is open source under the MIT license. You can read the code, the level files and the tests on <a href={game.repoUrl}>GitHub</a>. This page runs <a href={game.releaseUrl}>release {version}</a>.</p>
     </div>
   </section>
-
-  <script is:inline type="module" src={u("/games/sankofa-snake/sankofa-snake.js")}></script>
 </Base>
 <style>
-  .game-hero { padding-bottom: 32px; }
-  .game-section { padding: 0 0 80px; }
+  .game-hero { padding-bottom: 48px; }
   .game-about p { font-size: 19px; line-height: 1.55; margin: 20px 0 0; }
   .game-about h2 { margin-bottom: 8px; }
-  @media (max-width: 734px) {
-    .game-hero { padding-bottom: 20px; }
-    .game-section { padding-bottom: 56px; }
-    .game-section .wrap { padding-left: 8px; padding-right: 8px; }
-  }
 </style>

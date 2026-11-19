@@ -16,6 +16,8 @@ const pages = [
   "tools/titus-humanizer/any-chatbot/",
   "tools/titus-humanizer/install/",
   "games/sankofa-snake/",
+  "games/sankofa-snake/play/",
+  "games/sankofa-snake/how-to-play/",
   "privacy/",
   "terms/",
   "site-map/",
@@ -341,7 +343,7 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
 
 test("Sankofa Snake starts, runs and pauses", async ({ page }) => {
   const errors = collectErrors(page);
-  await page.goto("games/sankofa-snake/?seed=1");
+  await page.goto("games/sankofa-snake/play/?seed=1");
   const game = page.locator("[data-sankofa-snake]");
   await expect(game.getByRole("heading", { name: "Sankofa Snake", level: 2 })).toBeVisible();
   await game.getByRole("button", { name: "Play", exact: true }).click();
@@ -367,4 +369,115 @@ test("Sankofa Snake has its own menu item and the Tools card opens it", async ({
   const labels = await nav.locator(".nav-links a").allTextContents();
   expect(labels.indexOf("Sankofa Snake")).toBe(labels.indexOf("Humanizer") + 1);
   expect(labels.indexOf("Blog")).toBe(labels.indexOf("Sankofa Snake") + 1);
+});
+
+test("Sankofa Snake has About, Play game and How to play tabs", async ({ page, isMobile }) => {
+  const errors = collectErrors(page);
+  await page.goto("games/sankofa-snake/");
+  const tabs = page.getByRole("navigation", { name: "Sankofa Snake" });
+  // On a phone the tabs fold into a menu button.
+  const open = async () => { if (isMobile) await page.getByRole("button", { name: "Open the Sankofa Snake menu" }).click(); };
+  await expect(tabs.locator(".subnav-links a")).toHaveText(["About the game", "Play game", "How to play"]);
+  await expect(tabs.locator(".subnav-links a", { hasText: "About the game" })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator("[data-sankofa-snake]")).toHaveCount(0);
+
+  // The Play game tab has the three buttons and leaves How to play to its own tab.
+  await open();
+  await tabs.getByRole("link", { name: "Play game" }).click();
+  await expect(page).toHaveURL(/\/games\/sankofa-snake\/play\/$/);
+  const game = page.locator("[data-sankofa-snake]");
+  for (const name of ["Play", "Daily challenge", "Choose a level"]) {
+    await expect(game.getByRole("button", { name, exact: true })).toBeVisible();
+  }
+  await expect(game.getByRole("button", { name: "How to play" })).toHaveCount(0);
+
+  // The How to play tab shows the rules and the switches, with no Back or Play button.
+  await open();
+  await tabs.getByRole("link", { name: "How to play" }).click();
+  await expect(page).toHaveURL(/\/games\/sankofa-snake\/how-to-play\/$/);
+  const help = page.locator("[data-sankofa-snake]");
+  await expect(help.getByText("Eat 20 cowrie shells to clear a level")).toBeVisible();
+  await expect(help.getByRole("button", { name: "Sound", exact: true })).toBeVisible();
+  await expect(help.getByRole("button", { name: "Back" })).toHaveCount(0);
+  await expect(help.getByRole("button", { name: "Play", exact: true })).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+// Like the blog comments test, this needs a build with SITE_HOST=cloudflare, and fakes /api/comments.
+test("Sankofa Snake reviews show ratings, sort, and post a review and a reply", async ({ page }) => {
+  const errors = collectErrors(page);
+  const posted: any[] = [];
+  let next = 20;
+  await page.route(/\/api\/comments(\?.*)?$/, async (route) => {
+    const req = route.request();
+    if (req.method() === "POST") {
+      const sent = req.postDataJSON();
+      posted.push(sent);
+      const comment = { id: next++, name: sent.name, body: sent.body, created: "2026-11-19T12:00:00.000Z", parent: sent.parent ?? null, author: false, rating: sent.rating ?? null, favorite: sent.favorite ?? null };
+      return route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ status: "approved", comment }) });
+    }
+    expect(new URL(req.url()).searchParams.get("post")).toBe("games/sankofa-snake");
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({
+      total: 2, count: 3,
+      ratings: { count: 2, average: 7, counts: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1] },
+      comments: [
+        { id: 1, name: "Ama", body: "The Ocean level is hard.", created: "2026-11-15T10:00:00.000Z", parent: null, author: false, rating: 4, favorite: "ocean" },
+        { id: 2, name: "Kwame", body: "", created: "2026-11-16T10:00:00.000Z", parent: null, author: false, rating: 10, favorite: null },
+        { id: 3, name: "Titus Nyarko Nde", body: "Try Practice first.", created: "2026-11-16T11:00:00.000Z", parent: 1, author: true, rating: null, favorite: null },
+      ],
+    }) });
+  });
+  await page.goto("games/sankofa-snake/play/");
+  test.skip((await page.locator("#reviews").count()) === 0, "built without SITE_HOST=cloudflare, so there's no reviews section");
+  const reviews = page.locator("#reviews");
+  await expect(reviews.getByRole("heading", { name: /Reviews and ratings/ })).toBeVisible();
+  await expect(page.locator("#rv-average")).toHaveText("7.0");
+  await expect(page.locator("#rv-total")).toHaveText("From 2 ratings");
+  await expect(page.locator("#rv-bars li")).toHaveCount(10);
+  await expect(page.locator("#rv-bars li").first()).toHaveAttribute("aria-label", "10 out of 10: 1 rating");
+  await expect(page.locator("#review-1 .rv-score")).toHaveAttribute("aria-label", "Rated 4 out of 10");
+  await expect(page.locator("#review-1 .rv-fav")).toHaveText("Favorite: Level 8, Ocean");
+  await expect(page.locator("#review-1 .cm-replies .cm-badge")).toHaveText("Author");
+
+  // Newest first, then by rating either way.
+  const tops = page.locator("#cm-list > .cm-item > .cm-meta strong");
+  await expect(tops).toHaveText(["Kwame", "Ama"]);
+  await page.getByRole("button", { name: "Lowest rated" }).click();
+  await expect(tops).toHaveText(["Ama", "Kwame"]);
+  await expect(page.getByRole("button", { name: "Lowest rated" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Highest rated" }).click();
+  await expect(tops).toHaveText(["Kwame", "Ama"]);
+
+  // A review needs a rating. The text is optional.
+  await page.fill("#cm-name", "Esi");
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toHaveText("Please pick a rating from 1 to 10.");
+  await page.locator("#rv-rating label", { hasText: /^8$/ }).click();
+  await page.selectOption("#rv-favorite-level", "daily");
+  await page.fill("#cm-body", "The daily challenge is fun.");
+  await passCheck(page);
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toHaveText("Thanks. Your review is up.");
+  await expect(page.locator("#rv-total")).toHaveText("From 3 ratings");
+  await expect(page.locator("#rv-average")).toHaveText("7.3");
+  await expect(page.locator("#review-20 .rv-score")).toHaveAttribute("aria-label", "Rated 8 out of 10");
+
+  // A reply to someone else's review has no rating, and needs text.
+  await page.locator("#review-2").getByRole("button", { name: "Reply to Kwame" }).first().click();
+  await expect(page.locator("#rv-rating")).toBeHidden();
+  await expect(page.locator("#rv-favorite")).toBeHidden();
+  await expect(page.locator("#cm-send")).toHaveText("Post reply");
+  await page.fill("#cm-name", "Yaw");
+  await page.click("#cm-send");
+  await expect(page.locator("#cm-form-status")).toHaveText("Please add your name and a reply.");
+  await page.fill("#cm-body", "Agreed, the Village is the best.");
+  await page.click("#cm-send");
+  await expect(page.locator("#review-2 .cm-replies .cm-item")).toHaveCount(1);
+  await expect(page.locator("#rv-total")).toHaveText("From 3 ratings");
+  await expect(page.locator("#rv-rating")).toBeVisible();
+  expect(posted).toEqual([
+    { post: "games/sankofa-snake", name: "Esi", body: "The daily challenge is fun.", trap: false, token: "test-token", rating: 8, favorite: "daily" },
+    { post: "games/sankofa-snake", name: "Yaw", body: "Agreed, the Village is the best.", trap: false, token: "test-token", parent: 2 },
+  ]);
+  expect(errors).toEqual([]);
 });
