@@ -353,3 +353,18 @@ test("Sankofa Snake starts, runs and pauses", async ({ page }) => {
   await expect(overlay.getByText("Paused", { exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("Sankofa Snake has its own menu item and the Tools card opens it", async ({ page, isMobile }) => {
+  await page.goto("tools/");
+  // A click on the card's screenshot, away from the buttons, opens the game page. The title's link
+  // covers the card, so it takes the click (force skips the check that the image itself is on top).
+  await page.locator(".tool-feature", { hasText: "Sankofa Snake" }).locator(".tool-shot img").click({ force: true });
+  await expect(page).toHaveURL(/\/games\/sankofa-snake\/$/);
+  if (isMobile) await page.getByRole("button", { name: "Open menu" }).click();
+  const nav = page.getByRole("navigation", { name: "Site", exact: true });
+  const item = nav.getByRole("link", { name: "Sankofa Snake" });
+  await expect(item).toHaveAttribute("aria-current", "page");
+  const labels = await nav.locator(".nav-links a").allTextContents();
+  expect(labels.indexOf("Sankofa Snake")).toBe(labels.indexOf("Humanizer") + 1);
+  expect(labels.indexOf("Blog")).toBe(labels.indexOf("Sankofa Snake") + 1);
+});

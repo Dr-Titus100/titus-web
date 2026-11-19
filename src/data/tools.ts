@@ -31,7 +31,7 @@ export const tools = [
   {
     name: "Sankofa Snake",
     kind: "Game",
-    blurb: "A snake game in kente colors. Guide a snake of woven kente blocks to collect cowrie shells, with a new world and a new challenge in each level.",
+    blurb: "A snake game in kente colors. You steer a snake of woven kente blocks to collect cowrie shells, and each level adds a new world and one new rule.",
     href: "/games/sankofa-snake/",
     version: games["sankofa-snake"].version,
     gradient: "linear-gradient(135deg,#f2b705,#1e8a3e,#c8102e)",

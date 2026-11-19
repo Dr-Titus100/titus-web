@@ -16,7 +16,7 @@ import { tools } from "../../data/tools";
         <article class="card tool-feature reveal">
           <div class="tool-text">
             <p class="small muted tool-kind">{t.kind}<br />Version {t.version.replace(/^v/, "")}</p>
-            <h2 class="h-tile">{t.name}</h2>
+            <h2 class="h-tile"><a class="tool-link" href={u(t.href)}>{t.name}</a></h2>
             <p class="muted">{t.blurb}</p>
             <div class="btn-row">
               <a class="btn" href={u(t.links[0].href)}>{t.cta}</a>
@@ -35,6 +35,15 @@ import { tools } from "../../data/tools";
 <style>
   .tools-list { padding: 0 0 120px; }
   .tool-feature { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: center; padding: 56px; }
+  /* The title's link covers the whole card, so a click anywhere on it opens the tool's page. The buttons sit above it. */
+  .tool-feature { position: relative; }
+  .tool-feature:hover { border-color: var(--line); cursor: pointer; }
+  .tool-link { color: inherit; }
+  .tool-link:hover { text-decoration: none; }
+  .tool-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+  .tool-link:focus-visible { outline: none; }
+  .tool-link:focus-visible::after { outline: 2px solid var(--accent); outline-offset: -4px; }
+  .tool-text .btn-row { position: relative; z-index: 1; }
   .tool-text { display: flex; flex-direction: column; gap: 12px; }
   .tool-text p, .tool-text h2 { margin: 0; }
   .tool-text .btn-row { margin-top: 12px; }
