@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import { u } from "../lib/url";
 import { providers } from "../data/providers";
 import { commentsTurnstileKey } from "../data/profile";
-const updated = "November 13, 2026";
+const updated = "November 19, 2026";
 // SITE_HOST=cloudflare is set in Cloudflare's build settings. Builds for GitHub Pages leave it unset.
 const onCloudflare = process.env.SITE_HOST === "cloudflare";
 ---
@@ -56,10 +56,14 @@ const onCloudflare = process.env.SITE_HOST === "cloudflare";
         </>
       )}
 
+      <h2 id="sankofa-snake">Sankofa Snake</h2>
+      <p>The <a href={u("/games/sankofa-snake/")}>Sankofa Snake</a> game runs entirely in your browser. It keeps your best score, your stars and the levels you've cleared in your browser's local storage, so the next level stays open when you come back. The game sends nothing to this site or anywhere else, has no ads and collects no personal information.</p>
+
       <h2>What this site stores in your browser</h2>
       <ul>
         <li><code>th.provider</code> and <code>th.model.*</code> in local storage: the provider and model you last picked on the Rewrite page.</li>
         <li><code>th.key.*</code> in local storage: your API key, only if you turned on Remember. It expires after 30 days.</li>
+        <li><code>sankofa-snake/v1</code> in local storage: your Sankofa Snake best scores, stars and cleared levels.</li>
         <li>Your browser's normal cache of the pages, the Python runtime and the video.</li>
       </ul>
       <p>To clear them, choose Forget my key on the Rewrite page, or clear this site's data in your browser's settings.</p>

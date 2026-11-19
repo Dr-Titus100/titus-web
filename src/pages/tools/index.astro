@@ -3,11 +3,11 @@ import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url";
 import { tools } from "../../data/tools";
 ---
-<Base title="Tools" current="tools" description="Skills and plugins by Titus Nyarko Nde, each with a free way to try it on this site.">
+<Base title="Tools" current="tools" description="Skills, plugins and games by Titus Nyarko Nde, each free to try on this site.">
   <section class="hero">
     <div class="wrap wrap-text">
       <h1 class="h1">Tools</h1>
-      <p class="lead">Skills and plugins for Claude, ChatGPT and other assistants. Each one has a free way to try it on this site.</p>
+      <p class="lead">Skills and plugins for Claude, ChatGPT and other assistants, and a game. Each one is free to try on this site.</p>
     </div>
   </section>
   <section class="tools-list">
@@ -19,13 +19,13 @@ import { tools } from "../../data/tools";
             <h2 class="h-tile">{t.name}</h2>
             <p class="muted">{t.blurb}</p>
             <div class="btn-row">
-              <a class="btn" href={u(t.links[0].href)}>Try the {t.links[0].label}</a>
-              <a class="btn" href={u(t.href)}>Learn more</a>
+              <a class="btn" href={u(t.links[0].href)}>{t.cta}</a>
+              <a class="btn" href={t.more.href.startsWith("http") ? t.more.href : u(t.more.href)}>{t.more.label}</a>
             </div>
           </div>
           <picture class="tool-shot">
-            <source srcset={u("/images/checker-light.webp")} type="image/webp" />
-            <img src={u("/images/checker-light.jpg")} alt="The titus-humanizer Checker scoring a sample email 0.80, high, with each AI-writing pattern highlighted" width="1152" height="770" loading="lazy" decoding="async" />
+            <source srcset={u(t.image.webp)} type="image/webp" />
+            <img src={u(t.image.jpg)} alt={t.image.alt} width={t.image.width} height={t.image.height} loading="lazy" decoding="async" />
           </picture>
         </article>
       ))}

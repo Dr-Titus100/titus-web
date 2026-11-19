@@ -15,6 +15,7 @@ const pages = [
   "tools/titus-humanizer/rewrite/",
   "tools/titus-humanizer/any-chatbot/",
   "tools/titus-humanizer/install/",
+  "games/sankofa-snake/",
   "privacy/",
   "terms/",
   "site-map/",
@@ -336,4 +337,19 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
   ]);
   // The browser logs the 401 answer to the wrong token. Nothing else should show up.
   expect(errors.filter((e) => !e.includes("401"))).toEqual([]);
+});
+
+test("Sankofa Snake starts, runs and pauses", async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto("games/sankofa-snake/?seed=1");
+  const game = page.locator("[data-sankofa-snake]");
+  await expect(game.getByRole("heading", { name: "Sankofa Snake", level: 2 })).toBeVisible();
+  await game.getByRole("button", { name: "Play", exact: true }).click();
+  const overlay = game.locator("[data-overlay]");
+  await expect(overlay.getByText("Press an arrow key or swipe to start.")).toBeVisible();
+  await page.keyboard.press("ArrowUp");
+  await expect(overlay).toBeHidden();
+  await page.keyboard.press("p");
+  await expect(overlay.getByText("Paused", { exact: true })).toBeVisible();
+  expect(errors).toEqual([]);
 });
