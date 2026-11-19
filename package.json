@@ -4,8 +4,9 @@
   "description": "Website for Titus Nyarko Nde: skills, plugins, writing and experience.",
   "scripts": {
     "fetch-skills": "node scripts/fetch-skills.mjs",
+    "fetch-games": "node scripts/fetch-games.mjs",
     "copy-pyodide": "node scripts/copy-pyodide.mjs",
-    "prepare-site": "npm run fetch-skills && npm run copy-pyodide",
+    "prepare-site": "npm run fetch-skills && npm run fetch-games && npm run copy-pyodide",
     "dev": "npm run prepare-site && astro dev",
     "build": "npm run prepare-site && astro build && node scripts/add-csp.mjs",
     "preview": "astro preview",

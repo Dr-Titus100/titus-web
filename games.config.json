@@ -1,0 +1,15 @@
+{
+  "games": [
+    {
+      "slug": "sankofa-snake",
+      "name": "Sankofa Snake",
+      "repo": "Dr-Titus100/sankofa-snake",
+      "tag": "v0.1.0",
+      "files": {
+        "sankofa-snake.js": "8e631b497b34f2f5990fc26bd2afdb733bec9f2a068c767add1f5424a9394806",
+        "sankofa-snake.css": "a444c9ca4c6a4cf0dd285bcdadcc617782f0fc6f1c8c760646db5c1f03810631",
+        "sankofa-logo.svg": "6cf167e1e5ca40dff9d071c09cda7f8946abd6165b1a08e811cb74337a39b263"
+      }
+    }
+  ]
+}
