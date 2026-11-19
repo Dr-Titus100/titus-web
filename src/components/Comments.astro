@@ -3,34 +3,71 @@
 // database. With the Turnstile spam check on, a comment shows as soon as it passes the check. Without it,
 // each one waits until Titus approves it on /admin/comments/. Titus can delete any comment there. Readers can reply
 // to any comment. Replies are one level deep, and Titus's own replies carry an "Author" label.
+//
+// With `review`, the same section holds a game's reviews instead. Each review rates the game from 1
+// to 10 and may name a favorite level, and its words are optional. The section then opens with the
+// average rating and how many players gave each score, and the reviews can be sorted.
 import { u } from "../lib/url";
 import { commentsTurnstileKey } from "../data/profile";
-interface Props { post: string }
-const { post } = Astro.props;
+interface Props { post: string; review?: { favorites: { id: string; label: string }[] } }
+const { post, review } = Astro.props;
+const noun = review ? "review" : "comment";
 ---
-<section class="comments" id="comments" aria-labelledby="comments-title" data-post={post} data-api={u("/api/comments")}>
-  <h2 class="comments-title" id="comments-title">Comments<span id="cm-count"></span></h2>
-  <p class="small muted" id="cm-status" role="status" aria-live="polite">Loading comments...</p>
+<section class={review ? "comments reviews" : "comments"} id={review ? "reviews" : "comments"} aria-labelledby="comments-title" data-post={post} data-api={u("/api/comments")}
+  data-review={review ? JSON.stringify(Object.fromEntries(review.favorites.map((f) => [f.id, f.label]))) : undefined}>
+  <h2 class="comments-title" id="comments-title">{review ? "Reviews and ratings" : "Comments"}<span id="cm-count"></span></h2>
+  {review && (
+    <div class="rv-summary" id="rv-summary" hidden>
+      <p class="rv-average"><strong id="rv-average"></strong><span>out of 10</span></p>
+      <p class="small muted rv-total" id="rv-total"></p>
+      <ol class="rv-bars" id="rv-bars" aria-label="How many players gave each rating"></ol>
+    </div>
+    <div class="rv-sort" id="rv-sort" role="group" aria-label="Sort reviews" hidden>
+      <span class="small muted">Sort by</span>
+      <button type="button" class="rv-sort-btn" data-sort="newest" aria-pressed="true">Newest</button>
+      <button type="button" class="rv-sort-btn" data-sort="highest" aria-pressed="false">Highest rated</button>
+      <button type="button" class="rv-sort-btn" data-sort="lowest" aria-pressed="false">Lowest rated</button>
+    </div>
+  )}
+  <p class="small muted" id="cm-status" role="status" aria-live="polite">{review ? "Loading reviews..." : "Loading comments..."}</p>
   <ol class="cm-list" id="cm-list"></ol>
 
   <form class="card cm-form" id="comment-form" data-sitekey={commentsTurnstileKey} novalidate>
-    <h3 class="cm-form-title" id="cm-form-title">Leave a comment</h3>
+    <h3 class="cm-form-title" id="cm-form-title">{review ? "Rate the game" : "Leave a comment"}</h3>
     <p class="small cm-replying" id="cm-replying" hidden>Replying to <strong id="cm-replying-name"></strong>. <button type="button" class="cm-link" id="cm-cancel-reply">Cancel reply</button></p>
     <div class="field">
       <label for="cm-name">Your name</label>
       <input type="text" id="cm-name" name="name" autocomplete="name" required maxlength="60" />
     </div>
+    {review && (
+      <fieldset class="field rv-rating" id="rv-rating">
+        <legend>Your rating</legend>
+        <p class="small muted rv-hint">1 is the lowest and 10 is the highest.</p>
+        <div class="rv-scale">
+          {Array.from({ length: 10 }, (_, i) => (
+            <label class="rv-choice"><input type="radio" name="rating" value={i + 1} required /><span>{i + 1}</span></label>
+          ))}
+        </div>
+      </fieldset>
+      <div class="field rv-favorite" id="rv-favorite">
+        <label for="rv-favorite-level">Favorite level or way to play (optional)</label>
+        <select id="rv-favorite-level" name="favorite">
+          <option value="">No favorite</option>
+          {review.favorites.map((f) => <option value={f.id}>{f.label}</option>)}
+        </select>
+      </div>
+    )}
     <div class="field">
-      <label for="cm-body">Your comment</label>
-      <textarea id="cm-body" name="body" required maxlength="3000"></textarea>
+      <label for="cm-body" id="cm-body-label">{review ? "Your review (optional)" : "Your comment"}</label>
+      <textarea id="cm-body" name="body" required={!review} maxlength="3000"></textarea>
     </div>
     <input type="checkbox" name="trap" class="cm-trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
     <div class="cm-check" id="cm-check"></div>
     <div class="btn-row">
-      <button class="btn" type="submit" id="cm-send">Post comment</button>
+      <button class="btn" type="submit" id="cm-send">{review ? "Post review" : "Post comment"}</button>
       <span class="small muted" id="cm-form-status" role="status" aria-live="polite"></span>
     </div>
-    <p class="small muted cm-note">{commentsTurnstileKey ? "Your comment shows up here as soon as you post it. I read every one and remove spam." : "I read every comment before it shows up here."} The site keeps your name, your comment and the time in a Cloudflare database. It doesn't ask for your email and doesn't store your IP address. The <a href={u("/privacy/#comments")}>Privacy page</a> has the details.</p>
+    <p class="small muted cm-note">{commentsTurnstileKey ? `Your ${noun} shows up here as soon as you post it. I read every one and remove spam.` : `I read every ${noun} before it shows up here.`} The site keeps your name, your {review ? "rating, your review" : "comment"} and the time in a Cloudflare database. It doesn't ask for your email and doesn't store your IP address. The <a href={u("/privacy/#comments")}>Privacy page</a> has the details.</p>
   </form>
 </section>
 
@@ -59,15 +96,56 @@ const { post } = Astro.props;
   .cm-check:empty { display: none; }
   .cm-note { margin: 0; }
   #cm-form-status.ok { color: var(--good); }
+  .rv-summary { display: grid; grid-template-columns: auto 1fr; gap: 4px 32px; align-items: center; margin: 8px 0 24px; padding: 20px 24px; border-radius: 18px; background: var(--card); border: 1px solid var(--card-line); }
+  .rv-summary[hidden] { display: none; }
+  .rv-average { margin: 0; display: flex; align-items: baseline; gap: 8px; }
+  .rv-average strong { font-size: 48px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+  .rv-average span { color: var(--ink-soft); }
+  .rv-total { grid-column: 1; margin: 0; }
+  .rv-bars { grid-column: 2; grid-row: 1 / span 2; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+  .rv-bar { display: grid; grid-template-columns: 22px 1fr 32px; gap: 10px; align-items: center; font-size: 13px; color: var(--ink-soft); }
+  .rv-bar span:first-child { text-align: right; }
+  .rv-track { height: 8px; border-radius: 4px; background: var(--line-soft); overflow: hidden; }
+  .rv-fill { display: block; height: 100%; border-radius: 4px; background: var(--link); }
+  .rv-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 20px; }
+  .rv-sort[hidden] { display: none; }
+  .rv-sort-btn { padding: 6px 14px; border-radius: 980px; border: 1px solid var(--line-soft); background: none; color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; }
+  .rv-sort-btn[aria-pressed="true"] { border-color: var(--link); color: var(--link); font-weight: 600; }
+  .rv-score { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+  .rv-score strong { font-size: 15px; }
+  .rv-pips { display: inline-flex; gap: 3px; }
+  .rv-pips i { width: 10px; height: 10px; border-radius: 3px; background: var(--line-soft); }
+  .rv-pips i.on { background: var(--link); }
+  .rv-fav { margin: 0 0 6px; font-size: 15px; color: var(--ink-soft); }
+  .rv-rating { border: 0; padding: 0; margin: 0; min-width: 0; }
+  .rv-rating legend { padding: 0; margin-bottom: 4px; font-weight: 600; }
+  .rv-hint { margin: 0 0 10px; }
+  .rv-scale { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; }
+  .rv-choice { position: relative; display: block; }
+  .rv-choice input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .rv-choice span { display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 12px; border: 1px solid var(--line-soft); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rv-choice input:checked + span { background: var(--link); border-color: var(--link); color: #fff; }
+  .rv-choice input:focus-visible + span { outline: 2px solid var(--link); outline-offset: 2px; }
+  .rv-favorite select { width: 100%; }
+  @media (max-width: 734px) {
+    .rv-summary { grid-template-columns: 1fr; }
+    .rv-bars { grid-column: 1; grid-row: auto; margin-top: 12px; }
+    .rv-scale { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
   #cm-form-status.err { color: var(--bad); }
 </style>
 
 <script>
-  type Comment = { id: number; name: string; body: string; created: string; parent: number | null; author: boolean };
-  const box = document.getElementById("comments");
+  type Comment = { id: number; name: string; body: string; created: string; parent: number | null; author: boolean; rating?: number; favorite?: string };
+  type Ratings = { count: number; average: number | null; counts: number[] };
+  const box = document.getElementById("comments") || document.getElementById("reviews");
   if (box) {
     const api = box.dataset.api!;
     const post = box.dataset.post!;
+    // For a game, the favorite levels by id, such as { ocean: "Ocean" }. A blog post has none.
+    const favorites: Record<string, string> | null = box.dataset.review ? JSON.parse(box.dataset.review) : null;
+    const review = favorites !== null;
+    const noun = review ? "review" : "comment";
     const list = document.getElementById("cm-list")!;
     const count = document.getElementById("cm-count")!;
     const status = document.getElementById("cm-status")!;
@@ -78,25 +156,50 @@ const { post } = Astro.props;
     const replying = document.getElementById("cm-replying")!;
     const replyingName = document.getElementById("cm-replying-name")!;
     const bodyField = document.getElementById("cm-body") as HTMLTextAreaElement;
+    const bodyLabel = document.getElementById("cm-body-label")!;
+    const ratingBox = document.getElementById("rv-rating");
+    const favoriteBox = document.getElementById("rv-favorite");
     const say = (text: string, kind = "") => { formStatus.textContent = text; formStatus.className = `small muted ${kind}`; };
     const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
-    // The one form writes both comments and replies. Reply buttons switch it to a reply.
+    // The one form writes both comments and replies. Reply buttons switch it to a reply. A reply to a
+    // review has no rating, so the rating and favorite fields hide while replying.
     let replyTo: number | null = null;
     const setReply = (c: Comment | null) => {
       replyTo = c ? c.id : null;
       replyingName.textContent = c ? c.name : "";
       replying.hidden = !c;
-      formTitle.textContent = c ? "Write a reply" : "Leave a comment";
-      send.textContent = c ? "Post reply" : "Post comment";
+      formTitle.textContent = c ? "Write a reply" : review ? "Rate the game" : "Leave a comment";
+      send.textContent = c ? "Post reply" : review ? "Post review" : "Post comment";
+      if (review) {
+        ratingBox!.hidden = Boolean(c);
+        favoriteBox!.hidden = Boolean(c);
+        bodyLabel.textContent = c ? "Your reply" : "Your review (optional)";
+        bodyField.required = Boolean(c);
+      }
     };
     document.getElementById("cm-cancel-reply")!.addEventListener("click", () => { setReply(null); bodyField.focus(); });
+
+    // A review's score as a number and ten small blocks, read out as "Rated 8 out of 10".
+    const score = (rating: number) => {
+      const p = document.createElement("p");
+      p.className = "rv-score";
+      p.setAttribute("aria-label", `Rated ${rating} out of 10`);
+      const pips = document.createElement("span");
+      pips.className = "rv-pips";
+      pips.setAttribute("aria-hidden", "true");
+      for (let i = 1; i <= 10; i++) pips.append(Object.assign(document.createElement("i"), { className: i <= rating ? "on" : "" }));
+      const num = Object.assign(document.createElement("strong"), { textContent: `${rating}/10` });
+      num.setAttribute("aria-hidden", "true");
+      p.append(pips, num);
+      return p;
+    };
 
     // Comment text goes in with textContent, so nothing a reader types runs as HTML.
     const item = (c: Comment) => {
       const li = document.createElement("li");
       li.className = "cm-item";
-      li.id = `comment-${c.id}`;
+      li.id = `${noun}-${c.id}`;
       const meta = document.createElement("p");
       meta.className = "cm-meta";
       const who = document.createElement("strong");
@@ -112,9 +215,17 @@ const { post } = Astro.props;
       when.dateTime = c.created;
       when.textContent = day(c.created);
       meta.append(when);
-      const body = document.createElement("p");
-      body.className = "cm-body";
-      body.textContent = c.body;
+      li.append(meta);
+      if (c.rating) li.append(score(c.rating));
+      if (c.favorite && favorites?.[c.favorite]) {
+        li.append(Object.assign(document.createElement("p"), { className: "rv-fav", textContent: `Favorite: ${favorites[c.favorite]}` }));
+      }
+      if (c.body) {
+        const body = document.createElement("p");
+        body.className = "cm-body";
+        body.textContent = c.body;
+        li.append(body);
+      }
       const reply = Object.assign(document.createElement("button"), { type: "button", className: "cm-link cm-reply-btn", textContent: "Reply" });
       reply.setAttribute("aria-label", `Reply to ${c.name}`);
       reply.addEventListener("click", () => {
@@ -122,8 +233,53 @@ const { post } = Astro.props;
         form.scrollIntoView({ behavior: "smooth", block: "start" });
         bodyField.focus({ preventScroll: true });
       });
-      li.append(meta, body, reply);
+      li.append(reply);
       return li;
+    };
+
+    // The rating summary: the average, the number of ratings, and a bar for each score from 10 down to 1.
+    let ratings: Ratings = { count: 0, average: null, counts: Array(10).fill(0) };
+    const showRatings = () => {
+      const summary = document.getElementById("rv-summary");
+      if (!summary) return;
+      summary.hidden = ratings.count === 0;
+      if (!ratings.count) return;
+      document.getElementById("rv-average")!.textContent = (ratings.average ?? 0).toFixed(1);
+      document.getElementById("rv-total")!.textContent = ratings.count === 1 ? "From 1 rating" : `From ${ratings.count} ratings`;
+      const most = Math.max(...ratings.counts, 1);
+      document.getElementById("rv-bars")!.replaceChildren(...ratings.counts.map((n, i) => {
+        const li = document.createElement("li");
+        li.className = "rv-bar";
+        li.setAttribute("aria-label", `${i + 1} out of 10: ${n === 1 ? "1 rating" : `${n} ratings`}`);
+        const track = Object.assign(document.createElement("span"), { className: "rv-track" });
+        const fill = Object.assign(document.createElement("span"), { className: "rv-fill" });
+        fill.style.width = `${(n / most) * 100}%`;
+        track.append(fill);
+        const label = Object.assign(document.createElement("span"), { textContent: String(i + 1) });
+        const num = Object.assign(document.createElement("span"), { textContent: String(n) });
+        for (const el of [label, track, num]) el.setAttribute("aria-hidden", "true");
+        li.append(label, track, num);
+        return li;
+      }).reverse());
+    };
+    const addRating = (r: number) => {
+      const counts = [...ratings.counts];
+      counts[r - 1] += 1;
+      const total = ratings.count + 1;
+      const sum = counts.reduce((a, n, i) => a + n * (i + 1), 0);
+      ratings = { count: total, average: Math.round((sum / total) * 10) / 10, counts };
+      showRatings();
+    };
+
+    // Reviews can be sorted. Replies always stay under their review, oldest first.
+    let sort: "newest" | "highest" | "lowest" = "newest";
+    const order = (tops: Comment[]) => {
+      if (!review) return tops;
+      const byDate = [...tops].sort((a, b) => b.created.localeCompare(a.created) || b.id - a.id);
+      if (sort === "newest") return byDate;
+      const dir = sort === "highest" ? -1 : 1;
+      // Notes from the author have no rating and go after the rated reviews.
+      return byDate.sort((a, b) => (a.rating ? 0 : 1) - (b.rating ? 0 : 1) || dir * ((a.rating ?? 0) - (b.rating ?? 0)));
     };
 
     // What the list shows now, so a new comment can join it without loading everything again.
@@ -136,7 +292,7 @@ const { post } = Astro.props;
       shown = comments;
       shownTotal = total;
       shownAll = all;
-      const tops = comments.filter((c) => !c.parent);
+      const tops = order(comments.filter((c) => !c.parent));
       list.replaceChildren(...tops.map((c) => {
         const li = item(c);
         const replies = document.createElement("ol");
@@ -148,9 +304,20 @@ const { post } = Astro.props;
       count.textContent = comments.length ? ` (${Math.max(all, comments.length)})` : "";
       // A very long thread shows only its newest comments, and says so.
       const partial = total > tops.length;
-      status.textContent = !comments.length ? "No comments yet." : partial ? `These are the newest ${tops.length} comments.` : "";
+      status.textContent = !comments.length
+        ? review ? "No reviews yet. Be the first to rate the game." : "No comments yet."
+        : partial ? `These are the newest ${tops.length} ${noun}s.` : "";
       status.hidden = comments.length > 0 && !partial;
+      const sorter = document.getElementById("rv-sort");
+      if (sorter) sorter.hidden = tops.length < 2;
     };
+    document.querySelectorAll<HTMLButtonElement>(".rv-sort-btn").forEach((b) => {
+      b.addEventListener("click", () => {
+        sort = b.dataset.sort as typeof sort;
+        document.querySelectorAll<HTMLButtonElement>(".rv-sort-btn").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+        show(shown, shownTotal, shownAll);
+      });
+    });
 
     fetch(`${api}?post=${encodeURIComponent(post)}`, { headers: { Accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
@@ -161,9 +328,15 @@ const { post } = Astro.props;
         const tops = loaded.filter((c) => !c.parent).length;
         const total = typeof out.total === "number" ? out.total : tops;
         const count = typeof out.count === "number" ? out.count : loaded.length;
+        if (review && out.ratings && Array.isArray(out.ratings.counts) && out.ratings.counts.length === 10) {
+          ratings = out.ratings;
+          // A review posted before the list loaded isn't in the server's numbers yet.
+          for (const m of extra) if (m.rating) addRating(m.rating);
+          showRatings();
+        }
         show(comments, total + extra.filter((c) => !c.parent).length, count + extra.length);
       })
-      .catch(() => { status.textContent = "Comments couldn't load right now. Try reloading the page in a minute."; });
+      .catch(() => { status.textContent = `${review ? "Reviews" : "Comments"} couldn't load right now. Try reloading the page in a minute.`; });
 
     // The optional Turnstile check loads only when someone starts writing a comment.
     const sitekey = form.dataset.sitekey || "";
@@ -194,9 +367,17 @@ const { post } = Astro.props;
       const data = new FormData(form);
       const name = String(data.get("name") || "").trim();
       const body = String(data.get("body") || "").trim();
-      if (!name || !body) { say("Please add your name and a comment.", "err"); return; }
+      const rating = review && replyTo === null ? Number(data.get("rating") || 0) : 0;
+      const favorite = review && replyTo === null ? String(data.get("favorite") || "") : "";
+      if (review && replyTo === null) {
+        if (!name) { say("Please add your name.", "err"); return; }
+        if (!rating) { say("Please pick a rating from 1 to 10.", "err"); return; }
+      } else if (!name || !body) {
+        say(replyTo !== null ? "Please add your name and a reply." : "Please add your name and a comment.", "err");
+        return;
+      }
       if (sitekey && !token) { say(`Please finish the check above the ${send.textContent} button.`, "err"); return; }
-      if (!navigator.onLine) { say("You're offline. Your comment is still here. Connect and try again.", "err"); return; }
+      if (!navigator.onLine) { say(`You're offline. Your ${noun} is still here. Connect and try again.`, "err"); return; }
       send.disabled = true;
       say("Posting...");
       const controller = new AbortController();
@@ -206,34 +387,43 @@ const { post } = Astro.props;
           method: "POST",
           signal: controller.signal,
           headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ post, name, body, trap: data.get("trap") !== null, token, ...(replyTo ? { parent: replyTo } : {}) }),
+          body: JSON.stringify({
+            post, name, body, trap: data.get("trap") !== null, token,
+            ...(replyTo ? { parent: replyTo } : {}),
+            ...(rating ? { rating } : {}),
+            ...(favorite ? { favorite } : {}),
+          }),
         });
         const out = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(out.error || "server");
         const wasReply = replyTo !== null;
         form.reset();
         setReply(null);
+        const what = wasReply ? "reply" : noun;
         // A comment that passed the spam check is live, so it joins the list at once.
         const added: Comment | undefined = out.status === "approved" && out.comment ? out.comment : undefined;
         if (added) {
           mine.push(added);
+          if (added.rating) addRating(added.rating);
           show([...shown, added], shownTotal + (added.parent ? 0 : 1), Math.max(shownAll, shown.length) + 1);
-          say(wasReply ? "Thanks. Your reply is up." : "Thanks. Your comment is up.", "ok");
-          document.getElementById(`comment-${added.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+          say(`Thanks. Your ${what} is up.`, "ok");
+          document.getElementById(`${noun}-${added.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
         } else {
-          say(wasReply ? "Thanks. Your reply will show up here after I read it." : "Thanks. Your comment will show up here after I read it.", "ok");
+          say(`Thanks. Your ${what} will show up here after I read it.`, "ok");
         }
       } catch (err: any) {
         const why: Record<string, string> = {
-          busy: "Too many comments came from here in a short time.",
+          busy: `Too many ${noun}s came from here in a short time.`,
           check: "The spam check didn't pass.",
-          full: "Comments are paused for a while.",
+          full: `${review ? "Reviews" : "Comments"} are paused for a while.`,
           name: "The name is too long.",
-          body: "The comment is too long.",
-          parent: "The comment you're replying to isn't available anymore.",
+          body: `The ${replyTo !== null ? "reply" : noun} is too long.`,
+          parent: `The ${noun} you're replying to isn't available anymore.`,
+          rating: "Please pick a rating from 1 to 10.",
+          favorite: "That favorite isn't on the list. Pick another one.",
         };
-        const reason = controller.signal.aborted ? "The site didn't answer in time." : why[err?.message] || "The comment couldn't be saved.";
-        say(`${reason} Your comment is still here. Try again in a minute.`, "err");
+        const reason = controller.signal.aborted ? "The site didn't answer in time." : why[err?.message] || `The ${noun} couldn't be saved.`;
+        say(`${reason} Your ${noun} is still here. Try again in a minute.`, "err");
       } finally {
         window.clearTimeout(timer);
         send.disabled = false;

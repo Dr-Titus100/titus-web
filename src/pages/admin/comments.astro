@@ -1,5 +1,5 @@
 ---
-// Titus's moderation page for blog comments. It works only on the Cloudflare site, where the Worker
+// Titus's moderation page for blog comments and game reviews. It works only on the Cloudflare site, where the Worker
 // checks the admin token (the COMMENTS_ADMIN_TOKEN secret) on every request. The page itself holds
 // no secrets, and search engines are told to skip it.
 import Base from "../../layouts/Base.astro";
@@ -9,15 +9,15 @@ import { getCollection } from "astro:content";
 // The posts you can start a comment on, newest first.
 const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
-<Base title="Comment moderation" description="Approve or delete comments on the blog." noindex>
+<Base title="Comment moderation" description="Approve or delete comments on the blog and reviews of the games." noindex>
   <section class="section">
     <div class="wrap wrap-narrow">
       <h1 class="h1">Comment moderation</h1>
       <p class="lead">{commentsTurnstileKey
         ? "New comments and replies show on their post as soon as they pass the spam check, and they're listed here under Approved. Older ones from before the check may still wait for you."
-        : "New comments and replies wait here until you approve them. Approved ones show under their post."} You can reply to any comment or start your own, and deleting a comment deletes its replies too.</p>
+        : "New comments and replies wait here until you approve them. Approved ones show under their post."} Reviews of Sankofa Snake are listed here too, with their rating. You can reply to any comment or start your own, and deleting a comment deletes its replies too.</p>
 
-      <form class="card mod-login" id="mod-login" data-api={u("/api/comments/admin")} data-blog={u("/blog/")} novalidate>
+      <form class="card mod-login" id="mod-login" data-api={u("/api/comments/admin")} data-blog={u("/blog/")} data-root={u("/")} novalidate>
         <div class="field">
           <label for="mod-token">Admin token</label>
           <input type="password" id="mod-token" autocomplete="current-password" required />
@@ -34,9 +34,10 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
         <form class="card mod-new" id="mod-new" novalidate>
           <h2 class="mod-new-title">New comment</h2>
           <div class="field">
-            <label for="mod-new-post">Post</label>
+            <label for="mod-new-post">Post or game</label>
             <select id="mod-new-post">
               {posts.map((p) => <option value={p.id}>{p.data.title}</option>)}
+              <option value="games/sankofa-snake">Sankofa Snake reviews (a note from you, with no rating)</option>
             </select>
           </div>
           <div class="field">
@@ -46,7 +47,7 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
           <div class="btn-row">
             <button class="btn btn-small" type="submit" id="mod-new-send">Post comment</button>
           </div>
-          <p class="small muted mod-note">It shows on the post at once, with your name and the Author label.</p>
+          <p class="small muted mod-note">It shows on the post or the game's Play page at once, with your name and the Author label.</p>
         </form>
         <h2 class="mod-heading">Waiting for approval <span id="mod-pending-count"></span></h2>
         <ol class="mod-list" id="mod-pending"></ol>
@@ -70,6 +71,8 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
   .mod-meta { margin: 0 0 8px; font-size: 15px; color: var(--ink-soft); }
   .mod-meta strong { color: var(--ink); margin-right: 8px; }
   .mod-body { margin: 0 0 12px; white-space: pre-line; overflow-wrap: anywhere; }
+  .mod-body:empty { display: none; }
+  .mod-rating { margin: 0 0 8px; font-weight: 600; }
   .mod-badge { display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 980px; font-size: 12px; font-weight: 600; color: var(--link); box-shadow: inset 0 0 0 1px var(--link); }
   .mod-reply { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
   .mod-reply textarea { min-height: 120px; }
@@ -81,10 +84,13 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
 
 <script>
   type Row = { id: number; post: string; name: string; body: string; status: "pending" | "approved"; created: string;
-    parent: number | null; parentName: string | null; author: boolean };
+    parent: number | null; parentName: string | null; author: boolean; rating?: number | null; favorite?: string | null };
   const login = document.getElementById("mod-login") as HTMLFormElement;
   const api = login.dataset.api!;
   const blog = login.dataset.blog!;
+  const root = login.dataset.root!;
+  // A game's reviews show on its Play page. Everything else is a blog post.
+  const pageOf = (post: string) => (post.startsWith("games/") ? `${root}${post}/play/#reviews` : `${blog}${post}/`);
   const tokenInput = document.getElementById("mod-token") as HTMLInputElement;
   const forget = document.getElementById("mod-forget") as HTMLButtonElement;
   const status = document.getElementById("mod-status")!;
@@ -135,13 +141,15 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
       meta.append(badge);
     }
     const link = document.createElement("a");
-    link.href = `${blog}${c.post}/`;
-    link.textContent = c.post;
+    link.href = pageOf(c.post);
+    link.textContent = c.post.startsWith("games/") ? `${c.post.slice(6)} reviews` : c.post;
     const when = new Date(c.created).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
     meta.append(c.parent ? `${when}, replying to ${c.parentName || "a deleted comment"} on ` : `${when} on `, link);
     const body = document.createElement("p");
     body.className = "mod-body";
     body.textContent = c.body;
+    const rating = Object.assign(document.createElement("p"), { className: "mod-rating" });
+    rating.textContent = c.rating ? `Rated ${c.rating} out of 10${c.favorite ? `. Favorite: ${c.favorite}` : ""}` : "";
     const row = document.createElement("div");
     row.className = "btn-row";
     if (c.status === "pending") {
@@ -158,7 +166,7 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
       window.setTimeout(() => { delete del.dataset.armed; del.textContent = "Delete"; }, 5000);
     });
     row.append(del);
-    li.append(meta, body, row);
+    li.append(meta, ...(c.rating ? [rating] : []), body, row);
     // Your reply shows at once with the Author label. Replying to a waiting comment approves it too.
     if (!c.author) {
       const open = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: c.status === "pending" ? "Approve and reply" : "Reply" });
