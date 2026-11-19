@@ -88,6 +88,6 @@ At the end of the thesis I recommended several next steps:
 
 ## Sources
 
-- Nde, T. N. (2018). *Gamma distribution modelling and time series analysis and forecasting on rainfall in Tamale Metropolitan Assembly.* BSc project, Department of Statistics, University for Development Studies, Ghana.
+- Nde, T. N. (2018). *Gamma distribution modelling and time series analysis and forecasting on rainfall in Tamale Metropolitan Assembly.* BSc thesis, Department of Statistics, University for Development Studies, Ghana.
 - Rainfall data: monthly totals from the Tamale meteorological office, 1987 to 2017.
 - Amankwa, E. (2014). *Rising temperature and declining rainfall -- A threat to water security in Northern Region of Ghana.* British Journal of Applied Science & Technology, 4(34), 4721–4730.
