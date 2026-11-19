@@ -47,7 +47,7 @@ First, I fitted a few simple trend lines to the 31 years of monthly data. The be
 
 Next, I ran formal trend tests, which ask whether a pattern is strong enough to rule out chance. The Mann-Kendall test, a common choice for climate data, gave a p-value of 0.967. In plain terms, a downward drift this small would show up by chance almost all the time even if nothing were changing. A version of the test that accounts for the seasons gave the same answer (p = 0.966). Two simpler tests also found no clear trend.
 
-So the slight decline in the fitted curve is not statistically significant. Over 1987 to 2017, the records gave no solid evidence that Tamale's rainfall was going up or down. That agrees with an earlier study of northern Ghana (Amankwah, 2014), which used the same Mann-Kendall test on 50 years of data and also found no significant rainfall trend.
+So the slight decline in the fitted curve is not statistically significant. Over 1987 to 2017, the records gave no solid evidence that Tamale's rainfall was going up or down. That agrees with an earlier study of northern Ghana (Amankwa, 2014), which used the same Mann-Kendall test on 50 years of data and also found no significant rainfall trend.
 
 Even without a trend, the city's water supply leans heavily on rain. In the thesis I recommended that residents and planners should keep developing other water sources as a safeguard.
 
