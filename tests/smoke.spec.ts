@@ -126,8 +126,8 @@ test("the blog list filters posts by tag and keeps the tag in the address", asyn
   const total = await rows.count();
   await page.getByRole("tab", { name: "Research", exact: true }).click();
   await expect(page).toHaveURL(/\?tag=research$/);
-  await expect(rows.filter({ visible: true })).toHaveCount(1);
-  await expect(rows.filter({ visible: true })).toContainText("AI fiction gives itself away");
+  await expect(rows.filter({ visible: true })).toHaveCount(2);
+  await expect(rows.filter({ visible: true })).toContainText(["What 31 years of rain records", "AI fiction gives itself away"]);
   await page.getByRole("tab", { name: "All", exact: true }).click();
   await expect(page).not.toHaveURL(/tag=/);
   await expect(rows.filter({ visible: true })).toHaveCount(total);
