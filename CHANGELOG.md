@@ -4,6 +4,8 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-20
 
+- Sankofa Snake 0.10.0. Swimming along a current in the Ocean or the Weaving village makes the snake faster until it leaves the current. How to play says how to steer on a phone. The game has a new license that doesn't allow app store releases or 3D versions without permission. The full list is in the game's changelog.
+- The About page describes the faster currents and the new license, and the Terms page names the game's license.
 - The note at the bottom of each page now fits its part of the site. Only the Humanizer pages talk about the Checker. The Sankofa Snake pages say the game runs in your browser and keeps your progress on your device, the blog explains comments, the About page explains the contact form, and the Privacy and Terms pages have their own notes. The other pages say the site adds no analytics or tracking.
 - The game pages load Sankofa Snake with its version in the address. A browser that kept an old copy of the game now fetches each new release instead of playing the old one.
 - Sankofa Snake 0.9.1. Every trotro and taxi color now shows up. Each run picks the colors in a new order, so the Road shows all five taxi colors and all four trotro colors instead of the same few every time.
