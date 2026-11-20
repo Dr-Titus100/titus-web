@@ -2,10 +2,11 @@
 import Base from "../../../layouts/Base.astro";
 import ToolNav from "../../../components/ToolNav.astro";
 import { u } from "../../../lib/url";
+import { version } from "../../../data/sankofa-snake";
 ---
 <Base title="How to play Sankofa Snake" current="sankofa-snake" image="/og/sankofa-snake.png" imageAlt="The Sankofa bird logo next to the Ocean level of Sankofa Snake, where a snake of kente blocks swims toward a cowrie shell between ocean currents" description="How to play Sankofa Snake: the controls, the nine levels, power-ups, currents, stars, the daily challenge, free play, practice and the sound and vibration switches.">
   <ToolNav slot="subnav" tool="sankofa-snake" current="how-to-play" />
-  <link rel="stylesheet" href={u("/games/sankofa-snake/sankofa-snake.css")} />
+  <link rel="stylesheet" href={u(`/games/sankofa-snake/sankofa-snake.css?v=${version}`)} />
 
   <section class="hero game-hero">
     <div class="wrap wrap-text">
@@ -24,7 +25,7 @@ import { u } from "../../../lib/url";
     </div>
   </section>
 
-  <script is:inline type="module" src={u("/games/sankofa-snake/sankofa-snake.js")}></script>
+  <script is:inline type="module" src={u(`/games/sankofa-snake/sankofa-snake.js?v=${version}`)}></script>
 </Base>
 <style>
   .game-hero { padding-bottom: 32px; }

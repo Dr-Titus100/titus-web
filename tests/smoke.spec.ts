@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 
 // Every page on the site. Add new pages here.
@@ -587,4 +588,14 @@ test("the game pages have their own link preview image", async ({ page }) => {
   }
   const res = await page.request.get("og/sankofa-snake.png");
   expect(res.status()).toBe(200);
+});
+
+test("the game pages load the game with its version in the address, so a new release reaches every browser", async ({ page }) => {
+  const games = JSON.parse(readFileSync(new URL("../src/data/games.generated.json", import.meta.url), "utf8"));
+  const version = games["sankofa-snake"].version.replace(/^v/, "").replace(/\./g, "\\.");
+  for (const path of ["games/sankofa-snake/play/", "games/sankofa-snake/how-to-play/"]) {
+    await page.goto(path);
+    await expect(page.locator('script[src*="sankofa-snake.js"]')).toHaveAttribute("src", new RegExp(`sankofa-snake\\.js\\?v=${version}$`));
+    await expect(page.locator('link[href*="sankofa-snake.css"]')).toHaveAttribute("href", new RegExp(`sankofa-snake\\.css\\?v=${version}$`));
+  }
 });

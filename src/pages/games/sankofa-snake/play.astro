@@ -6,10 +6,11 @@ import { u } from "../../../lib/url";
 import { favorites, version } from "../../../data/sankofa-snake";
 // Reviews need the Worker and database that only the Cloudflare host has (SITE_HOST=cloudflare).
 const reviews = process.env.SITE_HOST === "cloudflare";
+// The version in the game's address makes every browser fetch a new release instead of an old copy it kept.
 ---
 <Base title="Play Sankofa Snake" current="sankofa-snake" image="/og/sankofa-snake.png" imageAlt="The Sankofa bird logo next to the Ocean level of Sankofa Snake, where a snake of kente blocks swims toward a cowrie shell between ocean currents" description="Play Sankofa Snake, a free snake game in kente colors, in your browser. Then rate it from 1 to 10 and read what other players think.">
   <ToolNav slot="subnav" tool="sankofa-snake" current="play" />
-  <link rel="stylesheet" href={u("/games/sankofa-snake/sankofa-snake.css")} />
+  <link rel="stylesheet" href={u(`/games/sankofa-snake/sankofa-snake.css?v=${version}`)} />
 
   <section class="hero game-hero">
     <div class="wrap wrap-text">
@@ -33,7 +34,7 @@ const reviews = process.env.SITE_HOST === "cloudflare";
     </section>
   )}
 
-  <script is:inline type="module" src={u("/games/sankofa-snake/sankofa-snake.js")}></script>
+  <script is:inline type="module" src={u(`/games/sankofa-snake/sankofa-snake.js?v=${version}`)}></script>
 </Base>
 <style>
   .game-hero { padding-bottom: 32px; }
