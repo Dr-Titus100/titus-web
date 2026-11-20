@@ -68,6 +68,27 @@ const footerCols = [
     { href: profileLinks.orcid, label: "ORCID" },
   ] },
 ];
+// The note above the site map changes with the part of the site, so each page talks about what it does.
+// Comments and reviews exist only on the Cloudflare host (SITE_HOST=cloudflare).
+const onCloudflare = process.env.SITE_HOST === "cloudflare";
+const path = Astro.url.pathname;
+type FooterNote = { text: string; privacy?: string; contact?: boolean };
+const footerNote: FooterNote =
+  current === "humanizer"
+    ? { text: "The Checker runs in your browser. Rewrites go only to the AI provider you choose, and contact messages go through Web3Forms.", privacy: "" }
+    : current === "sankofa-snake"
+      ? { text: `Sankofa Snake runs in your browser and keeps your progress only on this device.${onCloudflare ? " Reviews are saved on this site with the name you give." : ""}`, privacy: "#sankofa-snake" }
+      : current === "blog"
+        ? onCloudflare
+          ? { text: "Comments are saved on this site with the name you give. The form never asks for your email.", privacy: "#comments" }
+          : { text: "This site adds no analytics or tracking of its own.", privacy: "" }
+        : current === "about"
+          ? { text: "Messages from the contact form go through Web3Forms, which emails them to me.", privacy: "" }
+          : path.endsWith("/privacy/")
+            ? { text: "If anything here is unclear, ask me through the", contact: true }
+            : path.endsWith("/terms/")
+              ? { text: "These terms cover the tools, the game and the comments on this site.", privacy: "" }
+              : { text: "This site adds no analytics or tracking of its own.", privacy: "" };
 ---
 <!doctype html>
 <html lang="en" class="no-js">
@@ -122,11 +143,11 @@ const footerCols = [
     </main>
     <footer class="footer">
       <div class="wrap">
-        {current === "sankofa-snake" ? (
-          <p class="footer-note">Sankofa Snake runs in your browser and keeps your progress only on this device. Reviews are saved on this site, and contact messages go through Web3Forms. The <a href={u("/privacy/#sankofa-snake")}>Privacy page</a> has the details.</p>
-        ) : (
-          <p class="footer-note">The Checker runs in your browser. Rewrites go only to the AI provider you choose, and contact messages go through Web3Forms. The <a href={u("/privacy/")}>Privacy page</a> has the details.</p>
-        )}
+        <p class="footer-note">
+          {footerNote.text}
+          {footerNote.contact && <> <a href={u("/about/#contact")}>contact form</a>.</>}
+          {footerNote.privacy !== undefined && <> The <a href={u(`/privacy/${footerNote.privacy}`)}>Privacy page</a> has the details.</>}
+        </p>
         <nav class="footer-cols" id="site-map" aria-label="Site map">
           {footerCols.map((col) => (
             <details class="footer-col" open>

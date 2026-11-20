@@ -600,14 +600,27 @@ test("the game pages load the game with its version in the address, so a new rel
   }
 });
 
-test("the game pages have a footer note about the game, and the Humanizer pages keep the Checker note", async ({ page }) => {
-  for (const path of ["games/sankofa-snake/", "games/sankofa-snake/play/", "games/sankofa-snake/how-to-play/"]) {
+test("each part of the site has its own footer note, and only the Humanizer pages mention the Checker", async ({ page }) => {
+  const notes: [string, RegExp, RegExp | null][] = [
+    ["tools/titus-humanizer/", /The Checker runs in your browser/, /\/privacy\/$/],
+    ["tools/titus-humanizer/checker/", /The Checker runs in your browser/, /\/privacy\/$/],
+    ["games/sankofa-snake/", /Sankofa Snake runs in your browser/, /\/privacy\/#sankofa-snake$/],
+    ["games/sankofa-snake/play/", /Sankofa Snake runs in your browser/, /\/privacy\/#sankofa-snake$/],
+    ["games/sankofa-snake/how-to-play/", /Sankofa Snake runs in your browser/, /\/privacy\/#sankofa-snake$/],
+    ["blog/", /Comments are saved on this site|no analytics/, /\/privacy\/(#comments)?$/],
+    ["about/", /contact form go through Web3Forms/, /\/privacy\/$/],
+    ["privacy/", /ask me through the contact form/, null],
+    ["terms/", /These terms cover the tools/, /\/privacy\/$/],
+    ["", /no analytics or tracking/, /\/privacy\/$/],
+    ["tools/", /no analytics or tracking/, /\/privacy\/$/],
+    ["experience/", /no analytics or tracking/, /\/privacy\/$/],
+  ];
+  for (const [path, text, privacy] of notes) {
     await page.goto(path);
     const note = page.locator(".footer-note");
-    await expect(note).toContainText("Sankofa Snake runs in your browser");
-    await expect(note).not.toContainText("Checker");
-    await expect(note.locator("a")).toHaveAttribute("href", /\/privacy\/#sankofa-snake$/);
+    await expect(note, path).toContainText(text);
+    if (!path.startsWith("tools/titus-humanizer/")) await expect(note, path).not.toContainText("Checker");
+    if (privacy) await expect(note.locator('a[href*="/privacy/"]'), path).toHaveAttribute("href", privacy);
+    else await expect(note.locator('a[href*="/privacy/"]'), path).toHaveCount(0);
   }
-  await page.goto("tools/titus-humanizer/");
-  await expect(page.locator(".footer-note")).toContainText("The Checker runs in your browser");
 });
