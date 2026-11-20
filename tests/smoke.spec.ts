@@ -430,7 +430,10 @@ test("Sankofa Snake reviews show ratings, sort, and post a review and a reply", 
   await page.goto("games/sankofa-snake/play/");
   test.skip((await page.locator("#reviews").count()) === 0, "built without SITE_HOST=cloudflare, so there's no reviews section");
   const reviews = page.locator("#reviews");
-  await expect(reviews.getByRole("heading", { name: /Reviews and ratings/ })).toBeVisible();
+  await expect(reviews.getByRole("heading", { name: /Community reviews/ })).toBeVisible();
+  await expect(reviews.locator(".rv-intro")).toHaveText("Ratings and reviews from players on this website.");
+  await expect(reviews.locator("#cm-agree")).toContainText("you agree to the posting rules and confirm you're 13 or older");
+  await expect(reviews.locator("#cm-agree a")).toHaveAttribute("href", /\/terms\/#posting-rules$/);
   await expect(page.locator("#rv-average")).toHaveText("7.0");
   await expect(page.locator("#rv-total")).toHaveText("From 2 ratings");
   await expect(page.locator("#rv-bars li")).toHaveCount(10);
@@ -480,4 +483,98 @@ test("Sankofa Snake reviews show ratings, sort, and post a review and a reply", 
     { post: "games/sankofa-snake", name: "Yaw", body: "Agreed, the Village is the best.", trap: false, token: "test-token", parent: 2 },
   ]);
   expect(errors).toEqual([]);
+});
+
+// Like the reviews test, this needs a build with SITE_HOST=cloudflare. It fakes /api/comments and the report API.
+test("readers can report a review or a reply, but not the author's notes", async ({ page }) => {
+  const errors = collectErrors(page);
+  const reports: any[] = [];
+  await page.route(/\/api\/comments(\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({
+    total: 1, count: 3,
+    ratings: { count: 1, average: 4, counts: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
+    comments: [
+      { id: 1, name: "Ama", body: "Buy cheap shoes here.", created: "2026-11-15T10:00:00.000Z", parent: null, author: false, rating: 4 },
+      { id: 2, name: "Kofi", body: "Call me at home.", created: "2026-11-15T11:00:00.000Z", parent: 1, author: false },
+      { id: 3, name: "Titus Nyarko Nde", body: "Thanks.", created: "2026-11-16T11:00:00.000Z", parent: 1, author: true },
+    ],
+  }) }));
+  await page.route(/\/api\/comments\/report$/, async (route) => {
+    const sent = route.request().postDataJSON();
+    reports.push(sent);
+    if (sent.id === 2) return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ error: "missing" }) });
+    return route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+  });
+  await page.goto("games/sankofa-snake/play/");
+  test.skip((await page.locator("#reviews").count()) === 0, "built without SITE_HOST=cloudflare, so there's no reviews section");
+  await expect(page.locator("#review-1 > .cm-report-btn")).toBeVisible();
+  // The author's note has no Report link.
+  await expect(page.locator("#review-3 .cm-report-btn")).toHaveCount(0);
+
+  const report = page.getByRole("button", { name: "Report Ama's review" });
+  await report.click();
+  await expect(report).toHaveAttribute("aria-expanded", "true");
+  const box = page.locator("#review-1 > .cm-report");
+  await expect(box.getByRole("radio")).toHaveCount(4);
+  await box.getByRole("button", { name: "Send report" }).click();
+  await expect(box.locator(".cm-report-status")).toHaveText("Please pick a reason.");
+  await box.getByLabel("Spam or advertising").check();
+  await box.getByRole("button", { name: "Send report" }).click();
+  await expect(page.locator("#review-1 > .cm-done")).toHaveText("Thanks for the report. I'll take a look.");
+  await expect(page.getByRole("button", { name: "Report Ama's review" })).toHaveCount(0);
+
+  // A reply that's gone says so, and the form stays open.
+  await page.getByRole("button", { name: "Report Kofi's reply" }).click();
+  const second = page.locator("#review-2 > .cm-report");
+  await second.getByLabel("Shares someone's personal information").check();
+  await second.getByRole("button", { name: "Send report" }).click();
+  await expect(second.locator(".cm-report-status")).toHaveText("This reply isn't on the site anymore.");
+  await second.getByRole("button", { name: "Cancel" }).click();
+  await expect(second).toHaveCount(0);
+  expect(reports).toEqual([{ id: 1, reason: "spam" }, { id: 2, reason: "personal" }]);
+  // The browser logs the 404 answer. Nothing else should show up.
+  expect(errors.filter((e) => !e.includes("404"))).toEqual([]);
+});
+
+test("the moderation page lists reported comments, and Keep it clears the reports", async ({ page }) => {
+  const errors = collectErrors(page);
+  const rows: any[] = [
+    { id: 1, post: "games/sankofa-snake", name: "Ama", body: "Buy cheap shoes here.", status: "approved", created: "2026-11-15T10:00:00.000Z", parent: null, parentName: null, author: false, rating: 4, reports: { spam: 2, other: 1 } },
+    { id: 2, post: "the-exercise-book", name: "Kofi", body: "Nice.", status: "approved", created: "2026-11-14T10:00:00.000Z", parent: null, parentName: null, author: false },
+  ];
+  const actions: any[] = [];
+  await page.route(/\/api\/comments\/admin$/, async (route) => {
+    const req = route.request();
+    if (req.method() === "POST") {
+      const body = req.postDataJSON();
+      actions.push(body);
+      if (body.action === "dismiss") delete rows.find((r) => r.id === body.id).reports;
+      return route.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
+    }
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify({ comments: rows }) });
+  });
+  await page.goto("admin/comments/");
+  await page.fill("#mod-token", "right-token");
+  await page.click("#mod-login button[type=submit]");
+  const reported = page.locator("#mod-reported .mod-item");
+  await expect(reported).toHaveCount(1);
+  await expect(page.locator("#mod-reported-count")).toHaveText("(1)");
+  await expect(reported.locator(".mod-flag")).toHaveText("Reported 3 times: spam or advertising (2), something else (1)");
+  // It still shows in its usual list, with the flag.
+  await expect(page.locator("#mod-approved .mod-item .mod-flag")).toHaveCount(1);
+  await reported.getByRole("button", { name: "Keep it" }).click();
+  await expect(page.locator("#mod-status")).toHaveText("Kept, and its reports are cleared.");
+  await expect(page.locator("#mod-reported-empty")).toBeVisible();
+  await expect(page.locator(".mod-flag")).toHaveCount(0);
+  expect(actions).toEqual([{ action: "dismiss", id: 1 }]);
+  expect(errors).toEqual([]);
+});
+
+test("the game pages have their own link preview image", async ({ page }) => {
+  for (const path of ["games/sankofa-snake/", "games/sankofa-snake/play/", "games/sankofa-snake/how-to-play/"]) {
+    await page.goto(path);
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\/sankofa-snake\.png$/);
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute("content", /Sankofa bird logo/);
+  }
+  const res = await page.request.get("og/sankofa-snake.png");
+  expect(res.status()).toBe(200);
 });

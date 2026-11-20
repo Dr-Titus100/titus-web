@@ -15,7 +15,7 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
       <h1 class="h1">Comment moderation</h1>
       <p class="lead">{commentsTurnstileKey
         ? "New comments and replies show on their post as soon as they pass the spam check, and they're listed here under Approved. Older ones from before the check may still wait for you."
-        : "New comments and replies wait here until you approve them. Approved ones show under their post."} Reviews of Sankofa Snake are listed here too, with their rating. You can reply to any comment or start your own, and deleting a comment deletes its replies too.</p>
+        : "New comments and replies wait here until you approve them. Approved ones show under their post."} Reviews of Sankofa Snake are listed here too, with their rating. You can reply to any comment or start your own, and deleting a comment deletes its replies too. When a reader reports a comment, it shows under Reported with the reasons, and you can keep it or delete it.</p>
 
       <form class="card mod-login" id="mod-login" data-api={u("/api/comments/admin")} data-blog={u("/blog/")} data-root={u("/")} novalidate>
         <div class="field">
@@ -49,6 +49,9 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
           </div>
           <p class="small muted mod-note">It shows on the post or the game's Play page at once, with your name and the Author label.</p>
         </form>
+        <h2 class="mod-heading">Reported <span id="mod-reported-count"></span></h2>
+        <ol class="mod-list" id="mod-reported"></ol>
+        <p class="small muted" id="mod-reported-empty" hidden>No reports.</p>
         <h2 class="mod-heading">Waiting for approval <span id="mod-pending-count"></span></h2>
         <ol class="mod-list" id="mod-pending"></ol>
         <p class="small muted" id="mod-pending-empty" hidden>Nothing is waiting.</p>
@@ -73,6 +76,7 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
   .mod-body { margin: 0 0 12px; white-space: pre-line; overflow-wrap: anywhere; }
   .mod-body:empty { display: none; }
   .mod-rating { margin: 0 0 8px; font-weight: 600; }
+  .mod-flag { margin: 0 0 8px; font-weight: 600; color: var(--bad); }
   .mod-badge { display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 980px; font-size: 12px; font-weight: 600; color: var(--link); box-shadow: inset 0 0 0 1px var(--link); }
   .mod-reply { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
   .mod-reply textarea { min-height: 120px; }
@@ -84,7 +88,11 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
 
 <script>
   type Row = { id: number; post: string; name: string; body: string; status: "pending" | "approved"; created: string;
-    parent: number | null; parentName: string | null; author: boolean; rating?: number | null; favorite?: string | null };
+    parent: number | null; parentName: string | null; author: boolean; rating?: number | null; favorite?: string | null;
+    reports?: Record<string, number> };
+  // The reasons a reader can pick when reporting, as the Worker names them.
+  const REASONS: Record<string, string> = { spam: "spam or advertising", rude: "rude, hateful or bullying", personal: "someone's personal information", other: "something else" };
+  const reportCount = (c: Row) => Object.values(c.reports || {}).reduce((a, n) => a + n, 0);
   const login = document.getElementById("mod-login") as HTMLFormElement;
   const api = login.dataset.api!;
   const blog = login.dataset.blog!;
@@ -128,7 +136,7 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
     status.textContent = problem[err?.message] || "The request didn't work. Try again in a minute.";
   };
 
-  function item(c: Row) {
+  function item(c: Row, inReported = false) {
     const li = document.createElement("li");
     li.className = "mod-item";
     const meta = document.createElement("p");
@@ -150,8 +158,21 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
     body.textContent = c.body;
     const rating = Object.assign(document.createElement("p"), { className: "mod-rating" });
     rating.textContent = c.rating ? `Rated ${c.rating} out of 10${c.favorite ? `. Favorite: ${c.favorite}` : ""}` : "";
+    // A reported comment says how many reports came in and why, such as "Reported 3 times: spam or advertising (2), something else (1)".
+    const flag = Object.assign(document.createElement("p"), { className: "mod-flag" });
+    const n = reportCount(c);
+    if (n) {
+      const why = Object.entries(c.reports!).map(([r, k]) => `${REASONS[r] || r} (${k})`).join(", ");
+      flag.textContent = `Reported ${n === 1 ? "once" : `${n} times`}: ${why}`;
+    }
     const row = document.createElement("div");
     row.className = "btn-row";
+    if (inReported) {
+      // Keep it clears the reports and leaves the comment up.
+      const keep = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: "Keep it" });
+      keep.addEventListener("click", () => act("dismiss", c.id, keep));
+      row.append(keep);
+    }
     if (c.status === "pending") {
       const approve = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: "Approve" });
       approve.addEventListener("click", () => act("approve", c.id, approve));
@@ -166,7 +187,7 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
       window.setTimeout(() => { delete del.dataset.armed; del.textContent = "Delete"; }, 5000);
     });
     row.append(del);
-    li.append(meta, ...(c.rating ? [rating] : []), body, row);
+    li.append(meta, ...(n ? [flag] : []), ...(c.rating ? [rating] : []), body, row);
     // Your reply shows at once with the Author label. Replying to a waiting comment approves it too.
     if (!c.author) {
       const open = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-small", textContent: c.status === "pending" ? "Approve and reply" : "Reply" });
@@ -196,6 +217,11 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
   }
 
   function fill(rows: Row[], approvedTotal?: number) {
+    // Reported comments come first, the most reported at the top. They also stay in their usual list.
+    const reported = rows.filter((r) => reportCount(r) > 0).sort((a, b) => reportCount(b) - reportCount(a));
+    document.getElementById("mod-reported")!.replaceChildren(...reported.map((r) => item(r, true)));
+    document.getElementById("mod-reported-count")!.textContent = `(${reported.length})`;
+    document.getElementById("mod-reported-empty")!.hidden = reported.length > 0;
     for (const kind of ["pending", "approved"] as const) {
       const these = rows.filter((r) => r.status === kind);
       document.getElementById(`mod-${kind}`)!.replaceChildren(...these.map(item));
@@ -229,11 +255,11 @@ const posts = (await getCollection("blog", (p) => !p.data.draft)).sort((a, b) =>
     }
   }
 
-  async function act(action: "approve" | "delete" | "reply", id: number, button: HTMLButtonElement, body?: string) {
+  async function act(action: "approve" | "delete" | "reply" | "dismiss", id: number, button: HTMLButtonElement, body?: string) {
     button.disabled = true;
     try {
       await call("POST", { action, id, ...(body !== undefined ? { body } : {}) });
-      status.textContent = action === "approve" ? "Approved." : action === "reply" ? "Reply posted." : "Deleted.";
+      status.textContent = { approve: "Approved.", reply: "Reply posted.", dismiss: "Kept, and its reports are cleared.", delete: "Deleted." }[action];
     } catch (err) {
       fail(err);
       // A failed reply keeps its text in the box, so you can try again.

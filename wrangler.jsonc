@@ -18,10 +18,11 @@
   "d1_databases": [
     { "binding": "COMMENTS_DB", "database_name": "titus-web-comments" }
   ],
-  // At most 5 new comments and 60 moderation requests a minute from one IP address.
+  // At most 5 new comments, 10 reports and 60 moderation requests a minute from one IP address.
   "ratelimits": [
     { "name": "COMMENTS_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } },
-    { "name": "ADMIN_LIMIT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } }
+    { "name": "ADMIN_LIMIT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
+    { "name": "REPORT_LIMIT", "namespace_id": "1003", "simple": { "limit": 10, "period": 60 } }
   ],
   // Email Service, for the email about each new comment. The recipient is the NOTIFY_TO secret, set in
   // the dashboard, so the address never appears in this repo. Cloudflare sends only to verified addresses.

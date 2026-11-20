@@ -1,14 +1,14 @@
 ---
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url";
-const updated = "November 12, 2026";
+const updated = "November 19, 2026";
 ---
-<Base title="Terms" current="" description="The terms for using this website and the titus-humanizer tools on it.">
+<Base title="Terms" current="" description="The terms for using this website, the titus-humanizer tools and Sankofa Snake, and the rules for comments and reviews.">
   <article class="section legal">
     <div class="wrap wrap-narrow">
       <p class="eyebrow">Last updated {updated}</p>
       <h1 class="h1">Terms</h1>
-      <p class="lead">These terms cover this website and the titus-humanizer tools on it. By using the site, you agree to them.</p>
+      <p class="lead">These terms cover this website, the titus-humanizer tools and the Sankofa Snake game on it, and the comments and reviews readers post. By using the site, you agree to them.</p>
 
       <h2>The tools come with no warranty</h2>
       <p>The Checker, the Rewrite page, the rulebook and the titus-humanizer skill are free, and they're provided as they are, with no warranty of any kind. I'm not liable for any loss that comes from using them. Check every rewrite before you use it, since an AI model can change a fact or a meaning.</p>
@@ -22,8 +22,22 @@ const updated = "November 12, 2026";
       <h2>Licenses</h2>
       <p>titus-humanizer is open source under the <a href="https://github.com/Dr-Titus100/titus-humanizer/blob/main/LICENSE">MIT License</a>, so you can use, change and share it under that license. The writing on this site, including the blog posts, the About and Experience pages and the photos, belongs to Titus Nyarko Nde. Please ask before you republish it.</p>
 
+      <h2 id="posting-rules">Comments and reviews</h2>
+      <p>You can comment on blog posts and review Sankofa Snake if you're 13 or older. By posting, you agree to these rules. Please don't post:</p>
+      <ul>
+        <li>spam, advertising or links to sell something</li>
+        <li>insults, hate, threats, bullying or harassment</li>
+        <li>anyone's personal information, such as a home address, phone number or email address, and that includes your own</li>
+        <li>sexual or violent content</li>
+        <li>anything illegal, or someone else's work copied without permission</li>
+        <li>a name that pretends you're someone else</li>
+      </ul>
+      <p>A review should be about the game. Reviews and ratings are the opinions of the players who post them, and they come only from this website. They aren't App Store or Google Play ratings.</p>
+      <p>Every comment, review and reply has a Report link. Use it to tell me about a post that breaks these rules. I read every report. I may remove a post that breaks the rules, or any other post, without notice. Deleting a comment also deletes the replies under it.</p>
+      <p>You keep the rights to what you write. By posting, you let me show it on this site with your name for as long as it stays up. If you want your post taken down, ask me through the <a href={u("/about/#contact")}>contact form</a> and I'll delete it.</p>
+
       <h2>Fair use of the site</h2>
-      <p>Please don't overload the site or the contact form, send spam through the form or try to break the tools.</p>
+      <p>Please don't overload the site, the contact form or the comment and report forms, send spam through them or try to break the tools.</p>
 
       <h2>Privacy</h2>
       <p>The <a href={u("/privacy/")}>Privacy page</a> explains what each part of the site sends and stores.</p>
