@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-20
 
+- The game pages load Sankofa Snake with its version in the address. A browser that kept an old copy of the game now fetches each new release instead of playing the old one.
 - Sankofa Snake 0.9.1. Every trotro and taxi color now shows up. Each run picks the colors in a new order, so the Road shows all five taxi colors and all four trotro colors instead of the same few every time.
 - Sankofa Snake 0.9.0. Each world has its own instrument. Trotros and taxis come in several colors, each with red corner lights. The Market's stalls and the Lab's benches come in different sizes, every canoe has its own color, and the teaching guides have two new lessons. The full list is in the game's changelog.
 - The About page describes the instruments for each world.
