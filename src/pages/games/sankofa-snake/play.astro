@@ -38,6 +38,8 @@ const reviews = process.env.SITE_HOST === "cloudflare";
 <style>
   .game-hero { padding-bottom: 32px; }
   .game-section { padding: 0 0 80px; }
+  /* The game scrolls back to its own top when its screen changes. This keeps it clear of the sticky nav and subnav. */
+  .game-section :global([data-sankofa-snake]) { --ss-scroll-margin: 116px; }
   .game-reviews :global(.comments) { margin-top: 0; padding-top: 0; border-top: 0; }
   @media (max-width: 734px) {
     .game-hero { padding-bottom: 20px; }
