@@ -77,7 +77,7 @@ const footerNote: FooterNote =
   current === "humanizer"
     ? { text: "The Checker runs in your browser. Rewrites go only to the AI provider you choose, and contact messages go through Web3Forms.", privacy: "" }
     : current === "sankofa-snake"
-      ? { text: `Sankofa Snake runs in your browser and keeps your progress only on this device.${onCloudflare ? " Reviews are saved on this site with the name you give." : ""}`, privacy: "#sankofa-snake" }
+      ? { text: `Sankofa Snake runs in your browser and keeps your progress only on this device.${onCloudflare ? " This site keeps reviews with the name you give." : ""}`, privacy: "#sankofa-snake" }
       : current === "blog"
         ? onCloudflare
           ? { text: "Comments are saved on this site with the name you give. The form never asks for your email.", privacy: "#comments" }
