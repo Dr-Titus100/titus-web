@@ -6,7 +6,11 @@
 //
 // With `review`, the same section holds a game's reviews instead. Each review rates the game from 1
 // to 10 and may name a favorite level, and its words are optional. The section then opens with the
-// average rating and how many players gave each score, and the reviews can be sorted.
+// average rating and how many players gave each score, and the reviews can be sorted. The section
+// calls them community reviews, so nobody takes the scores for App Store or Google Play ratings.
+//
+// Every comment, review and reply from a reader has a Report link. A report flags it on the moderation
+// page and hides nothing by itself.
 import { u } from "../lib/url";
 import { commentsTurnstileKey } from "../data/profile";
 interface Props { post: string; review?: { favorites: { id: string; label: string }[] } }
@@ -15,7 +19,8 @@ const noun = review ? "review" : "comment";
 ---
 <section class={review ? "comments reviews" : "comments"} id={review ? "reviews" : "comments"} aria-labelledby="comments-title" data-post={post} data-api={u("/api/comments")}
   data-review={review ? JSON.stringify(Object.fromEntries(review.favorites.map((f) => [f.id, f.label]))) : undefined}>
-  <h2 class="comments-title" id="comments-title">{review ? "Reviews and ratings" : "Comments"}<span id="cm-count"></span></h2>
+  <h2 class="comments-title" id="comments-title">{review ? "Community reviews" : "Comments"}<span id="cm-count"></span></h2>
+  {review && <p class="small muted rv-intro">Ratings and reviews from players on this website.</p>}
   {review && (
     <div class="rv-summary" id="rv-summary" hidden>
       <p class="rv-average"><strong id="rv-average"></strong><span>out of 10</span></p>
@@ -63,6 +68,7 @@ const noun = review ? "review" : "comment";
     </div>
     <input type="checkbox" name="trap" class="cm-trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
     <div class="cm-check" id="cm-check"></div>
+    <p class="small cm-agree" id="cm-agree">By posting, you agree to the <a href={u("/terms/#posting-rules")}>posting rules</a> and confirm you're 13 or older.</p>
     <div class="btn-row">
       <button class="btn" type="submit" id="cm-send">{review ? "Post review" : "Post comment"}</button>
       <span class="small muted" id="cm-form-status" role="status" aria-live="polite"></span>
@@ -84,6 +90,17 @@ const noun = review ? "review" : "comment";
   .cm-link { background: none; border: 0; padding: 0; font: inherit; font-size: 15px; color: var(--link); cursor: pointer; }
   .cm-link:hover { text-decoration: underline; }
   .cm-reply-btn { margin-top: 8px; }
+  .cm-report-btn { margin: 8px 0 0 20px; color: var(--ink-soft); }
+  .cm-report { margin: 12px 0 0; padding: 16px 18px; border-radius: 14px; background: var(--card); border: 1px solid var(--card-line); display: flex; flex-direction: column; gap: 10px; }
+  .cm-report fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .cm-report legend { padding: 0; margin-bottom: 4px; font-weight: 600; font-size: 15px; }
+  .cm-report label { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+  .cm-report .btn-row { align-items: center; }
+  .cm-report-status { margin: 0; }
+  .cm-report-status.err { color: var(--bad); }
+  .cm-done { margin: 8px 0 0; font-size: 15px; color: var(--ink-soft); }
+  .rv-intro { margin: 0 0 12px; }
+  .cm-agree { margin: 0; color: var(--ink-soft); }
   .cm-replies { list-style: none; margin: 16px 0 0; padding: 0 0 0 20px; border-left: 2px solid var(--line-soft); display: flex; flex-direction: column; gap: 16px; }
   .cm-replies:empty { display: none; }
   .cm-replying { margin: 0; color: var(--ink-soft); }
@@ -159,6 +176,13 @@ const noun = review ? "review" : "comment";
     const bodyLabel = document.getElementById("cm-body-label")!;
     const ratingBox = document.getElementById("rv-rating");
     const favoriteBox = document.getElementById("rv-favorite");
+    // Why a reader can report a comment. The Worker accepts these ids only.
+    const REASONS: [string, string][] = [
+      ["spam", "Spam or advertising"],
+      ["rude", "Rude, hateful or bullying"],
+      ["personal", "Shares someone's personal information"],
+      ["other", "Something else that breaks the posting rules"],
+    ];
     const say = (text: string, kind = "") => { formStatus.textContent = text; formStatus.className = `small muted ${kind}`; };
     const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
@@ -234,7 +258,82 @@ const noun = review ? "review" : "comment";
         bodyField.focus({ preventScroll: true });
       });
       li.append(reply);
+      // Titus's own comments have no Report link.
+      if (!c.author) {
+        const report = Object.assign(document.createElement("button"), { type: "button", className: "cm-link cm-report-btn", textContent: "Report" });
+        report.setAttribute("aria-label", `Report ${c.name}'s ${c.parent ? "reply" : noun}`);
+        report.setAttribute("aria-expanded", "false");
+        report.addEventListener("click", () => openReport(c, report));
+        li.append(report);
+      }
       return li;
+    };
+
+    // The report form opens under the comment. Only one is open at a time.
+    let openForm: { box: HTMLElement; button: HTMLButtonElement } | null = null;
+    const closeReport = () => {
+      if (!openForm) return;
+      openForm.box.remove();
+      openForm.button.setAttribute("aria-expanded", "false");
+      openForm = null;
+    };
+    const openReport = (c: Comment, button: HTMLButtonElement) => {
+      const wasOpen = openForm?.button === button;
+      closeReport();
+      if (wasOpen) { button.focus(); return; }
+      const box = document.createElement("form");
+      box.className = "cm-report";
+      box.noValidate = true;
+      const set = document.createElement("fieldset");
+      set.append(Object.assign(document.createElement("legend"), { textContent: `Why are you reporting this ${c.parent ? "reply" : noun}?` }));
+      for (const [id, label] of REASONS) {
+        const l = document.createElement("label");
+        const r = Object.assign(document.createElement("input"), { type: "radio", name: "reason", value: id });
+        l.append(r, label);
+        set.append(l);
+      }
+      const row = document.createElement("div");
+      row.className = "btn-row";
+      const sendIt = Object.assign(document.createElement("button"), { type: "submit", className: "btn btn-small", textContent: "Send report" });
+      const cancel = Object.assign(document.createElement("button"), { type: "button", className: "cm-link", textContent: "Cancel" });
+      cancel.addEventListener("click", () => { closeReport(); button.focus(); });
+      row.append(sendIt, cancel);
+      const note = Object.assign(document.createElement("p"), { className: "small muted cm-report-status" });
+      note.setAttribute("role", "status");
+      note.setAttribute("aria-live", "polite");
+      box.append(set, row, note);
+      box.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const reason = (box.querySelector("input[name=reason]:checked") as HTMLInputElement | null)?.value;
+        const tell = (text: string, kind = "") => { note.textContent = text; note.className = `small muted cm-report-status ${kind}`; };
+        if (!reason) { tell("Please pick a reason.", "err"); return; }
+        sendIt.disabled = true;
+        tell("Sending...");
+        try {
+          const res = await fetch(`${api}/report`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({ id: c.id, reason }),
+          });
+          const out = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(out.error || "server");
+          closeReport();
+          const done = Object.assign(document.createElement("p"), { className: "cm-done", textContent: "Thanks for the report. I'll take a look." });
+          done.setAttribute("role", "status");
+          button.replaceWith(done);
+        } catch (err: any) {
+          const why: Record<string, string> = {
+            busy: "Too many reports came from here in a short time. Try again in a minute.",
+            missing: `This ${c.parent ? "reply" : noun} isn't on the site anymore.`,
+          };
+          tell(why[err?.message] || "The report couldn't be sent. Try again in a minute.", "err");
+          sendIt.disabled = false;
+        }
+      });
+      button.after(box);
+      button.setAttribute("aria-expanded", "true");
+      openForm = { box, button };
+      (box.querySelector("input") as HTMLInputElement).focus();
     };
 
     // The rating summary: the average, the number of ratings, and a bar for each score from 10 down to 1.

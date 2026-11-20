@@ -7,7 +7,7 @@ import { favorites, version } from "../../../data/sankofa-snake";
 // Reviews need the Worker and database that only the Cloudflare host has (SITE_HOST=cloudflare).
 const reviews = process.env.SITE_HOST === "cloudflare";
 ---
-<Base title="Play Sankofa Snake" current="sankofa-snake" description="Play Sankofa Snake, a free snake game in kente colors, in your browser. Then rate it from 1 to 10 and read what other players think.">
+<Base title="Play Sankofa Snake" current="sankofa-snake" image="/og/sankofa-snake.png" imageAlt="The Sankofa bird logo next to the Ocean level of Sankofa Snake, where a snake of kente blocks swims toward a cowrie shell between ocean currents" description="Play Sankofa Snake, a free snake game in kente colors, in your browser. Then rate it from 1 to 10 and read what other players think.">
   <ToolNav slot="subnav" tool="sankofa-snake" current="play" />
   <link rel="stylesheet" href={u("/games/sankofa-snake/sankofa-snake.css")} />
 

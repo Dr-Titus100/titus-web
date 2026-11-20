@@ -9,9 +9,11 @@
 //   GET  /api/comments?post=<slug>   approved comments and replies on one post, and for a game the rating summary
 //   POST /api/comments               a new comment or reply. It shows at once when the spam check is on,
 //                                    and otherwise waits until Titus approves it
+//   POST /api/comments/report        a reader reports a comment, review or reply, with one of the REASONS below.
+//                                    It flags the comment on the moderation page and hides nothing by itself
 //   GET  /api/comments/admin         every comment, for the moderation page (needs the admin token)
-//   POST /api/comments/admin         approve, delete or reply to one comment, or post Titus's own comment
-//                                    on a post (needs the admin token)
+//   POST /api/comments/admin         approve, delete or reply to one comment, clear its reports, or post
+//                                    Titus's own comment on a post (needs the admin token)
 //
 // Replies are one level deep. A reply to a reply joins the same thread, under the first comment.
 // Titus's own replies, posted from the moderation page, carry author = 1 and show an "Author" label.
@@ -20,6 +22,7 @@
 //   COMMENTS_DB              D1 database. Wrangler creates it on the first deploy. The table is created here.
 //   COMMENTS_LIMIT           rate limiter for new comments, keyed by the visitor's IP address. The address is never stored.
 //   ADMIN_LIMIT              rate limiter for the moderation API, keyed the same way.
+//   REPORT_LIMIT             rate limiter for reports, keyed the same way.
 //   COMMENTS_ADMIN_TOKEN     secret, at least 32 characters. The moderation page sends it. Without it, moderation is off.
 //   TURNSTILE_SECRET         optional secret. When set, every new comment must pass a Turnstile check, and
 //                            comments that pass show at once. Without it, every new comment waits for approval.
@@ -28,7 +31,9 @@
 //                            this repo or on the site. Without it, no emails go out.
 //
 // The database keeps only the post, the name, the comment, its status, the time, the comment it
-// replies to, whether Titus wrote it, and for a game review the rating and favorite level.
+// replies to, whether Titus wrote it, and for a game review the rating and favorite level. A report
+// keeps the comment, the reason, how many times that reason came in and the time of the latest. It
+// doesn't keep who sent it.
 
 const NAME_MAX = 60;
 // The longest comment or reply, for readers and Titus alike. The text boxes use the same limit.
@@ -47,6 +52,10 @@ const GAME = /^games\/[a-z0-9][a-z0-9-]{0,59}$/;
 const FAVORITES = {
   "games/sankofa-snake": ["farm", "park", "market", "city", "road", "lab", "maze", "ocean", "village", "daily", "free", "practice"],
 };
+// Why a reader can report a comment. The page shows the words for each one.
+const REASONS = ["spam", "rude", "personal", "other"];
+// One comment's count for one reason stops here, so a flood of reports can't grow the table.
+const REPORT_MAX = 1000;
 const validPost = (post) => SLUG.test(post) || GAME.test(post);
 const isGame = (post) => GAME.test(post);
 // The page a post's comments show on.
@@ -65,6 +74,10 @@ export default {
         if (request.method === "GET") return await listApproved(url, env);
         if (request.method === "POST") return await addComment(request, url, env, ctx);
         return json({ error: "method" }, 405, { Allow: "GET, POST" });
+      }
+      if (url.pathname === "/api/comments/report") {
+        if (request.method === "POST") return await addReport(request, url, env, ctx);
+        return json({ error: "method" }, 405, { Allow: "POST" });
       }
       if (url.pathname === "/api/comments/admin") {
         if (request.method === "GET" || request.method === "POST") return await admin(request, url, env);
@@ -106,6 +119,14 @@ async function db(env) {
         created_at TEXT NOT NULL
       )`),
       d1.prepare("CREATE INDEX IF NOT EXISTS comments_by_post ON comments (post, status, created_at)"),
+      // One row for each comment and reason, with a count, so repeat reports don't add rows.
+      d1.prepare(`CREATE TABLE IF NOT EXISTS reports (
+        comment_id INTEGER NOT NULL,
+        reason TEXT NOT NULL,
+        count INTEGER NOT NULL DEFAULT 1,
+        last_at TEXT NOT NULL,
+        PRIMARY KEY (comment_id, reason)
+      )`),
     ]);
     // Columns added after the first release. Two Workers starting at once may both try to add one,
     // so "duplicate column" from the slower one is fine.
@@ -253,6 +274,64 @@ async function addComment(request, url, env, ctx) {
   return json({ status: "approved", comment }, 201);
 }
 
+// A reader reports a comment. Only approved comments from readers can be reported, since only those
+// show on the site. The first report on a comment also sends Titus an email.
+async function addReport(request, url, env, ctx) {
+  const origin = request.headers.get("Origin");
+  if (origin && origin !== url.origin) return json({ error: "origin" }, 403);
+  if (!(request.headers.get("Content-Type") || "").includes("application/json")) return json({ error: "type" }, 415);
+  if (Number(request.headers.get("Content-Length") || 0) > 2_000) return json({ error: "size" }, 413);
+  if (await overLimit(env.REPORT_LIMIT, ip(request))) return json({ error: "busy" }, 429);
+
+  let input;
+  try { input = await request.json(); } catch { return json({ error: "invalid" }, 400); }
+  if (!input || typeof input !== "object") return json({ error: "invalid" }, 400);
+  const id = Number(input.id);
+  if (!Number.isInteger(id) || id < 1) return json({ error: "id" }, 400);
+  const reason = String(input.reason || "");
+  if (!REASONS.includes(reason)) return json({ error: "reason" }, 400);
+
+  const d1 = await db(env);
+  if (!d1) return json({ error: "unavailable" }, 503);
+  const target = await d1.prepare("SELECT id, post, name, body, rating, parent_id FROM comments WHERE id = ? AND status = 'approved' AND author = 0")
+    .bind(id).first();
+  if (!target) return json({ error: "missing" }, 404);
+  const before = await d1.prepare("SELECT COUNT(*) AS n FROM reports WHERE comment_id = ?").bind(id).first("n");
+  const saved = await d1.prepare(`INSERT INTO reports (comment_id, reason, count, last_at)
+      SELECT ?, ?, 1, ? WHERE EXISTS (SELECT 1 FROM comments WHERE id = ? AND status = 'approved')
+      ON CONFLICT (comment_id, reason) DO UPDATE SET count = MIN(count + 1, ?), last_at = excluded.last_at`)
+    .bind(id, reason, new Date().toISOString(), id, REPORT_MAX).run();
+  if (!saved.meta || saved.meta.changes === 0) return json({ error: "missing" }, 404);
+  if (!before) ctx.waitUntil(notifyReport(env, target, reason));
+  return json({ ok: true }, 202);
+}
+
+// Emails Titus the first time a comment is reported, so a problem doesn't wait until he next opens the
+// moderation page. Later reports on the same comment only add to its count there.
+async function notifyReport(env, c, reason) {
+  if (!env.NOTIFY_EMAIL || !env.NOTIFY_TO) return;
+  try {
+    const site = `https://${NOTIFY_FROM.email.split("@")[1]}`;
+    const what = { spam: "spam or advertising", rude: "rude, hateful or bullying", personal: "sharing someone's personal information", other: "something else" }[reason];
+    const kind = c.rating ? "review" : c.parent_id ? "reply" : "comment";
+    const text = [
+      `Someone reported a ${kind} by ${c.name} for ${what}.`,
+      ...(c.body ? ["", c.body] : []),
+      "",
+      `The page: ${site}${pagePath(c.post)}`,
+      `Keep or delete it: ${site}/admin/comments/`,
+    ].join("\n");
+    await env.NOTIFY_EMAIL.send({
+      to: env.NOTIFY_TO,
+      from: NOTIFY_FROM,
+      subject: `Reported ${kind} from ${c.name}`.slice(0, 200),
+      text,
+    });
+  } catch (err) {
+    console.error("report email failed", err && (err.code || err.message) ? `${err.code || ""} ${err.message || ""}` : err);
+  }
+}
+
 // Emails Titus about a new comment, with the text, a link to the post and a link to the moderation page. Errors only
 // go to the Worker's logs: the comment is already saved, and it shows on the moderation page anyway.
 async function notify(env, url, page, c) {
@@ -319,14 +398,24 @@ async function admin(request, url, env) {
   if (request.method === "GET") {
     // Every waiting comment (PENDING_MAX keeps that list short), then the newest approved ones.
     // The two lists come separately, so a long approved history never hides a waiting comment.
+    // Reported comments come in a third list, so an old one past the approved limit still shows.
     const cols = `SELECT c.id, c.post, c.name, c.body, c.status, c.created_at AS created, c.parent_id AS parent,
-      c.author, c.rating, c.favorite, p.name AS parentName FROM comments c LEFT JOIN comments p ON p.id = c.parent_id`;
-    const [pending, approved, total] = await d1.batch([
+      c.author, c.rating, c.favorite, p.name AS parentName,
+      (SELECT json_group_object(r.reason, r.count) FROM reports r WHERE r.comment_id = c.id) AS reports
+      FROM comments c LEFT JOIN comments p ON p.id = c.parent_id`;
+    const [pending, approved, total, reported] = await d1.batch([
       d1.prepare(`${cols} WHERE c.status = 'pending' ORDER BY c.created_at DESC, c.id DESC LIMIT ?`).bind(PENDING_MAX * 2),
       d1.prepare(`${cols} WHERE c.status = 'approved' ORDER BY c.created_at DESC, c.id DESC LIMIT ?`).bind(APPROVED_SHOWN),
       d1.prepare("SELECT COUNT(*) AS n FROM comments WHERE status = 'approved'"),
+      d1.prepare(`${cols} WHERE c.id IN (SELECT comment_id FROM reports) ORDER BY c.created_at DESC, c.id DESC LIMIT ?`).bind(APPROVED_SHOWN),
     ]);
-    const rows = [...pending.results, ...approved.results].map((c) => ({ ...c, author: c.author === 1 }));
+    const seen = new Set();
+    const rows = [...pending.results, ...approved.results, ...reported.results].filter((c) => !seen.has(c.id) && seen.add(c.id))
+      .map(({ reports, ...c }) => {
+        let counts = {};
+        try { counts = JSON.parse(reports || "{}") || {}; } catch {}
+        return { ...c, author: c.author === 1, ...(Object.keys(counts).length ? { reports: counts } : {}) };
+      });
     return json({ comments: rows, approvedTotal: total.results[0].n });
   }
 
@@ -352,8 +441,14 @@ async function admin(request, url, env) {
   if (input.action === "approve") {
     result = await d1.prepare("UPDATE comments SET status = 'approved' WHERE id = ?").bind(id).run();
   } else if (input.action === "delete") {
-    // Deleting a comment deletes its replies too.
-    result = await d1.prepare("DELETE FROM comments WHERE id = ? OR parent_id = ?").bind(id, id).run();
+    // Deleting a comment deletes its replies too, and the reports on all of them.
+    [, result] = await d1.batch([
+      d1.prepare("DELETE FROM reports WHERE comment_id IN (SELECT id FROM comments WHERE id = ? OR parent_id = ?)").bind(id, id),
+      d1.prepare("DELETE FROM comments WHERE id = ? OR parent_id = ?").bind(id, id),
+    ]);
+  } else if (input.action === "dismiss") {
+    // Keep a reported comment and clear its reports.
+    result = await d1.prepare("DELETE FROM reports WHERE comment_id = ?").bind(id).run();
   } else if (input.action === "reply") {
     const body = tidy(input.body, true);
     if (!body || body.length > BODY_MAX) return json({ error: "body" }, 400);

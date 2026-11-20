@@ -2,6 +2,14 @@
 
 Notable changes to the titus-web site, newest first. The site has no version numbers, so entries are grouped by date.
 
+## 2026-11-19
+
+- Every comment, review and reply from a reader has a Report link. A report flags it on the moderation page under Reported, with the reasons and how many times each came in. Keep it clears the reports, and I get an email about the first report on each comment. Reports don't hide anything by themselves.
+- The Terms page has rules for comments and reviews: what isn't allowed, when I remove posts and who owns the text. The comment and review forms say that posting means agreeing to them and being 13 or older.
+- The Privacy page lists everything Sankofa Snake saves in the browser, and explains reports. The Children section now says the game is for all ages and collects nothing, and that comments and reviews are for people 13 and older.
+- The game's reviews are called community reviews, with a line saying they come from players on this website.
+- The three Sankofa Snake pages have their own link preview image, with the bird logo and the Ocean level, and alt text to match.
+
 ## 2026-11-13
 
 - The overview's score note now says "The cleanup removes invisible characters, but it does not remove file metadata." The overview and the Checker say "This skill does not target AI watermarks".
