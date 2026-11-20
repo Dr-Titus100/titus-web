@@ -498,9 +498,13 @@ test("readers can report a review or a reply, but not the author's notes", async
       { id: 3, name: "Titus Nyarko Nde", body: "Thanks.", created: "2026-11-16T11:00:00.000Z", parent: 1, author: true },
     ],
   }) }));
+  // The first report waits until the test lets it through, to open another form while it's sending.
+  let release = () => {};
+  const held = new Promise<void>((r) => { release = r; });
   await page.route(/\/api\/comments\/report$/, async (route) => {
     const sent = route.request().postDataJSON();
     reports.push(sent);
+    if (sent.id === 1) await held;
     if (sent.id === 2) return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ error: "missing" }) });
     return route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ ok: true }) });
   });
@@ -519,13 +523,18 @@ test("readers can report a review or a reply, but not the author's notes", async
   await expect(box.locator(".cm-report-status")).toHaveText("Please pick a reason.");
   await box.getByLabel("Spam or advertising").check();
   await box.getByRole("button", { name: "Send report" }).click();
-  await expect(page.locator("#review-1 > .cm-done")).toHaveText("Thanks for the report. I'll take a look.");
-  await expect(page.getByRole("button", { name: "Report Ama's review" })).toHaveCount(0);
-
-  // A reply that's gone says so, and the form stays open.
+  await expect(box.locator(".cm-report-status")).toHaveText("Sending...");
+  // Open another report while the first is sending. The first one finishing must leave it open.
   await page.getByRole("button", { name: "Report Kofi's reply" }).click();
   const second = page.locator("#review-2 > .cm-report");
   await second.getByLabel("Shares someone's personal information").check();
+  release();
+  await expect(page.locator("#review-1 > .cm-done")).toHaveText("Thanks for the report. I'll take a look.");
+  await expect(page.getByRole("button", { name: "Report Ama's review" })).toHaveCount(0);
+  await expect(second).toBeVisible();
+  await expect(second.getByLabel("Shares someone's personal information")).toBeChecked();
+
+  // A reply that's gone says so, and the form stays open.
   await second.getByRole("button", { name: "Send report" }).click();
   await expect(second.locator(".cm-report-status")).toHaveText("This reply isn't on the site anymore.");
   await second.getByRole("button", { name: "Cancel" }).click();

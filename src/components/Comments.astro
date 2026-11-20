@@ -317,7 +317,9 @@ const noun = review ? "review" : "comment";
           });
           const out = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(out.error || "server");
-          closeReport();
+          // Remove only this report's form. Another comment's form may have opened while this one was sending.
+          box.remove();
+          if (openForm?.box === box) openForm = null;
           const done = Object.assign(document.createElement("p"), { className: "cm-done", textContent: "Thanks for the report. I'll take a look." });
           done.setAttribute("role", "status");
           button.replaceWith(done);
