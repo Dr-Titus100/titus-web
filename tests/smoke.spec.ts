@@ -348,8 +348,8 @@ test("Sankofa Snake starts, runs and pauses", async ({ page, isMobile }) => {
   await expect(game.getByRole("heading", { name: "Sankofa Snake", level: 2 })).toBeVisible();
   await game.getByRole("button", { name: "Play", exact: true }).click();
   const overlay = game.locator("[data-overlay]");
-  // Phones are told to swipe, computers to press a key.
-  await expect(overlay.getByText(isMobile ? "Swipe to start." : "Press an arrow key to start.")).toBeVisible();
+  // Phones are told to press an arrow button or swipe, computers to press a key.
+  await expect(overlay.getByText(isMobile ? "Press an arrow or swipe to start." : "Press an arrow key to start.")).toBeVisible();
   await page.keyboard.press("ArrowUp");
   await expect(overlay).toBeHidden();
   await page.keyboard.press("p");
