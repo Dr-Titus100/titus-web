@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-20
 
+- Sankofa Snake 0.8.1. The Sound switch under the board is gold while the sound is on, the same as the switches on How to play.
 - Sankofa Snake 0.8.0. Phones and tablets get arrow buttons under the board. Every run puts the obstacles, currents and roads in new places, the Maze is a new maze each time, and on about half of the runs the roads cross. Choosing a level low on the Play game page no longer leaves the page scrolled down to the reviews. The full list is in the game's changelog.
 - The About page mentions the new layouts and the arrow buttons.
 - Sankofa Snake 0.7.0. It checks saved progress when it loads, has a Reset progress button on How to play, draws the board only while the snake moves, and shows phones swipe and tap instructions. A phone turned sideways keeps the buttons on the screen. The full list is in the game's changelog.
