@@ -122,7 +122,11 @@ const footerCols = [
     </main>
     <footer class="footer">
       <div class="wrap">
-        <p class="footer-note">The Checker runs in your browser. Rewrites go only to the AI provider you choose, and contact messages go through Web3Forms. The <a href={u("/privacy/")}>Privacy page</a> has the details.</p>
+        {current === "sankofa-snake" ? (
+          <p class="footer-note">Sankofa Snake runs in your browser and keeps your progress only on this device. Reviews are saved on this site, and contact messages go through Web3Forms. The <a href={u("/privacy/#sankofa-snake")}>Privacy page</a> has the details.</p>
+        ) : (
+          <p class="footer-note">The Checker runs in your browser. Rewrites go only to the AI provider you choose, and contact messages go through Web3Forms. The <a href={u("/privacy/")}>Privacy page</a> has the details.</p>
+        )}
         <nav class="footer-cols" id="site-map" aria-label="Site map">
           {footerCols.map((col) => (
             <details class="footer-col" open>

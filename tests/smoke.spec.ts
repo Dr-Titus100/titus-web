@@ -599,3 +599,15 @@ test("the game pages load the game with its version in the address, so a new rel
     await expect(page.locator('link[href*="sankofa-snake.css"]')).toHaveAttribute("href", new RegExp(`sankofa-snake\\.css\\?v=${version}$`));
   }
 });
+
+test("the game pages have a footer note about the game, and the Humanizer pages keep the Checker note", async ({ page }) => {
+  for (const path of ["games/sankofa-snake/", "games/sankofa-snake/play/", "games/sankofa-snake/how-to-play/"]) {
+    await page.goto(path);
+    const note = page.locator(".footer-note");
+    await expect(note).toContainText("Sankofa Snake runs in your browser");
+    await expect(note).not.toContainText("Checker");
+    await expect(note.locator("a")).toHaveAttribute("href", /\/privacy\/#sankofa-snake$/);
+  }
+  await page.goto("tools/titus-humanizer/");
+  await expect(page.locator(".footer-note")).toContainText("The Checker runs in your browser");
+});
