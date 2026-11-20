@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import { u } from "../lib/url";
 import { providers } from "../data/providers";
 import { commentsTurnstileKey } from "../data/profile";
-const updated = "November 19, 2026";
+const updated = "November 20, 2026";
 // SITE_HOST=cloudflare is set in Cloudflare's build settings. Builds for GitHub Pages leave it unset.
 const onCloudflare = process.env.SITE_HOST === "cloudflare";
 ---
@@ -64,8 +64,9 @@ const onCloudflare = process.env.SITE_HOST === "cloudflare";
         <li>For the daily challenge: the date, your best score that day, whether you cleared it, your current streak, your longest streak and the last day you cleared it.</li>
         <li>For free play: your most cowries in one run in each world, with wrap-around edges and with walls.</li>
         <li>Whether the sound and the vibration are on or off.</li>
+        <li>A version number for the format of the save, so a later version of the game can read it.</li>
       </ul>
-      <p>The game sends none of this to this site or anywhere else, has no ads and collects no personal information. Clearing this site's data in your browser's settings removes it. If you post a review on the game's Play game tab, the review is handled like a blog comment, as described above.</p>
+      <p>The game sends none of this to this site or anywhere else, has no ads and collects no personal information. To delete your progress, use Reset progress on the <a href={u("/games/sankofa-snake/how-to-play/")}>How to play</a> tab. It asks first and keeps your sound and vibration switches. Clearing this site's data in your browser's settings removes everything. If you post a review on the game's Play game tab, the review is handled like a blog comment, as described above.</p>
 
       <h2>What this site stores in your browser</h2>
       <ul>

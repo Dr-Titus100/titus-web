@@ -2,6 +2,11 @@
 
 Notable changes to the titus-web site, newest first. The site has no version numbers, so entries are grouped by date.
 
+## 2026-11-20
+
+- Sankofa Snake 0.7.0. It checks saved progress when it loads, has a Reset progress button on How to play, draws the board only while the snake moves, and shows phones swipe and tap instructions. A phone turned sideways keeps the buttons on the screen. The full list is in the game's changelog.
+- The Privacy page says how to delete your game progress with Reset progress, and that the save holds a version number.
+
 ## 2026-11-19
 
 - Dependabot now sends one grouped pull request a week for the site's packages and one for GitHub Actions. They go to dev, like every other change, and a new version waits 14 days before Dependabot offers it.
