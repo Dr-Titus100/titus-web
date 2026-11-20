@@ -341,14 +341,15 @@ test("the moderation page lists comments and approves one", async ({ page }) => 
   expect(errors.filter((e) => !e.includes("401"))).toEqual([]);
 });
 
-test("Sankofa Snake starts, runs and pauses", async ({ page }) => {
+test("Sankofa Snake starts, runs and pauses", async ({ page, isMobile }) => {
   const errors = collectErrors(page);
   await page.goto("games/sankofa-snake/play/?seed=1");
   const game = page.locator("[data-sankofa-snake]");
   await expect(game.getByRole("heading", { name: "Sankofa Snake", level: 2 })).toBeVisible();
   await game.getByRole("button", { name: "Play", exact: true }).click();
   const overlay = game.locator("[data-overlay]");
-  await expect(overlay.getByText("Press an arrow key or swipe to start.")).toBeVisible();
+  // Phones are told to swipe, computers to press a key.
+  await expect(overlay.getByText(isMobile ? "Swipe to start." : "Press an arrow key to start.")).toBeVisible();
   await page.keyboard.press("ArrowUp");
   await expect(overlay).toBeHidden();
   await page.keyboard.press("p");

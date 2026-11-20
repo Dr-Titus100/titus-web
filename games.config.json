@@ -4,10 +4,10 @@
       "slug": "sankofa-snake",
       "name": "Sankofa Snake",
       "repo": "Dr-Titus100/sankofa-snake",
-      "tag": "v0.6.2",
+      "tag": "v0.7.0",
       "files": {
-        "sankofa-snake.js": "d875b07bc08b8a0c02fa7da83890e028997134c9f791a24ed0ab43464453100e",
-        "sankofa-snake.css": "3a7b71417b81789d60bbfbf71a693f68f747fdb34469bdcbe3bccdaa30ddd5e4",
+        "sankofa-snake.js": "e1d8fd4bdc12c05730e9fc4e715f7067b69fee402dc3d63076d1414cfad265a6",
+        "sankofa-snake.css": "8971d00a8f9c7f8ebdb1653d72daf8848f4e62e98a164046bc03c40ac38a234d",
         "sankofa-logo.svg": "6cf167e1e5ca40dff9d071c09cda7f8946abd6165b1a08e811cb74337a39b263"
       }
     }
