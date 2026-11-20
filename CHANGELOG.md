@@ -4,6 +4,7 @@ Notable changes to the titus-web site, newest first. The site has no version num
 
 ## 2026-11-19
 
+- Dependabot now sends one grouped pull request a week for the site's packages and one for GitHub Actions. They go to dev, like every other change, and a new version waits 14 days before Dependabot offers it.
 - Every comment, review and reply from a reader has a Report link. A report flags it on the moderation page under Reported, with the reasons and how many times each came in. Keep it clears the reports, and I get an email about the first report on each comment. Reports don't hide anything by themselves.
 - The Terms page has rules for comments and reviews: what isn't allowed, when I remove posts and who owns the text. The comment and review forms say that posting means agreeing to them and being 13 or older.
 - The Privacy page lists everything Sankofa Snake saves in the browser, and explains reports. The Children section now says the game is for all ages and collects nothing, and that comments and reviews are for people 13 and older.
