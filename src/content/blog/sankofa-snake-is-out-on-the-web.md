@@ -1,6 +1,6 @@
 ---
 title: "Sankofa Snake is out on the web"
-description: "Sankofa Snake, a free snake game with nine levels drawn from Ghana, is now ready to play in your browser on a computer, phone or tablet."
+description: "Sankofa Snake, a free snake game with nine levels drawn from Ghanaian culture, is now ready to play in your browser on a computer, phone, or tablet."
 date: 2026-11-21T13:45:00Z
 tags: ["Release"]
 ---
