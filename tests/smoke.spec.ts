@@ -127,8 +127,12 @@ test("the blog list filters posts by tag and keeps the tag in the address", asyn
   const total = await rows.count();
   await page.getByRole("tab", { name: "Research", exact: true }).click();
   await expect(page).toHaveURL(/\?tag=research$/);
-  await expect(rows.filter({ visible: true })).toHaveCount(2);
-  await expect(rows.filter({ visible: true })).toContainText(["What 31 years of rain records", "AI fiction gives itself away"]);
+  // Counts come from the page, so adding posts under a tag never breaks this test.
+  const research = await page.locator('.post-row[data-tags~="research"]').count();
+  expect(research).toBeGreaterThan(0);
+  expect(research).toBeLessThan(total);
+  await expect(rows.filter({ visible: true })).toHaveCount(research);
+  await expect(rows.filter({ visible: true, hasText: "AI fiction gives itself away" })).toHaveCount(1);
   await page.getByRole("tab", { name: "All", exact: true }).click();
   await expect(page).not.toHaveURL(/tag=/);
   await expect(rows.filter({ visible: true })).toHaveCount(total);
@@ -136,7 +140,10 @@ test("the blog list filters posts by tag and keeps the tag in the address", asyn
   await page.goto("blog/titus-humanizer-release/");
   await page.locator(".eyebrow a.post-tag", { hasText: "Release" }).click();
   await expect(page.getByRole("tab", { name: "Release", exact: true })).toHaveAttribute("aria-selected", "true");
-  await expect(rows.filter({ visible: true })).toHaveCount(2);
+  const release = await page.locator('.post-row[data-tags~="release"]').count();
+  expect(release).toBeGreaterThan(0);
+  await expect(rows.filter({ visible: true })).toHaveCount(release);
+  await expect(rows.filter({ visible: true, hasText: "titus-humanizer" })).toHaveCount(1);
 });
 
 test("each home page blog card ends with a Read the post link", async ({ page }) => {
