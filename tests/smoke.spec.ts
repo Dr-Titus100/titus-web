@@ -136,7 +136,7 @@ test("the blog list filters posts by tag and keeps the tag in the address", asyn
   await page.goto("blog/titus-humanizer-release/");
   await page.locator(".eyebrow a.post-tag", { hasText: "Release" }).click();
   await expect(page.getByRole("tab", { name: "Release", exact: true })).toHaveAttribute("aria-selected", "true");
-  await expect(rows.filter({ visible: true })).toHaveCount(1);
+  await expect(rows.filter({ visible: true })).toHaveCount(2);
 });
 
 test("each home page blog card ends with a Read the post link", async ({ page }) => {
