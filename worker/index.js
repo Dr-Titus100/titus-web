@@ -1,6 +1,6 @@
 // The Cloudflare Worker for titusnyarkonde.com. Static files in dist/ are served as before. This
-// script answers only /api/* (see run_worker_first in wrangler.jsonc), which is the comments API for
-// blog posts and the reviews of games.
+// script answers /api/* (see run_worker_first in wrangler.jsonc), which is the comments API for
+// blog posts and the reviews of games, and /media/*, so videos can be skipped forward and back (see media()).
 //
 // A "post" is a blog post's slug, such as my-first-post, or a game, such as games/sankofa-snake. A
 // game's reviews live on its Play page. A review is a comment with a rating from 1 to 10, and it may
@@ -35,6 +35,8 @@
 // keeps the comment, the reason, how many times that reason came in and the time of the latest. It
 // doesn't keep who sent it.
 
+import { media } from "./media.js";
+
 const NAME_MAX = 60;
 // The longest comment or reply, for readers and Titus alike. The text boxes use the same limit.
 const BODY_MAX = 3000;
@@ -68,6 +70,7 @@ const NOTIFY_FROM = { email: "comments@titusnyarkonde.com", name: "titusnyarkond
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/media/")) return media(request, env);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     try {
       if (url.pathname === "/api/comments") {
