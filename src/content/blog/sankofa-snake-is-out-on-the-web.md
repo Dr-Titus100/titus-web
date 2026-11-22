@@ -9,7 +9,7 @@ Sankofa Snake is now ready to play on the web. It's a free snake game that runs 
 
 You can play it now at [titusnyarkonde.com/games/sankofa-snake](https://titusnyarkonde.com/games/sankofa-snake/).
 
-<img src="../../media/sankofa-snake-gameplay.gif" alt="The woven snake winding between market stalls to collect cowrie shells" width="400" height="485" style="height: auto" loading="lazy">
+<img src="../../media/sankofa-snake-promo-highlights.gif" alt="Highlights from Sankofa Snake: the nine level worlds, a new Market layout on every run and the five-note scale that cowries play" width="720" height="405" style="height: auto" loading="lazy">
 
 ## Where the name comes from
 

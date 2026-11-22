@@ -1,6 +1,7 @@
 ---
 import Base from "../../../layouts/Base.astro";
 import ToolNav from "../../../components/ToolNav.astro";
+import PromoVideo from "../../../components/PromoVideo.astro";
 import { u } from "../../../lib/url";
 import { game, version } from "../../../data/sankofa-snake";
 const app = {
@@ -43,6 +44,15 @@ const app = {
       <p>The logo is the Sankofa bird, an Adinkra symbol from Ghana. The bird turns its head back to pick up an egg from its back, and the Akan word means "go back and get it." The game draws the kente patterns and the bird in code, so it needs no image files.</p>
       <p>Your scores and stars stay in your browser. The game itself sends nothing to any server and has no ads. This site keeps any review you post on the <a href={u("/games/sankofa-snake/play/#reviews")}>Play game</a> tab, as the <a href={u("/privacy/#comments")}>Privacy page</a> explains.</p>
       <p>The code is free to read, copy, change and teach with under the <a href={`${game.repoUrl}/blob/main/LICENSE`}>Sankofa Snake License</a>. It follows the MIT license with two limits. Without my permission, nobody may publish the game in an app store or make a 3D version of it. You can read the code, the level files and the tests on <a href={game.repoUrl}>GitHub</a>. This page runs <a href={game.releaseUrl}>release {version}</a>.</p>
+    </div>
+  </section>
+
+  <section class="section" id="video">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="h2">Watch the game</h2>
+      </div>
+      <PromoVideo name="sankofa-snake-promo" label="Sankofa Snake promotional video" length="2 minutes 18 seconds" />
     </div>
   </section>
 </Base>

@@ -3,11 +3,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { u } from "../lib/url";
 
+// Defaults are the titus-humanizer tour. Another page passes its own file name (without .mp4),
+// label and length. Each video needs NAME.mp4, NAME-720p.mp4 and NAME-poster.jpg in public/media.
+// A NAME.en.vtt file is optional and adds the transcript panel.
+interface Props { name?: string; label?: string; length?: string; meta?: string }
+const { name = "titus-humanizer-promo", label = "titus-humanizer tour video", length = "2 minutes 49 seconds", meta } = Astro.props;
+
 // Phones and small windows get the 720p file (about 3.7 MB). Wider screens get the 1080p file (about 8 MB).
 // The captions are burned into the video itself, so they show in every player with nothing to switch on.
 // The WebVTT file holds the same lines with their timings. The page builds the "Read the transcript"
 // panel from it. It isn't loaded as a captions track, since that would show every line twice.
-const vttPath = path.join(process.cwd(), "public/media/titus-humanizer-promo.en.vtt");
+const vttPath = path.join(process.cwd(), `public/media/${name}.en.vtt`);
 const vtt = fs.existsSync(vttPath) ? fs.readFileSync(vttPath, "utf8") : "";
 // A NOTE block in the file starts a new section of the transcript, titled with the NOTE's text.
 // Cue text after it joins into one paragraph.
@@ -25,16 +31,16 @@ for (const block of vtt.split(/\r?\n\r?\n/)) {
 ---
 <div class="video-stage">
   <div class="video-frame" data-video>
-    <video controls playsinline preload="none" poster={u("/media/titus-humanizer-promo-poster.jpg")} aria-label="titus-humanizer tour video">
-      <source src={u("/media/titus-humanizer-promo-720p.mp4")} type="video/mp4" media="(max-width: 900px)" />
-      <source src={u("/media/titus-humanizer-promo.mp4")} type="video/mp4" />
-      Your browser can't play this video. <a href={u("/media/titus-humanizer-promo.mp4")}>Download it</a> instead.
+    <video controls playsinline preload="none" poster={u(`/media/${name}-poster.jpg`)} aria-label={label}>
+      <source src={u(`/media/${name}-720p.mp4`)} type="video/mp4" media="(max-width: 900px)" />
+      <source src={u(`/media/${name}.mp4`)} type="video/mp4" />
+      Your browser can't play this video. <a href={u(`/media/${name}.mp4`)}>Download it</a> instead.
     </video>
-    <button class="video-play" type="button" hidden aria-label="Play the tour, 2 minutes 49 seconds">
+    <button class="video-play" type="button" hidden aria-label={`Play the video, ${length}`}>
       <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
     </button>
   </div>
-  <p class="small muted center video-meta">2 minutes 49 seconds, with captions</p>
+  <p class="small muted center video-meta">{meta ?? `${length}, with captions`}</p>
   {transcript.length > 0 && (
     <details class="transcript" id="transcript">
       <summary class="btn">Read the transcript</summary>
