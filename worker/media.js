@@ -10,6 +10,11 @@ export async function media(request, env) {
   // Ask for the whole file, without the range or any "only if changed" headers, then cut out the range.
   const res = await env.ASSETS.fetch(new Request(request.url, { method: "GET" }));
   if (res.status !== 200 || !res.body) return withRanges(res);
+  // "If-Range" means: send the range only if the file hasn't changed since the browser's copy, which it
+  // names by ETag or by date. When the file has changed, the whole new file goes out, so a resumed
+  // download never mixes bytes from two versions of a video.
+  const ifRange = request.headers.get("If-Range");
+  if (ifRange && !sameVersion(ifRange, res.headers)) return withRanges(res);
   const buf = await res.arrayBuffer();
   const size = buf.byteLength;
   const span = parseRange(range, size);
@@ -46,6 +51,15 @@ export function parseRange(header, size) {
   }
   if (start >= size || start > end) return "invalid";
   return [start, end];
+}
+
+// Only a strong ETag (one without "W/") or the exact Last-Modified date counts as the same version.
+function sameVersion(ifRange, headers) {
+  const value = ifRange.trim();
+  if (value.startsWith('"')) return value === headers.get("ETag");
+  if (value.startsWith("W/")) return false;
+  const modified = headers.get("Last-Modified");
+  return !!modified && Date.parse(value) === Date.parse(modified);
 }
 
 function withRanges(res) {

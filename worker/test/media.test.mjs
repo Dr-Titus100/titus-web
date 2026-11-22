@@ -9,12 +9,12 @@ const env = {
   ASSETS: {
     // Like the static file server: always the whole file, whatever the Range header says.
     async fetch(req) {
-      return new Response(req.method === "HEAD" ? null : file, { status: 200, headers: { "Content-Type": "video/mp4", "Content-Length": "1000" } });
+      return new Response(req.method === "HEAD" ? null : file, { status: 200, headers: { "Content-Type": "video/mp4", "Content-Length": "1000", ETag: '"v2"', "Last-Modified": "Sun, 22 Nov 2026 07:00:00 GMT" } });
     },
   },
 };
-const get = (range, method = "GET") =>
-  media(new Request("https://example.com/media/v.mp4", { method, headers: range ? { Range: range } : {} }), env);
+const get = (range, method = "GET", extra = {}) =>
+  media(new Request("https://example.com/media/v.mp4", { method, headers: { ...(range ? { Range: range } : {}), ...extra } }), env);
 
 test("a request without a range gets the whole file and says ranges work", async () => {
   const res = await get();
@@ -49,6 +49,17 @@ test("several ranges at once get the whole file", async () => {
   const res = await get("bytes=0-9,20-29");
   assert.equal(res.status, 200);
   assert.equal((await res.arrayBuffer()).byteLength, 1000);
+});
+
+test("If-Range sends the range only when the file is the same version", async () => {
+  assert.equal((await get("bytes=0-9", "GET", { "If-Range": '"v2"' })).status, 206);
+  assert.equal((await get("bytes=0-9", "GET", { "If-Range": "Sun, 22 Nov 2026 07:00:00 GMT" })).status, 206);
+  // An old ETag, an old date or a weak ETag gets the whole current file instead.
+  for (const old of ['"v1"', "Sat, 21 Nov 2026 07:00:00 GMT", 'W/"v2"']) {
+    const res = await get("bytes=0-9", "GET", { "If-Range": old });
+    assert.equal(res.status, 200);
+    assert.equal((await res.arrayBuffer()).byteLength, 1000);
+  }
 });
 
 test("parseRange reads the forms browsers send", () => {
