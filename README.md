@@ -132,6 +132,7 @@ If you replace the video, update the captions file in the same commit.
 The site can also be hosted on Cloudflare, which can send real security headers and builds a preview of every pull request.
 
 - `wrangler.jsonc` tells Cloudflare to upload `dist/` as static files, together with the small Worker in `worker/index.js` that answers `/api/*` for blog comments. It also turns on preview links for pull requests.
+- The Worker also answers `/media/*` (`worker/media.js`). Cloudflare's static file server sends a whole video even when the browser asks for one part of it, so the video can't be skipped forward or back. The Worker answers those requests with only the bytes asked for. `node --test worker/test/media.test.mjs` checks it.
 - In Cloudflare's build settings, set the build command to `npm run build` and these build variables: `SITE_URL` to the domain (such as `https://example.com`), `SITE_BASE` to `/` and `SITE_HOST` to `cloudflare`.
 - With `SITE_HOST=cloudflare`, `scripts/add-csp.mjs` also writes `dist/_headers`. It blocks framing, turns on HSTS and nosniff, and sets cache times. The Privacy page names Cloudflare as the host, and Rewrite offers Remember my key, because the site has an address of its own.
 - The tests run the same way. For a root-domain build, run them with `SITE_BASE=/`.

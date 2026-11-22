@@ -32,6 +32,9 @@ jobs:
       # Fails if src/data/examples.generated.json no longer matches the scoring script's output.
       - name: Check the overview demo is up to date
         run: node scripts/gen-examples.mjs --check
+      # The Worker's /media/ handler must answer byte-range requests, or videos can't be skipped through.
+      - name: Worker tests
+        run: node --test worker/test/media.test.mjs
       - run: npx playwright install --with-deps chromium
       - name: Smoke tests
         run: npx playwright test
