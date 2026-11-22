@@ -9,6 +9,8 @@ titus-humanizer is now available, free and open source under the MIT license. It
 
 The current release is v1.2.0. The code, the rules and the tests are on GitHub at [github.com/Dr-Titus100/titus-humanizer](https://github.com/Dr-Titus100/titus-humanizer), and you can try it without installing anything at [titusnyarkonde.com](https://titusnyarkonde.com/tools/titus-humanizer/).
 
+<img src="../../media/titus-humanizer-promo-highlights.gif" alt="Highlights from the titus-humanizer tour: the AI-pattern score for a sample email, a story before the rewrite and the install steps for Claude" width="720" height="405" style="height: auto" loading="lazy">
+
 ## Why I made it
 
 I've been working as an AI trainer for months now, and I've learned a lot about what makes AI models sound robotic. I can spot a lot of AI-written text by eye, sometimes after reading just the first few sentences. The truth is that people sometimes sound the same way and write like robots too. No wonder AI detectors return so many false positives. So I decided to add my voice and help people write plainer, better text.
