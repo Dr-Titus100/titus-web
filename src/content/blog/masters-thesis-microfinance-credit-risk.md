@@ -53,7 +53,7 @@ The models predicted defaults correctly about 71% of the time overall. Their acc
 - Partner with regular banks.
 - Collect and store data properly. Much of my time went into cleaning messy records.
 
-The study used one lender, so the results may differ elsewhere. A year later, my co-authors and I used the same lender's data in a published paper that applies machine learning to the same question. That paper has [its own post on this blog](/blog/machine-learning-microcredit-scoring/).
+The study used one lender, so the results may differ elsewhere. A year later, my co-authors and I used the same lender's data in a published paper that applies machine learning to the same question. That paper has [its own post on this blog](../machine-learning-microcredit-scoring/).
 
 ## Sources
 

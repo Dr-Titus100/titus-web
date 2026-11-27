@@ -59,7 +59,7 @@ We measured how much each fact helped the models by shuffling it and checking ho
 
 The interest rate result fits earlier work arguing that very high rates push microfinance borrowers into default. Gender was the least useful fact, most likely because nearly all the borrowers were women. That matches what microfinance studies find worldwide, where about three in four clients are women. Numerical variables, such as age and amount, mattered more than categorical ones, such as marital status.
 
-The number of repayments also mattered, which agrees with [my master's thesis](/blog/masters-thesis-microfinance-credit-risk/). There I found that defaults on these loans rose sharply after about six months.
+The number of repayments also mattered, which agrees with [my master's thesis](../masters-thesis-microfinance-credit-risk/). There I found that defaults on these loans rose sharply after about six months.
 
 ## Why it matters
 
