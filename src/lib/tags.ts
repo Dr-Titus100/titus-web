@@ -15,6 +15,7 @@ const colors: Record<string, string> = {
   ai: "ai",
   research: "research",
   release: "teaching",
+  tech: "industry",
   "data-science": "industry",
 };
 export const tagClass = (tag: string) => {
