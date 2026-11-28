@@ -2,7 +2,7 @@
 title: "Measuring the shape of something we can't see: dark matter halos"
 description: "For my Ph.D. comprehensive exam, I reviewed how scientists describe the invisible clouds of dark matter around galaxies, and I tested whether machine learning could do the job with honest error bars."
 date: 2026-11-28T12:50:00Z
-tags: ["Research", "AI"]
+tags: ["Research"]
 ---
 
 Most of the universe is invisible to us. According to the standard model of cosmology, about 68% of the universe is dark energy, which drives the universe's expansion faster and faster. About 27% is dark matter, which makes up roughly 85% of all matter. Ordinary matter, the stuff of stars, planets and people, is only about 5%.
